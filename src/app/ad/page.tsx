@@ -242,21 +242,21 @@ function AdContent() {
 
                         <h2 className="text-lg font-medium mb-8 leading-tight">{ad.title}</h2>
 
-                        {isAdmin && (
-                            <div className="flex gap-2 mb-4">
-                                <button
-                                    onClick={() => updateStatus('active')}
-                                    className="flex-1 bg-green-500 text-white py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-green-600 transition-all shadow-lg"
-                                >
-                                    <CheckCircle className="h-5 w-5" /> Одобрить
-                                </button>
-                                <button
-                                    onClick={() => updateStatus('rejected')}
-                                    className="flex-1 bg-red-500 text-white py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-red-600 transition-all shadow-lg"
-                                >
-                                    <XCircle className="h-5 w-5" /> Отклонить
-                                </button>
-                            </div>
+                        {isAdmin && ad?.status !== 'active' && (
+                            <button
+                                onClick={() => updateStatus('active')}
+                                className="w-full bg-green-500 text-white py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-green-600 transition-all shadow-lg mb-2"
+                            >
+                                <CheckCircle className="h-5 w-5" /> Одобрить
+                            </button>
+                        )}
+                        {isAdmin && ad?.status !== 'rejected' && (
+                            <button
+                                onClick={() => updateStatus('rejected')}
+                                className="w-full bg-red-500 text-white py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-red-600 transition-all shadow-lg mb-4"
+                            >
+                                <XCircle className="h-5 w-5" /> Отклонить
+                            </button>
                         )}
 
                         <Link

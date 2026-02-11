@@ -168,12 +168,16 @@ export default function AdminDashboard() {
             title: bannerTitle,
             content: bannerContent,
             image_url: bannerImage,
-            link_url: bannerLink
+            link_url: bannerLink,
+            is_active: true
         });
         if (!error) {
             toast.success('Баннер добавлен');
             setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
             fetchData();
+        } else {
+            console.error('Banner error:', error);
+            toast.error('Ошибка создания: ' + error.message);
         }
     };
 
