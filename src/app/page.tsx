@@ -128,16 +128,16 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
-            {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/5] bg-muted rounded-3xl" />)}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 animate-pulse">
+            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="aspect-[3/4] bg-muted rounded-2xl" />)}
           </div>
         ) : ads.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {ads.map((ad) => (
               <Link
                 key={ad.id}
                 href={`/ad?id=${ad.id}`}
-                className="bg-surface rounded-[2rem] border border-border overflow-hidden hover:shadow-xl transition-all flex flex-col h-full group"
+                className="bg-surface rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-all flex flex-col h-full group"
               >
                 <div className="aspect-square bg-muted relative overflow-hidden">
                   {ad.images?.[0] ? (
@@ -150,24 +150,24 @@ export default function HomePage() {
                     <div className="w-full h-full flex items-center justify-center text-muted italic">Нет фото</div>
                   )}
                   {ad.delivery_possible && (
-                    <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-md">
+                    <div className="absolute top-2 left-2 bg-primary text-white text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-md">
                       Доставка
                     </div>
                   )}
                 </div>
-                <div className="p-5 flex flex-col flex-1">
-                  <span className="text-xl font-black text-foreground mb-1">
-                    {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}
+                <div className="p-3 flex flex-col flex-1">
+                  <span className="text-lg font-black text-foreground mb-0.5">
+                    {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                   </span>
-                  <h3 className="line-clamp-2 text-sm font-bold mb-4 group-hover:text-primary transition-colors flex-1">
+                  <h3 className="line-clamp-2 text-xs font-bold mb-3 group-hover:text-primary transition-colors flex-1">
                     {ad.title}
                   </h3>
                   <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-bold text-muted uppercase">{ad.city}</span>
-                      {ad.profiles?.is_verified && <CheckCircle className="h-3 w-3 text-blue-500 fill-current" />}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold text-muted uppercase">{ad.city}</span>
+                      {ad.profiles?.is_verified && <CheckCircle className="h-2.5 w-2.5 text-blue-500 fill-current" />}
                     </div>
-                    <span className="text-[10px] text-muted">{new Date(ad.created_at).toLocaleDateString()}</span>
+                    <span className="text-[9px] text-muted">{new Date(ad.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </Link>

@@ -48,16 +48,16 @@ export default function AllAdsPage() {
             </div>
 
             {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {[1, 2, 3, 4, 5, 6].map(i => (
-                        <div key={i} className="aspect-[3/4] bg-muted animate-pulse rounded-3xl" />
+                        <div key={i} className="aspect-[3/4] bg-muted animate-pulse rounded-2xl" />
                     ))}
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredAds.map(ad => (
                         <Link href={`/ad?id=${ad.id}`} key={ad.id} className="group">
-                            <div className="bg-surface rounded-3xl border border-border overflow-hidden hover:shadow-xl transition-all hover:border-primary h-full flex flex-col">
+                            <div className="bg-surface rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-all hover:border-primary h-full flex flex-col">
                                 <div className="aspect-square relative overflow-hidden bg-muted">
                                     {ad.images?.[0] ? (
                                         <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -67,10 +67,10 @@ export default function AllAdsPage() {
                                         </div>
                                     )}
                                 </div>
-                                <div className="p-4 flex-1 flex flex-col">
-                                    <div className="text-xl font-black mb-1">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена договорная'}</div>
-                                    <h3 className="font-bold text-sm line-clamp-2 mb-2 flex-1">{ad.title}</h3>
-                                    <div className="flex items-center gap-1 text-xs text-muted mt-auto">
+                                <div className="p-3 flex-1 flex flex-col">
+                                    <div className="text-lg font-black mb-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}</div>
+                                    <h3 className="font-bold text-xs line-clamp-2 mb-2 flex-1">{ad.title}</h3>
+                                    <div className="flex items-center gap-1 text-[10px] text-muted mt-auto">
                                         <MapPin className="h-3 w-3" />
                                         {ad.city || 'Город не указан'}
                                     </div>
