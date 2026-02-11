@@ -10,6 +10,7 @@ import {
     Star,
     AlertCircle,
     CheckCircle,
+    XCircle,
     User,
     MapPin,
     Truck,
@@ -27,6 +28,7 @@ function AdContent() {
     const router = useRouter();
     const id = searchParams.get('id');
 
+    const [isAdmin, setIsAdmin] = useState(false);
     const [ad, setAd] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [isFavorite, setIsFavorite] = useState(false);
@@ -36,10 +38,23 @@ function AdContent() {
         if (id) {
             fetchAd();
             checkFavorite();
+            checkAdminStatus();
         } else {
             setLoading(false);
         }
     }, [id]);
+
+    const checkAdminStatus = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+        const ADMIN_EMAILS = ['ht-elk@yandex.ru', 'dron-vbg@yandex.ru', 'konkev@bk.ru'];
+
+        if (profile?.role === 'admin' || ADMIN_EMAILS.includes(session.user.email || '')) {
+            setIsAdmin(true);
+        }
+    };
 
     const fetchAd = async () => {
         if (!id) return;
@@ -70,6 +85,14 @@ function AdContent() {
         }
         setAd(data);
         setLoading(false);
+    };
+
+    const updateStatus = async (status: string) => {
+        const { error } = await supabase.from('ads').update({ status }).eq('id', id);
+        if (!error) {
+            toast.success(status === 'active' ? 'Одобрено' : 'Отклонено');
+            fetchAd();
+        }
     };
 
     const checkFavorite = async () => {
@@ -218,6 +241,23 @@ function AdContent() {
                         </div>
 
                         <h2 className="text-lg font-medium mb-8 leading-tight">{ad.title}</h2>
+
+                        {isAdmin && (
+                            <div className="flex gap-2 mb-4">
+                                <button
+                                    onClick={() => updateStatus('active')}
+                                    className="flex-1 bg-green-500 text-white py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-green-600 transition-all shadow-lg"
+                                >
+                                    <CheckCircle className="h-5 w-5" /> Одобрить
+                                </button>
+                                <button
+                                    onClick={() => updateStatus('rejected')}
+                                    className="flex-1 bg-red-500 text-white py-3 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-red-600 transition-all shadow-lg"
+                                >
+                                    <XCircle className="h-5 w-5" /> Отклонить
+                                </button>
+                            </div>
+                        )}
 
                         <Link
                             href={`/chat?adId=${ad.id}&receiverId=${ad.user_id}`}

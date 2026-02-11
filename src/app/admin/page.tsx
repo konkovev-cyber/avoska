@@ -193,14 +193,14 @@ export default function AdminDashboard() {
                 <h1 className="text-4xl font-black flex items-center gap-3">
                     <Settings className="h-10 w-10 text-primary" /> Админка
                 </h1>
-                <div className="flex gap-2 bg-muted p-1 rounded-2xl overflow-x-auto max-w-full">
+                <div className="flex gap-2 p-1 rounded-2xl overflow-x-auto max-w-full">
                     {(['ads', 'users', 'cities', 'banners', 'reports'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={cn(
-                                "px-4 py-2 rounded-xl text-sm font-bold capitalize transition-all whitespace-nowrap",
-                                activeTab === tab ? "bg-white shadow-sm text-primary" : "text-muted hover:text-foreground"
+                                "px-6 py-3 rounded-xl text-sm font-black capitalize transition-all whitespace-nowrap",
+                                activeTab === tab ? "bg-primary text-white shadow-lg" : "bg-muted text-muted-foreground hover:bg-muted/80"
                             )}
                         >
                             {tab === 'ads' ? `Объявления (${stats.pending})` :
@@ -237,30 +237,32 @@ export default function AdminDashboard() {
                 {activeTab === 'ads' && (
                     <div className="divide-y divide-border">
                         {ads.map(ad => (
-                            <div key={ad.id} className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-16 h-16 bg-muted rounded-2xl overflow-hidden shrink-0">
-                                        {ad.images?.[0] && <img src={ad.images[0]} className="w-full h-full object-cover" />}
-                                    </div>
-                                    <div>
-                                        <div className="font-black text-lg line-clamp-1">{ad.title}</div>
-                                        <div className="text-sm text-muted">
-                                            {ad.profiles?.full_name || 'Загрузка...'} • <span className={cn(
-                                                "font-bold",
-                                                statusLabels[ad.status]?.color || 'text-muted'
-                                            )}>{statusLabels[ad.status]?.label || ad.status}</span>
+                            <div key={ad.id} className="group hover:bg-muted/30 transition-colors relative">
+                                <div className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                                    <Link href={`/ad?id=${ad.id}`} className="flex items-center gap-4 flex-1">
+                                        <div className="w-16 h-16 bg-muted rounded-2xl overflow-hidden shrink-0 shadow-sm">
+                                            {ad.images?.[0] && <img src={ad.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />}
                                         </div>
+                                        <div>
+                                            <div className="font-black text-lg line-clamp-1 group-hover:text-primary transition-colors">{ad.title}</div>
+                                            <div className="text-sm text-muted">
+                                                {ad.profiles?.full_name || 'Загрузка...'} • <span className={cn(
+                                                    "font-bold",
+                                                    statusLabels[ad.status]?.color || 'text-muted'
+                                                )}>{statusLabels[ad.status]?.label || ad.status}</span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                    <div className="flex gap-2 w-full md:w-auto relative z-10">
+                                        {ad.status === 'pending' && (
+                                            <>
+                                                <button onClick={() => handleApprove(ad.id)} className="flex-1 md:flex-none bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-md"><CheckCircle className="h-4 w-4" /> Одобрить</button>
+                                                <button onClick={() => handleReject(ad.id)} className="flex-1 md:flex-none bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-md"><XCircle className="h-4 w-4" /> Отклонить</button>
+                                            </>
+                                        )}
+                                        <button onClick={() => deleteAd(ad.id)} className="p-2.5 text-destructive hover:bg-red-50 rounded-xl transition-colors" title="Удалить"><Trash2 /></button>
+                                        <Link href={`/ad?id=${ad.id}`} target="_blank" className="p-2.5 hover:bg-muted rounded-xl text-primary transition-colors"><ExternalLink /></Link>
                                     </div>
-                                </div>
-                                <div className="flex gap-2 w-full md:w-auto">
-                                    {ad.status === 'pending' && (
-                                        <>
-                                            <button onClick={() => handleApprove(ad.id)} className="flex-1 md:flex-none bg-green-500 text-white px-4 py-2 rounded-xl flex items-center justify-center gap-2 font-bold"><CheckCircle className="h-4 w-4" /> Одобрить</button>
-                                            <button onClick={() => handleReject(ad.id)} className="flex-1 md:flex-none bg-red-500 text-white px-4 py-2 rounded-xl flex items-center justify-center gap-2 font-bold"><XCircle className="h-4 w-4" /> Отклонить</button>
-                                        </>
-                                    )}
-                                    <button onClick={() => { if (confirm('Удалить?')) supabase.from('ads').delete().eq('id', ad.id).then(() => fetchData()) }} className="p-2 text-destructive hover:bg-red-50 rounded-xl"><Trash2 /></button>
-                                    <Link href={`/ad?id=${ad.id}`} target="_blank" className="p-2 hover:bg-muted rounded-xl text-primary"><ExternalLink /></Link>
                                 </div>
                             </div>
                         ))}
