@@ -25,14 +25,26 @@ import { cn } from '@/lib/utils';
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
-    const [activeTab, setActiveTab] = useState<'ads' | 'users' | 'cities' | 'banners' | 'reports'>('ads');
-    const [stats, setStats] = useState({ ads: 0, users: 0, pending: 0, cities: 0 });
+    const [activeTab, setActiveTab] = useState<'ads' | 'users' | 'cities' | 'banners' | 'reports' | 'categories'>('ads');
+    const [stats, setStats] = useState({ ads: 0, users: 0, pending: 0, cities: 0, categories: 0 });
     const [ads, setAds] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [cities, setCities] = useState<any[]>([]);
     const [reports, setReports] = useState<any[]>([]);
     const [banners, setBanners] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
+
+    // City form state
     const [newCity, setNewCity] = useState('');
+    const [editingCity, setEditingCity] = useState<any>(null);
+
+    // Category form state
+    const [catName, setCatName] = useState('');
+    const [catSlug, setCatSlug] = useState('');
+    const [catIcon, setCatIcon] = useState('');
+    const [catColor, setCatColor] = useState('');
+    const [catImage, setCatImage] = useState('');
+    const [editingCategory, setEditingCategory] = useState<any>(null);
 
     // Banner form state
     const [bannerTitle, setBannerTitle] = useState('');
@@ -42,6 +54,9 @@ export default function AdminDashboard() {
 
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+
+    // Banner form state
+
 
     useEffect(() => {
         checkAdmin();
@@ -68,12 +83,13 @@ export default function AdminDashboard() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [adsRes, usersRes, citiesRes, reportsRes, bannersRes] = await Promise.all([
+            const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes] = await Promise.all([
                 supabase.from('ads').select('*, profiles!user_id(full_name, email)').order('created_at', { ascending: false }),
                 supabase.from('profiles').select('*').order('created_at', { ascending: false }),
                 supabase.from('cities').select('*').order('name'),
                 supabase.from('reports').select('*, reporter:profiles(full_name), ad:ads(title)').order('created_at', { ascending: false }),
-                supabase.from('banners').select('*').order('created_at', { ascending: false })
+                supabase.from('banners').select('*').order('created_at', { ascending: false }),
+                supabase.from('categories').select('*').order('name')
             ]);
 
             if (adsRes.error) {
@@ -89,6 +105,7 @@ export default function AdminDashboard() {
             setCities(citiesRes.data || []);
             setReports(reportsRes.data || []);
             setBanners(bannersRes.data || []);
+            setCategories(categoriesRes.data || []);
 
             const allAdsCount = adsRes.data?.length || 0;
             const pendingAdsCount = (adsRes.data || []).filter((a: any) => a.status === 'pending').length;
@@ -97,7 +114,8 @@ export default function AdminDashboard() {
                 ads: allAdsCount,
                 users: usersRes.data?.length || 0,
                 pending: pendingAdsCount,
-                cities: citiesRes.data?.length || 0
+                cities: citiesRes.data?.length || 0,
+                categories: categoriesRes.data?.length || 0
             });
         } catch (err: any) {
             console.error('Global fetch error:', err);
@@ -105,6 +123,54 @@ export default function AdminDashboard() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const addCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const payload = {
+            name: catName,
+            slug: catSlug || catName.toLowerCase().replace(/ /g, '-'),
+            icon: catIcon,
+            color: catColor,
+            image: catImage
+        };
+
+        if (editingCategory) {
+            const { error } = await supabase.from('categories').update(payload).eq('id', editingCategory.id);
+            if (!error) {
+                toast.success('Категория обновлена');
+                setEditingCategory(null);
+                setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage('');
+                fetchData();
+            } else {
+                toast.error('Ошибка обновления: ' + error.message);
+            }
+        } else {
+            const { error } = await supabase.from('categories').insert(payload);
+            if (!error) {
+                toast.success('Категория добавлена');
+                setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage('');
+                fetchData();
+            } else {
+                toast.error('Ошибка создания: ' + error.message);
+            }
+        }
+    };
+
+    const deleteCategory = async (id: string) => {
+        if (!confirm('Удалить категорию?')) return;
+        const { error } = await supabase.from('categories').delete().eq('id', id);
+        if (!error) fetchData();
+    };
+
+    const startEditingCategory = (c: any) => {
+        setEditingCategory(c);
+        setCatName(c.name);
+        setCatSlug(c.slug);
+        setCatIcon(c.icon || '');
+        setCatColor(c.color || '');
+        setCatImage(c.image || '');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const statusLabels: Record<string, { label: string, color: string }> = {
@@ -146,13 +212,26 @@ export default function AdminDashboard() {
 
     const addCity = async () => {
         if (!newCity.trim()) return;
-        const { error } = await supabase.from('cities').insert({ name: newCity.trim() });
-        if (!error) {
-            toast.success('Город добавлен');
-            setNewCity('');
-            fetchData();
+
+        if (editingCity) {
+            const { error } = await supabase.from('cities').update({ name: newCity.trim() }).eq('id', editingCity.id);
+            if (!error) {
+                toast.success('Город обновлен');
+                setEditingCity(null);
+                setNewCity('');
+                fetchData();
+            } else {
+                toast.error('Ошибка обновления');
+            }
         } else {
-            toast.error('Ошибка или такой город уже есть');
+            const { error } = await supabase.from('cities').insert({ name: newCity.trim() });
+            if (!error) {
+                toast.success('Город добавлен');
+                setNewCity('');
+                fetchData();
+            } else {
+                toast.error('Ошибка или такой город уже есть');
+            }
         }
     };
 
@@ -160,6 +239,11 @@ export default function AdminDashboard() {
         if (!confirm('Удалить город?')) return;
         const { error } = await supabase.from('cities').delete().eq('id', id);
         if (!error) fetchData();
+    };
+
+    const startEditingCity = (c: any) => {
+        setEditingCity(c);
+        setNewCity(c.name);
     };
 
     const addBanner = async (e: React.FormEvent) => {
@@ -198,7 +282,7 @@ export default function AdminDashboard() {
                     <Settings className="h-10 w-10 text-primary" /> Админка
                 </h1>
                 <div className="flex gap-2 p-1 rounded-2xl overflow-x-auto max-w-full">
-                    {(['ads', 'users', 'cities', 'banners', 'reports'] as const).map(tab => (
+                    {(['ads', 'users', 'cities', 'categories', 'banners', 'reports'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
@@ -210,30 +294,65 @@ export default function AdminDashboard() {
                             {tab === 'ads' ? `Объявления (${stats.pending})` :
                                 tab === 'users' ? 'Люди' :
                                     tab === 'cities' ? 'Города' :
-                                        tab === 'banners' ? 'Баннеры' : 'Жалобы'}
+                                        tab === 'categories' ? 'Категории' :
+                                            tab === 'banners' ? 'Баннеры' : 'Жалобы'}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Stats Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-surface p-4 rounded-3xl border border-border">
+            {/* Stats Summary - Clickable */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                <button
+                    onClick={() => setActiveTab('ads')}
+                    className={cn(
+                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
+                        activeTab === 'ads' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
+                    )}
+                >
                     <div className="text-xs font-bold text-muted uppercase mb-1">Всего объявлений</div>
-                    <div className="text-2xl font-black">{stats.ads}</div>
-                </div>
-                <div className="bg-surface p-4 rounded-3xl border border-border">
+                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.ads}</div>
+                </button>
+                <button
+                    onClick={() => setActiveTab('ads')}
+                    className={cn(
+                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
+                        activeTab === 'ads' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
+                    )}
+                >
                     <div className="text-xs font-bold text-muted uppercase mb-1">На модерации</div>
-                    <div className="text-2xl font-black text-orange-500">{stats.pending}</div>
-                </div>
-                <div className="bg-surface p-4 rounded-3xl border border-border">
+                    <div className="text-2xl font-black text-orange-500 group-hover:scale-105 transition-transform origin-left">{stats.pending}</div>
+                </button>
+                <button
+                    onClick={() => setActiveTab('users')}
+                    className={cn(
+                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
+                        activeTab === 'users' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
+                    )}
+                >
                     <div className="text-xs font-bold text-muted uppercase mb-1">Пользователей</div>
-                    <div className="text-2xl font-black">{stats.users}</div>
-                </div>
-                <div className="bg-surface p-4 rounded-3xl border border-border">
+                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.users}</div>
+                </button>
+                <button
+                    onClick={() => setActiveTab('cities')}
+                    className={cn(
+                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
+                        activeTab === 'cities' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
+                    )}
+                >
                     <div className="text-xs font-bold text-muted uppercase mb-1">Городов</div>
-                    <div className="text-2xl font-black">{stats.cities}</div>
-                </div>
+                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.cities}</div>
+                </button>
+                <button
+                    onClick={() => setActiveTab('categories')}
+                    className={cn(
+                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
+                        activeTab === 'categories' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
+                    )}
+                >
+                    <div className="text-xs font-bold text-muted uppercase mb-1">Категорий</div>
+                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.categories}</div>
+                </button>
             </div>
 
             {/* Content Area */}
@@ -303,13 +422,61 @@ export default function AdminDashboard() {
                     <div className="p-6">
                         <div className="flex gap-4 mb-8">
                             <input value={newCity} onChange={e => setNewCity(e.target.value)} placeholder="Название города" className="flex-1 p-3 rounded-2xl bg-background border border-border outline-none" />
-                            <button onClick={addCity} className="bg-primary text-white px-6 py-3 rounded-2xl font-black">Добавить</button>
+                            <div className="flex gap-2">
+                                <button onClick={addCity} className="bg-primary text-white px-6 py-3 rounded-2xl font-black">
+                                    {editingCity ? 'Обновить' : 'Добавить'}
+                                </button>
+                                {editingCity && (
+                                    <button onClick={() => { setEditingCity(null); setNewCity(''); }} className="bg-muted px-6 py-3 rounded-2xl font-black">Отмена</button>
+                                )}
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {cities.map(c => (
                                 <div key={c.id} className="bg-background p-4 rounded-2xl border border-border flex items-center justify-between group">
                                     <span className="font-bold">{c.name}</span>
-                                    <button onClick={() => deleteCity(c.id)} className="text-destructive opacity-0 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => startEditingCity(c)} className="text-primary"><Settings className="h-4 w-4" /></button>
+                                        <button onClick={() => deleteCity(c.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'categories' && (
+                    <div className="p-6 space-y-8">
+                        <form onSubmit={addCategory} className="grid md:grid-cols-2 gap-4 bg-background p-6 rounded-3xl border border-border">
+                            <div className="md:col-span-2 flex justify-between items-center mb-2">
+                                <h3 className="font-black text-xl">{editingCategory ? 'Редактировать категорию' : 'Добавить новую категорию'}</h3>
+                                {editingCategory && (
+                                    <button type="button" onClick={() => { setEditingCategory(null); setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage(''); }} className="text-sm text-primary font-bold">Отменить редактирование</button>
+                                )}
+                            </div>
+                            <input value={catName} onChange={e => setCatName(e.target.value)} placeholder="Название категории" className="p-3 rounded-xl border border-border bg-surface outline-none" required />
+                            <input value={catSlug} onChange={e => setCatSlug(e.target.value)} placeholder="Slug (англ. url)" className="p-3 rounded-xl border border-border bg-surface outline-none" />
+                            <input value={catImage} onChange={e => setCatImage(e.target.value)} placeholder="URL картинки" className="p-3 rounded-xl border border-border bg-surface outline-none" />
+                            <input value={catColor} onChange={e => setCatColor(e.target.value)} placeholder="Цвет (Tailwind, e.g. from-red-500 to-orange-500)" className="p-3 rounded-xl border border-border bg-surface outline-none" />
+                            <input value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="Иконка (не обяз.)" className="p-3 rounded-xl border border-border bg-surface outline-none md:col-span-2" />
+                            <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-xl font-black transition-all hover:opacity-90">
+                                {editingCategory ? 'Обновить категорию' : 'Добавить категорию'}
+                            </button>
+                        </form>
+                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {categories.map(c => (
+                                <div key={c.id} className="bg-background p-4 rounded-3xl border border-border flex items-center gap-3 group">
+                                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0">
+                                        {c.image ? <img src={c.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs text-muted">No img</div>}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="font-bold truncate">{c.name}</div>
+                                        <div className="text-xs text-muted truncate">{c.slug}</div>
+                                    </div>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => startEditingCategory(c)} className="text-primary hover:scale-110 transition-transform"><Settings className="h-4 w-4" /></button>
+                                        <button onClick={() => deleteCategory(c.id)} className="text-destructive hover:scale-110 transition-transform"><Trash2 className="h-4 w-4" /></button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

@@ -25,7 +25,7 @@ function SearchContent() {
         setLoading(true);
         const { data } = await supabase
             .from('ads')
-            .select('*, profiles(full_name, rating), categories(name)')
+            .select('*, profiles!user_id(full_name, rating), categories!category_id(name)')
             .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
             .eq('status', 'active')
             .order('created_at', { ascending: false });

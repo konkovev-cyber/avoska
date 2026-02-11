@@ -1,40 +1,75 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight } from 'lucide-react';
-
-const CATEGORIES = [
-    { name: 'Недвижимость', slug: 'real-estate', icon: Home, color: 'bg-blue-500', desc: 'Квартиры, дома, комнаты и участки' },
-    { name: 'Транспорт', slug: 'transport', icon: Car, color: 'bg-green-500', desc: 'Легковые авто, спецтехника и запчасти' },
-    { name: 'Электроника', slug: 'electronics', icon: Smartphone, color: 'bg-purple-500', desc: 'Телефоны, компьютеры и гаджеты' },
-    { name: 'Одежда', slug: 'clothing', icon: Shirt, color: 'bg-orange-500', desc: 'Мужская, женская и детская одежда' },
-    { name: 'Хобби', slug: 'hobby', icon: Gamepad, color: 'bg-red-500', desc: 'Игры, коллекционирование и отдых' },
-    { name: 'Для дома', slug: 'home', icon: Armchair, color: 'bg-teal-500', desc: 'Мебель, ремонт и декор' },
-];
+import { supabase } from '@/lib/supabase/client';
+import { ChevronLeft } from 'lucide-react';
 
 export default function CategoriesPage() {
-    return (
-        <div className="container mx-auto px-4 py-8 max-w-5xl">
-            <h1 className="text-4xl font-black mb-8">Все категории</h1>
+    const [categories, setCategories] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-            <div className="grid md:grid-cols-2 gap-6">
-                {CATEGORIES.map((cat) => (
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const { data } = await supabase
+                .from('categories')
+                .select('*')
+                .order('name');
+            setCategories(data || []);
+            setLoading(false);
+        };
+        fetchCategories();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-20 flex justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+            <div className="flex flex-col gap-2 mb-12">
+                <Link href="/" className="inline-flex items-center gap-2 text-primary font-black mb-4 hover:translate-x-[-4px] transition-transform">
+                    <ChevronLeft className="h-5 w-5" /> На главную
+                </Link>
+                <h1 className="text-5xl font-black tracking-tighter">Все категории</h1>
+                <p className="text-muted font-bold">Найдите то, что нужно именно вам</p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                {categories.map((cat) => (
                     <Link
                         key={cat.slug}
                         href={`/category?slug=${cat.slug}`}
-                        className="flex items-center p-8 bg-surface rounded-3xl border border-border hover:border-primary hover:shadow-xl transition-all group"
+                        className="group relative h-48 rounded-[2rem] overflow-hidden border border-border bg-muted shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500"
                     >
-                        <div className={`w-16 h-16 ${cat.color} rounded-2xl flex items-center justify-center text-white mr-6 group-hover:scale-110 transition-transform shadow-lg`}>
-                            <cat.icon className="h-8 w-8" />
+                        {/* Full Card Image */}
+                        <img
+                            src={cat.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=400`}
+                            alt={cat.name}
+                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            onError={(e) => {
+                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=400`;
+                            }}
+                        />
+
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+
+                        {/* Text Content */}
+                        <div className="absolute bottom-0 left-0 right-0 p-5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                            <h3 className="text-white text-base font-black leading-tight drop-shadow-lg break-words">
+                                {cat.name}
+                            </h3>
+                            <div className="w-8 h-1 bg-primary mt-2 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                         </div>
-                        <div className="flex-1">
-                            <h3 className="text-xl font-black mb-1">{cat.name}</h3>
-                            <p className="text-muted text-sm">{cat.desc}</p>
-                        </div>
-                        <ChevronRight className="h-6 w-6 text-muted group-hover:text-primary transition-colors" />
                     </Link>
                 ))}
             </div>
         </div>
     );
 }
+

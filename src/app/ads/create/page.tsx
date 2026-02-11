@@ -9,14 +9,18 @@ import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 
 const CATEGORIES = [
-    { name: 'Недвижимость', slug: 'real-estate' },
     { name: 'Транспорт', slug: 'transport' },
-    { name: 'Электроника', slug: 'electronics' },
-    { name: 'Одежда', slug: 'clothing' },
-    { name: 'Хобби', slug: 'hobby' },
-    { name: 'Для дома', slug: 'home' },
+    { name: 'Недвижимость', slug: 'real-estate' },
+    { name: 'Работа', slug: 'jobs' },
     { name: 'Услуги', slug: 'services' },
-    { name: 'Вакансии', slug: 'jobs' },
+    { name: 'Электроника', slug: 'electronics' },
+    { name: 'Дом и дача', slug: 'home' },
+    { name: 'Личные вещи', slug: 'clothing' },
+    { name: 'Запчасти', slug: 'parts' },
+    { name: 'Хобби и отдых', slug: 'hobby' },
+    { name: 'Животные', slug: 'pets' },
+    { name: 'Красота', slug: 'beauty' },
+    { name: 'Детские товары', slug: 'kids' },
 ];
 
 export default function CreateAdPage() {

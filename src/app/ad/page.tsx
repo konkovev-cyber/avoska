@@ -185,12 +185,12 @@ function AdContent() {
                     <h1 className="text-2xl font-black mb-2 block lg:hidden">{ad.title}</h1>
 
                     <div className="space-y-4">
-                        <div className="aspect-[4/3] bg-surface rounded-2xl border border-border overflow-hidden relative group cursor-zoom-in" onClick={() => setIsZoomed(true)}>
+                        <div className="aspect-[16/10] max-h-[450px] bg-surface rounded-2xl border border-border overflow-hidden relative group cursor-zoom-in flex items-center justify-center" onClick={() => setIsZoomed(true)}>
                             {ad.images && ad.images.length > 0 ? (
                                 <>
                                     <img
                                         src={ad.images[currentImageIndex]}
-                                        className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                                        className="max-w-full max-h-full object-contain transition-all duration-500 group-hover:scale-105"
                                         alt={ad.title}
                                     />
                                     <div className="absolute bottom-4 right-4 bg-black/50 text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">

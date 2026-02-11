@@ -4,16 +4,22 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, CheckCircle, Info, Filter, X, Search } from 'lucide-react';
+import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
-    { name: 'Недвижимость', slug: 'real-estate', icon: Home, color: 'bg-blue-500' },
-    { name: 'Транспорт', slug: 'transport', icon: Car, color: 'bg-green-500' },
-    { name: 'Электроника', slug: 'electronics', icon: Smartphone, color: 'bg-purple-500' },
-    { name: 'Одежда', slug: 'clothing', icon: Shirt, color: 'bg-orange-500' },
-    { name: 'Хобби', slug: 'hobby', icon: Gamepad, color: 'bg-red-500' },
-    { name: 'Для дома', slug: 'home', icon: Armchair, color: 'bg-teal-500' },
+    { name: 'Транспорт', slug: 'transport', icon: Car, color: 'bg-[#ff9c00]' },
+    { name: 'Недвижимость', slug: 'real-estate', icon: Home, color: 'bg-[#56ccf2]' },
+    { name: 'Работа', slug: 'jobs', icon: Briefcase, color: 'bg-[#eb5757]' },
+    { name: 'Услуги', slug: 'services', icon: Wrench, color: 'bg-[#bb6bd9]' },
+    { name: 'Электроника', slug: 'electronics', icon: Smartphone, color: 'bg-[#27ae60]' },
+    { name: 'Дом и дача', slug: 'home', icon: Armchair, color: 'bg-[#f2994a]' },
+    { name: 'Личные вещи', slug: 'clothing', icon: Shirt, color: 'bg-[#2d9cdb]' },
+    { name: 'Запчасти', slug: 'parts', icon: Settings, color: 'bg-[#597ef7]' },
+    { name: 'Хобби и отдых', slug: 'hobby', icon: Gamepad, color: 'bg-[#9b51e0]' },
+    { name: 'Животные', slug: 'pets', icon: Info, color: 'bg-[#f2c94c]' },
+    { name: 'Красота', slug: 'beauty', icon: Sparkles, color: 'bg-[#ff85c0]' },
+    { name: 'Детские товары', slug: 'kids', icon: Baby, color: 'bg-[#ffc53d]' },
 ];
 
 function CategoryContent() {
@@ -48,42 +54,40 @@ function CategoryContent() {
 
     const fetchAds = async () => {
         setLoading(true);
-        const { data: catData } = await supabase.from('categories').select('id').eq('slug', slug).single();
+        try {
+            const { data: catData } = await supabase.from('categories').select('id').eq('slug', slug).single();
 
-        if (catData) {
-            let query = supabase
-                .from('ads')
-                .select('*, profiles(full_name, is_verified)')
-                .eq('category_id', catData.id)
-                .eq('status', 'active');
+            if (catData) {
+                let query = supabase
+                    .from('ads')
+                    .select('*, profiles!user_id(full_name, avatar_url, is_verified)')
+                    .eq('category_id', catData.id)
+                    .eq('status', 'active');
 
-            if (priceFrom) query = query.gte('price', parseFloat(priceFrom));
-            if (priceTo) query = query.lte('price', parseFloat(priceTo));
-            if (selectedCity) query = query.eq('city', selectedCity);
+                if (priceFrom) query = query.gte('price', parseFloat(priceFrom));
+                if (priceTo) query = query.lte('price', parseFloat(priceTo));
+                if (selectedCity) query = query.eq('city', selectedCity);
 
-            // JSONB Filtering (Best effort with JS client)
-            // For complex JSONB filters, we might need a stored procedure or just filter in memory if the dataset is small.
-            // But let's try the contains operator for exact matches if possible.
-            // query = query.contains('specifications', specFilters); 
-            // Note: contains expects a partial object.
+                const { data, error } = await query.order('created_at', { ascending: false });
+                if (error) throw error;
 
-            const { data, error } = await query.order('created_at', { ascending: false });
+                let filteredData = data || [];
 
-            let filteredData = data || [];
-
-            // Manual specification filtering for multiple keys
-            if (Object.keys(specFilters).length > 0) {
-                filteredData = filteredData.filter(ad => {
-                    return Object.entries(specFilters).every(([key, value]) => {
-                        if (!value) return true;
-                        return ad.specifications?.[key] === value;
+                if (Object.keys(specFilters).length > 0) {
+                    filteredData = filteredData.filter(ad => {
+                        return Object.entries(specFilters).every(([key, value]) => {
+                            if (!value) return true;
+                            return ad.specifications?.[key] === value;
+                        });
                     });
-                });
+                }
+                setAds(filteredData);
             }
-
-            setAds(filteredData);
+        } catch (err) {
+            console.error('Fetch ads error:', err);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const resetFilters = () => {
@@ -97,19 +101,19 @@ function CategoryContent() {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
                 <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 md:w-16 md:h-16 ${category.color} rounded-2xl flex items-center justify-center text-white shadow-lg`}>
-                        <category.icon className="h-6 w-6 md:h-8 md:w-8" />
+                    <div className={`w-14 h-14 ${category.color} bg-opacity-10 rounded-2xl flex items-center justify-center border border-primary/20`}>
+                        <category.icon className="h-7 w-7 text-foreground opacity-80" />
                     </div>
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-black">{category.name}</h1>
-                        <p className="text-muted text-sm">{ads.length} объявлений</p>
+                        <h1 className="text-3xl font-black">{category.name}</h1>
+                        <p className="text-muted text-sm font-bold uppercase tracking-wider">{ads.length} объявлений</p>
                     </div>
                 </div>
                 <button
                     onClick={() => setShowMobileFilters(true)}
-                    className="md:hidden p-3 bg-surface border border-border rounded-xl flex items-center gap-2 font-bold"
+                    className="md:hidden w-full p-4 bg-surface border border-border rounded-2xl flex items-center justify-center gap-2 font-black"
                 >
                     <Filter className="h-5 w-5" /> Фильтры
                 </button>
@@ -117,43 +121,44 @@ function CategoryContent() {
 
             <div className="flex flex-col md:flex-row gap-8">
                 {/* Sidebar Filters - Desktop */}
-                <aside className="hidden md:block w-64 shrink-0 space-y-8 h-fit sticky top-24">
-                    <div className="bg-surface p-6 rounded-3xl border border-border shadow-sm">
+                <aside className="hidden md:block w-72 shrink-0 space-y-6">
+                    <div className="bg-surface p-6 rounded-3xl border border-border h-fit">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="font-black flex items-center gap-2"><Filter className="h-4 w-4 text-primary" /> Фильтры</h3>
+                            <h3 className="font-black text-lg">Фильтры</h3>
                             {(priceFrom || priceTo || selectedCity || Object.keys(specFilters).length > 0) && (
                                 <button onClick={resetFilters} className="text-xs font-bold text-primary hover:underline">Сбросить</button>
                             )}
                         </div>
 
                         {/* Price Filter */}
-                        <div className="mb-6">
-                            <label className="block text-xs font-black uppercase text-muted mb-3 tracking-widest">Цена (₽)</label>
-                            <div className="grid grid-cols-2 gap-2">
+                        <div className="mb-8">
+                            <label className="block text-[11px] font-black uppercase text-muted mb-3 tracking-widest">Цена, ₽</label>
+                            <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     placeholder="От"
                                     value={priceFrom}
                                     onChange={(e) => setPriceFrom(e.target.value)}
-                                    className="w-full p-2 text-sm rounded-lg bg-background border border-border outline-none focus:ring-1 focus:ring-primary"
+                                    className="w-full p-3 text-sm rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors"
                                 />
+                                <div className="w-4 h-0.5 bg-border"></div>
                                 <input
                                     type="number"
                                     placeholder="До"
                                     value={priceTo}
                                     onChange={(e) => setPriceTo(e.target.value)}
-                                    className="w-full p-2 text-sm rounded-lg bg-background border border-border outline-none focus:ring-1 focus:ring-primary"
+                                    className="w-full p-3 text-sm rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors"
                                 />
                             </div>
                         </div>
 
                         {/* City Filter */}
-                        <div className="mb-6">
-                            <label className="block text-xs font-black uppercase text-muted mb-3 tracking-widest">Город</label>
+                        <div className="mb-8">
+                            <label className="block text-[11px] font-black uppercase text-muted mb-3 tracking-widest">Город</label>
                             <select
                                 value={selectedCity}
                                 onChange={(e) => setSelectedCity(e.target.value)}
-                                className="w-full p-2 text-sm rounded-lg bg-background border border-border outline-none focus:ring-1 focus:ring-primary"
+                                className="w-full p-3 text-sm rounded-xl bg-background border border-border outline-none focus:border-primary appearance-none cursor-pointer"
                             >
                                 <option value="">Любой</option>
                                 {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
@@ -161,40 +166,46 @@ function CategoryContent() {
                         </div>
 
                         {/* Dynamic Specs Filters */}
-                        {slug === 'transport' && (
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-black uppercase text-muted mb-2 tracking-widest">КПП</label>
-                                    <select
-                                        value={specFilters.transmission || ''}
-                                        onChange={(e) => setSpecFilters({ ...specFilters, transmission: e.target.value })}
-                                        className="w-full p-2 text-sm rounded-lg bg-background border border-border outline-none"
-                                    >
-                                        <option value="">Любая</option>
-                                        <option value="auto">Автомат</option>
-                                        <option value="manual">Механика</option>
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-
-                        {slug === 'real-estate' && (
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-xs font-black uppercase text-muted mb-2 tracking-widest">Комнаты</label>
-                                    <select
-                                        value={specFilters.rooms || ''}
-                                        onChange={(e) => setSpecFilters({ ...specFilters, rooms: e.target.value })}
-                                        className="w-full p-2 text-sm rounded-lg bg-background border border-border outline-none"
-                                    >
-                                        <option value="">Любое</option>
-                                        <option value="studio">Студия</option>
-                                        <option value="1">1 комната</option>
-                                        <option value="2">2 комнаты</option>
-                                        <option value="3">3 комнаты</option>
-                                        <option value="4+">4+</option>
-                                    </select>
-                                </div>
+                        {(slug === 'transport' || slug === 'electronics' || slug === 'real-estate') && (
+                            <div className="space-y-6 pt-6 border-t border-border">
+                                {slug === 'transport' && (
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">КПП</label>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {['auto', 'manual'].map(t => (
+                                                <button
+                                                    key={t}
+                                                    onClick={() => setSpecFilters({ ...specFilters, transmission: specFilters.transmission === t ? '' : t })}
+                                                    className={cn(
+                                                        "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.transmission === t ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    {t === 'auto' ? 'Автомат' : 'Механика'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {slug === 'real-estate' && (
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Комнаты</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {['studio', '1', '2', '3'].map(r => (
+                                                <button
+                                                    key={r}
+                                                    onClick={() => setSpecFilters({ ...specFilters, rooms: specFilters.rooms === r ? '' : r })}
+                                                    className={cn(
+                                                        "p-2 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.rooms === r ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    {r === 'studio' ? 'Студия' : r}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -203,111 +214,87 @@ function CategoryContent() {
                 {/* Ads Grid */}
                 <div className="flex-1">
                     {loading ? (
-                        <div className="text-center p-20 flex flex-col items-center gap-4">
-                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-                            <span className="text-muted font-bold">Ищем объявления...</span>
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse">
+                            {[1, 2, 3, 4, 5, 6].map(i => <div key={i} className="aspect-[3/4] bg-muted rounded-2xl" />)}
                         </div>
                     ) : ads.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                             {ads.map((ad) => (
                                 <Link
                                     key={ad.id}
                                     href={`/ad?id=${ad.id}`}
-                                    className="bg-surface rounded-3xl border border-border overflow-hidden hover:shadow-xl transition-all flex flex-col h-full group"
+                                    className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-transparent hover:border-border"
                                 >
-                                    <div className="aspect-square bg-muted relative overflow-hidden">
+                                    <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                                         {ad.images?.[0] ? (
                                             <img
                                                 src={ad.images[0]}
                                                 alt={ad.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-muted italic flex-col gap-2">
-                                                <Info className="h-8 w-8 opacity-20" />
-                                                <span>Нет фото</span>
-                                            </div>
+                                            <div className="w-full h-full flex items-center justify-center text-muted italic text-[10px]">Нет фото</div>
                                         )}
-                                        {ad.delivery_possible && (
-                                            <div className="absolute top-3 left-3 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-md">
-                                                Доставка
-                                            </div>
-                                        )}
+                                        <button className="absolute top-2 right-2 p-1.5 bg-white/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white text-muted hover:text-red-500">
+                                            <Heart className="h-4 w-4" />
+                                        </button>
                                     </div>
-                                    <div className="p-5 flex flex-col flex-1">
-                                        <span className="text-xl font-black text-foreground mb-1">
-                                            {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена договорная'}
-                                        </span>
-                                        <h3 className="line-clamp-2 text-sm font-bold mb-4 group-hover:text-primary transition-colors flex-1">
+                                    <div className="p-3 flex flex-col flex-1">
+                                        <h3 className="text-xs font-medium line-clamp-2 mb-1 group-hover:text-primary transition-colors h-8">
                                             {ad.title}
                                         </h3>
-                                        <div className="flex items-center justify-between mt-auto">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[11px] font-bold text-muted uppercase tracking-tighter">{ad.city}</span>
-                                                {ad.profiles?.is_verified && <CheckCircle className="h-3 w-3 text-blue-500 fill-current" />}
+                                        <div className="text-base font-black text-foreground mb-2">
+                                            {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
+                                        </div>
+                                        <div className="mt-auto space-y-1">
+                                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground uppercase tracking-tight font-bold">
+                                                <span>{ad.city}</span>
+                                                {ad.profiles?.is_verified && <CheckCircle className="h-2.5 w-2.5 text-blue-500 fill-current" />}
                                             </div>
-                                            <span className="text-[10px] text-muted">{new Date(ad.created_at).toLocaleDateString()}</span>
+                                            <div className="text-[10px] text-muted-foreground font-medium">
+                                                {new Date(ad.created_at).toLocaleDateString()}
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>
                             ))}
                         </div>
                     ) : (
-                        <div className="p-20 text-center text-muted border border-dashed border-border rounded-3xl bg-surface/50">
-                            <Search className="h-10 w-10 mx-auto mb-4 opacity-20" />
-                            <h3 className="text-lg font-bold">Ничего не найдено</h3>
-                            <p>Попробуйте сбросить фильтры или изменить параметры поиска</p>
+                        <div className="py-24 text-center bg-surface rounded-[3rem] border border-dashed border-border flex flex-col items-center">
+                            <Search className="h-12 w-12 text-muted mb-4 opacity-20" />
+                            <h3 className="text-xl font-black">Ничего не нашли</h3>
+                            <p className="text-muted mt-2 max-w-xs mx-auto">Попробуйте изменить параметры фильтрации или выберите другую категорию</p>
+                            <button onClick={resetFilters} className="mt-6 text-primary font-black hover:underline cursor-pointer">Сбросить всё</button>
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Mobile Filters Drawer Overlay */}
+            {/* Mobile Filters Drawer */}
             {showMobileFilters && (
-                <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="absolute right-0 top-0 bottom-0 w-80 bg-background shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
-                        <div className="p-6 border-b border-border flex items-center justify-between">
+                <div className="fixed inset-0 z-50 md:hidden bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="absolute inset-x-0 bottom-0 bg-background rounded-t-[3rem] max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom duration-500 shadow-2xl">
+                        <div className="p-6 sticky top-0 bg-background border-b border-border flex items-center justify-between z-10">
                             <h3 className="text-xl font-black">Фильтры</h3>
-                            <button onClick={() => setShowMobileFilters(false)} className="p-2 rounded-full hover:bg-muted"><X className="h-6 w-6" /></button>
+                            <button onClick={() => setShowMobileFilters(false)} className="p-2 bg-surface rounded-full"><X className="h-6 w-6" /></button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                            {/* Price */}
+                        <div className="p-8 space-y-8">
                             <div>
-                                <label className="block text-xs font-black uppercase text-muted mb-3 tracking-widest">Цена (₽)</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <input type="number" placeholder="От" value={priceFrom} onChange={(e) => setPriceFrom(e.target.value)} className="w-full p-3 rounded-xl bg-surface border border-border" />
-                                    <input type="number" placeholder="До" value={priceTo} onChange={(e) => setPriceTo(e.target.value)} className="w-full p-3 rounded-xl bg-surface border border-border" />
+                                <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Цена, ₽</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input type="number" placeholder="От" value={priceFrom} onChange={(e) => setPriceFrom(e.target.value)} className="w-full p-4 rounded-2xl bg-surface border border-border outline-none" />
+                                    <input type="number" placeholder="До" value={priceTo} onChange={(e) => setPriceTo(e.target.value)} className="w-full p-4 rounded-2xl bg-surface border border-border outline-none" />
                                 </div>
                             </div>
-
-                            {/* City */}
                             <div>
-                                <label className="block text-xs font-black uppercase text-muted mb-3 tracking-widest">Город</label>
-                                <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="w-full p-3 rounded-xl bg-surface border border-border outline-none">
-                                    <option value="">Любой</option>
+                                <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Город</label>
+                                <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="w-full p-4 rounded-2xl bg-surface border border-border outline-none appearance-none">
+                                    <option value="">Любой город</option>
                                     {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                                 </select>
                             </div>
-
-                            {/* Dynamic Filters placeholder */}
-                            {slug === 'transport' && (
-                                <div>
-                                    <label className="block text-xs font-black uppercase text-muted mb-3 tracking-widest">КПП</label>
-                                    <select
-                                        value={specFilters.transmission || ''}
-                                        onChange={(e) => setSpecFilters({ ...specFilters, transmission: e.target.value })}
-                                        className="w-full p-3 rounded-xl bg-surface border border-border outline-none"
-                                    >
-                                        <option value="">Любая</option>
-                                        <option value="auto">Автомат</option>
-                                        <option value="manual">Механика</option>
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-                        <div className="p-6 border-t border-border grid grid-cols-2 gap-3">
-                            <button onClick={resetFilters} className="py-3 font-bold text-muted hover:text-foreground">Сбросить</button>
-                            <button onClick={() => setShowMobileFilters(false)} className="py-3 bg-primary text-white font-black rounded-xl">Показать</button>
+                            <button onClick={() => setShowMobileFilters(false)} className="w-full py-5 bg-primary text-white font-black rounded-2xl shadow-xl">Показать результаты</button>
+                            <button onClick={() => { resetFilters(); setShowMobileFilters(false); }} className="w-full py-4 text-muted font-bold">Сбросить всё</button>
                         </div>
                     </div>
                 </div>
