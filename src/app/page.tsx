@@ -1,65 +1,191 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
+import Link from 'next/link';
+import {
+  Home as HomeIcon,
+  Car,
+  Smartphone,
+  Shirt,
+  Gamepad,
+  Armchair,
+  ChevronRight,
+  CheckCircle,
+  Plus
+} from 'lucide-react';
+
+const CATEGORIES = [
+  { name: 'Недвижимость', slug: 'real-estate', icon: HomeIcon, color: 'bg-blue-500' },
+  { name: 'Транспорт', slug: 'transport', icon: Car, color: 'bg-green-500' },
+  { name: 'Электроника', slug: 'electronics', icon: Smartphone, color: 'bg-purple-500' },
+  { name: 'Одежда', slug: 'clothing', icon: Shirt, color: 'bg-orange-500' },
+  { name: 'Хобби', slug: 'hobby', icon: Gamepad, color: 'bg-red-500' },
+  { name: 'Для дома', slug: 'home', icon: Armchair, color: 'bg-teal-500' },
+];
+
+export default function HomePage() {
+  const [ads, setAds] = useState<any[]>([]);
+  const [banners, setBanners] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [adsRes, bannersRes] = await Promise.all([
+          supabase
+            .from('ads')
+            .select('*, profiles!user_id(full_name, avatar_url, is_verified)')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(12),
+          supabase
+            .from('banners')
+            .select('*')
+            .eq('is_active', true)
+        ]);
+
+        setAds(adsRes.data || []);
+        setBanners(bannersRes.data || []);
+      } catch (error) {
+        console.error('Home fetch error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="container mx-auto px-4 py-8">
+      {/* Hero Section */}
+      <section className="bg-primary rounded-3xl p-8 mb-12 text-white flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
+        <div className="z-10">
+          <h1 className="text-4xl md:text-5xl font-black mb-4">Найди всё в Авоське+</h1>
+          <p className="text-lg opacity-90 mb-8 max-w-2xl">
+            Доска объявлений нового поколения. Бесплатно до 10 объявлений!
           </p>
+          <Link href="/ads/create" className="bg-white text-primary px-8 py-4 rounded-full font-black flex items-center gap-2 hover:scale-105 transition-transform shadow-xl">
+            <Plus className="h-5 w-5" /> Разместить объявление
+          </Link>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent rounded-full opacity-20 blur-2xl"></div>
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full opacity-10 blur-2xl"></div>
+      </section>
+
+      {/* Banners Section */}
+      {banners.length > 0 && (
+        <section className="mb-12">
+          <div className="grid gap-6 md:grid-cols-2">
+            {banners.map(banner => (
+              <a
+                key={banner.id}
+                href={banner.link_url || '#'}
+                className="group relative h-48 rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 border border-border hover:shadow-lg transition-all"
+              >
+                {banner.image_url && <img src={banner.image_url} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:scale-105 transition-transform" />}
+                <div className="relative p-8 h-full flex flex-col justify-center">
+                  <h3 className="text-2xl font-black mb-2">{banner.title}</h3>
+                  <p className="text-muted line-clamp-2 max-w-md">{banner.content}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Categories Grid */}
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-black">Категории</h2>
+          <Link href="/categories" className="text-primary font-bold flex items-center gap-1 hover:underline">
+            Все <ChevronRight className="h-5 w-5" />
+          </Link>
         </div>
-      </main>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+          {CATEGORIES.map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/category?slug=${cat.slug}`}
+              className="flex flex-col items-center p-6 bg-surface rounded-2xl border border-border hover:border-primary hover:shadow-md transition-all group"
+            >
+              <div className={`w-12 h-12 ${cat.color} rounded-xl flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform shadow-sm`}>
+                <cat.icon className="h-6 w-6" />
+              </div>
+              <span className="text-sm font-bold text-center">{cat.name}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Recent Ads Section */}
+      <section>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-black">Свежие объявления</h2>
+          <Link href="/ads" className="text-primary font-bold flex items-center gap-1 hover:underline">
+            Смотреть всё <ChevronRight className="h-5 w-5" />
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
+            {[1, 2, 3, 4].map(i => <div key={i} className="aspect-[4/5] bg-muted rounded-3xl" />)}
+          </div>
+        ) : ads.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {ads.map((ad) => (
+              <Link
+                key={ad.id}
+                href={`/ad?id=${ad.id}`}
+                className="bg-surface rounded-[2rem] border border-border overflow-hidden hover:shadow-xl transition-all flex flex-col h-full group"
+              >
+                <div className="aspect-square bg-muted relative overflow-hidden">
+                  {ad.images?.[0] ? (
+                    <img
+                      src={ad.images[0]}
+                      alt={ad.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted italic">Нет фото</div>
+                  )}
+                  {ad.delivery_possible && (
+                    <div className="absolute top-4 left-4 bg-primary text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-md">
+                      Доставка
+                    </div>
+                  )}
+                </div>
+                <div className="p-5 flex flex-col flex-1">
+                  <span className="text-xl font-black text-foreground mb-1">
+                    {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}
+                  </span>
+                  <h3 className="line-clamp-2 text-sm font-bold mb-4 group-hover:text-primary transition-colors flex-1">
+                    {ad.title}
+                  </h3>
+                  <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-muted uppercase">{ad.city}</span>
+                      {ad.profiles?.is_verified && <CheckCircle className="h-3 w-3 text-blue-500 fill-current" />}
+                    </div>
+                    <span className="text-[10px] text-muted">{new Date(ad.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-surface p-12 rounded-[3rem] border border-dashed border-border text-center">
+            <h3 className="text-2xl font-black mb-2">Здесь пока пусто</h3>
+            <p className="text-muted mb-8 text-lg">Будьте первым, кто разместит здесь своё объявление!</p>
+            <Link
+              href="/ads/create"
+              className="inline-flex items-center gap-3 bg-primary text-white px-10 py-5 rounded-full font-black hover:scale-105 transition-all shadow-2xl"
+            >
+              <Plus className="h-6 w-6" /> Разместить объявление
+            </Link>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
