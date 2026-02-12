@@ -334,7 +334,7 @@ export default function ProfilePage() {
                                         </span>
                                         <span className="text-[10px] text-muted font-bold uppercase">{ad.categories.name}</span>
                                     </div>
-                                    <Link href={`/ads/${ad.id}`} className="block text-lg font-bold truncate hover:text-primary transition-colors">
+                                    <Link href={`/ad?id=${ad.id}`} className="block text-lg font-bold truncate hover:text-primary transition-colors">
                                         {ad.title}
                                     </Link>
                                     <div className="text-xl font-black mt-1">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
@@ -358,7 +358,7 @@ export default function ProfilePage() {
                                         <Trash2 className="h-5 w-5" />
                                     </button>
                                     <Link
-                                        href={`/ads/${ad.id}`}
+                                        href={`/ad?id=${ad.id}`}
                                         className="p-3 rounded-xl border border-border hover:bg-muted transition-all"
                                     >
                                         <ExternalLink className="h-5 w-5" />
@@ -379,7 +379,7 @@ export default function ProfilePage() {
                     favorites.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {favorites.map(({ ads: ad }) => (
-                                <Link key={ad.id} href={`/ads/${ad.id}`} className="bg-surface border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col group">
+                                <Link key={ad.id} href={`/ad?id=${ad.id}`} className="bg-surface border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col group">
                                     <div className="aspect-square bg-muted relative">
                                         {ad.images?.[0] ? (
                                             <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />

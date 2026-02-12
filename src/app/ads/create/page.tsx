@@ -253,22 +253,95 @@ export default function CreateAdPage() {
                 )}
 
                 {category === 'real-estate' && (
-                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div>
-                            <label className="block text-sm font-bold mb-2">Общая площадь (м²)</label>
-                            <input type="number" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Кол-во комнат</label>
-                            <select value={specifications.rooms || ''} onChange={(e) => setSpecifications({ ...specifications, rooms: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                                <option value="">Не выбрано</option>
-                                <option value="studio">Студия</option>
-                                <option value="1">1 комната</option>
-                                <option value="2">2 комнаты</option>
-                                <option value="3">3 комнаты</option>
-                                <option value="4+">4+ комнат</option>
+                            <label className="block text-sm font-bold mb-2">Тип недвижимости</label>
+                            <select
+                                value={specifications.type || ''}
+                                onChange={(e) => setSpecifications({ ...specifications, type: e.target.value })}
+                                className="w-full p-3 rounded-xl border border-border bg-background outline-none"
+                            >
+                                <option value="">Выберите...</option>
+                                <option value="apartment">Квартира</option>
+                                <option value="house">Дом, дача, коттедж</option>
+                                <option value="plot">Земельный участок</option>
+                                <option value="garage">Гараж и машиноместо</option>
+                                <option value="commercial">Коммерческая недвижимость</option>
                             </select>
                         </div>
+
+                        {specifications.type === 'apartment' && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Кол-во комнат</label>
+                                    <select value={specifications.rooms || ''} onChange={(e) => setSpecifications({ ...specifications, rooms: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
+                                        <option value="">Не выбрано</option>
+                                        <option value="studio">Студия</option>
+                                        <option value="1">1 комната</option>
+                                        <option value="2">2 комнаты</option>
+                                        <option value="3">3 комнаты</option>
+                                        <option value="4+">4+ комнат</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Общая площадь (м²)</label>
+                                    <input type="number" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Этаж</label>
+                                    <input type="number" value={specifications.floor || ''} onChange={(e) => setSpecifications({ ...specifications, floor: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Этажей в доме</label>
+                                    <input type="number" value={specifications.total_floors || ''} onChange={(e) => setSpecifications({ ...specifications, total_floors: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                                </div>
+                            </div>
+                        )}
+
+                        {specifications.type === 'house' && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Площадь дома (м²)</label>
+                                    <input type="number" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Площадь участка (сот.)</label>
+                                    <input type="number" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Этажей в доме</label>
+                                    <input type="number" value={specifications.total_floors || ''} onChange={(e) => setSpecifications({ ...specifications, total_floors: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Материал стен</label>
+                                    <select value={specifications.material || ''} onChange={(e) => setSpecifications({ ...specifications, material: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
+                                        <option value="">Выберите...</option>
+                                        <option value="brick">Кирпич</option>
+                                        <option value="wood">Брус/Бревно</option>
+                                        <option value="block">Газоблоки</option>
+                                        <option value="panel">Панель</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
+                        {specifications.type === 'plot' && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Площадь (сот.)</label>
+                                    <input type="number" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2">Статус участка</label>
+                                    <select value={specifications.status || ''} onChange={(e) => setSpecifications({ ...specifications, status: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
+                                        <option value="">Выберите...</option>
+                                        <option value="izhs">ИЖС</option>
+                                        <option value="snt">СНТ/ДНП</option>
+                                        <option value="prom">Промназначения</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

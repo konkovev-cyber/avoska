@@ -206,8 +206,14 @@ function AdContent() {
     return (
         <div className="bg-background min-h-screen pb-10">
             {isZoomed && (
-                <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center p-2" onClick={() => setIsZoomed(false)}>
+                <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-2 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsZoomed(false)}>
+                    <button className="absolute top-4 right-4 p-2 bg-white/10 rounded-full text-white hover:bg-white/20">
+                        <X className="h-6 w-6" />
+                    </button>
                     <img src={ad.images[currentImageIndex]} className="max-w-full max-h-full object-contain" alt="" />
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-xs font-bold backdrop-blur-md pointer-events-none">
+                        Нажмите, чтобы закрыть
+                    </div>
                 </div>
             )}
 
@@ -220,10 +226,10 @@ function AdContent() {
                             {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                         </div>
                         <div className="flex gap-2">
-                            <button onClick={toggleFavorite} className={cn("p-2 rounded-full", isFavorite ? "text-red-500 bg-red-50" : "text-muted")}>
+                            <button onClick={toggleFavorite} className={cn("p-2 rounded-full transition-colors", isFavorite ? "text-red-500 bg-red-50" : "text-muted hover:bg-muted/10")}>
                                 <Heart className={cn("h-6 w-6", isFavorite && "fill-current")} />
                             </button>
-                            <button onClick={handleShare} className="p-2 text-muted">
+                            <button onClick={handleShare} className="p-2 text-muted hover:bg-muted/10 rounded-full transition-colors">
                                 <Share2 className="h-6 w-6" />
                             </button>
                         </div>
@@ -245,12 +251,14 @@ function AdContent() {
                     {/* Main Section */}
                     <div className="flex-1 space-y-5">
                         {/* Image - Compact Aspect with brighter frame */}
-                        <div className="relative aspect-[4/3] bg-muted/10 rounded-2xl overflow-hidden group border-2 border-primary/10 shadow-md">
+                        <div className="relative aspect-[4/3] bg-muted/10 rounded-2xl overflow-hidden group border-2 border-primary/10 shadow-md cursor-zoom-in" onClick={() => setIsZoomed(true)}>
+                            <div className="absolute top-2 right-2 bg-black/30 backdrop-blur-md p-1.5 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                <Maximize2 className="h-4 w-4" />
+                            </div>
                             <img
                                 src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
                                 className="w-full h-full object-contain"
                                 alt=""
-                                onClick={() => setIsZoomed(true)}
                             />
                             {ad.images.length > 1 && (
                                 <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
@@ -293,12 +301,45 @@ function AdContent() {
                                         <span className="font-bold">{ad.category.name}</span>
                                     </div>
                                 )}
-                                {ad.specifications && Object.entries(ad.specifications).map(([k, v]) => (
-                                    <div key={k} className="flex justify-between py-1 border-b border-border/50 text-xs text-capitalize">
-                                        <span className="text-muted">{k}</span>
-                                        <span className="font-bold">{String(v)}</span>
-                                    </div>
-                                ))}
+                                {ad.specifications && Object.entries(ad.specifications).map(([k, v]) => {
+                                    const labels: Record<string, string> = {
+                                        brand: 'Марка',
+                                        model: 'Модель',
+                                        year: 'Год выпуска',
+                                        mileage: 'Пробег (км)',
+                                        transmission: 'Коробка передач',
+                                        area: 'Площадь (м²)',
+                                        rooms: 'Кол-во комнат',
+                                        floor: 'Этаж',
+                                        total_floors: 'Этажей в доме',
+                                        plot_area: 'Площадь участка',
+                                        house_area: 'Площадь дома',
+                                        type: 'Тип строения',
+                                        status: 'Статус участка',
+                                        size: 'Размер',
+                                        gender: 'Пол'
+                                    };
+
+                                    // Translate value for transmission/gender/rooms
+                                    let displayValue = String(v);
+                                    if (k === 'transmission') {
+                                        if (v === 'auto') displayValue = 'Автомат';
+                                        if (v === 'manual') displayValue = 'Механика';
+                                    }
+                                    if (k === 'gender') {
+                                        if (v === 'male') displayValue = 'Мужской';
+                                        if (v === 'female') displayValue = 'Женский';
+                                        if (v === 'unisex') displayValue = 'Унисекс';
+                                    }
+                                    if (k === 'rooms' && v === 'studio') displayValue = 'Студия';
+
+                                    return (
+                                        <div key={k} className="flex justify-between py-1 border-b border-border/50 text-xs">
+                                            <span className="text-muted">{labels[k] || k}</span>
+                                            <span className="font-bold">{displayValue}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>

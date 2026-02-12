@@ -31,6 +31,7 @@ const CATEGORIES = [
 
 export default function HomePage() {
   const [ads, setAds] = useState<any[]>([]);
+  const [newAds, setNewAds] = useState<any[]>([]); // New state for fresh ads
   const [banners, setBanners] = useState<any[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -54,10 +55,17 @@ export default function HomePage() {
       const currentCity = await initCity();
       setCity(currentCity);
 
-      const [bannersRes] = await Promise.all([
-        supabase.from('banners').select('*').eq('is_active', true)
+      const [bannersRes, newAdsRes] = await Promise.all([
+        supabase.from('banners').select('*').eq('is_active', true),
+        supabase.from('ads')
+          .select('*, profiles!user_id(full_name, avatar_url, is_verified)')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false })
+          .limit(8)
       ]);
       setBanners(bannersRes.data || []);
+      setNewAds(newAdsRes.data || []);
+
       await fetchAds(0, true, currentCity);
     } catch (error) {
       console.error('Initial fetch error:', error);
@@ -198,7 +206,7 @@ export default function HomePage() {
         </section>
 
         {banners.length > 0 && (
-          <section className="mb-16 overflow-hidden">
+          <section className="mb-10 overflow-hidden">
             <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-none px-1">
               {banners.map(banner => (
                 <a
@@ -212,6 +220,58 @@ export default function HomePage() {
             </div>
           </section>
         )}
+
+        {/* Fresh Ads Section - 8 items */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight">Новое</h2>
+            <Link href="/search?sort=newest" className="text-sm font-bold text-primary hover:underline">
+              Смотреть все
+            </Link>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-none">
+            {newAds.map((ad) => (
+              <div key={ad.id} className="shrink-0 w-[160px] md:w-[200px] group relative flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200">
+                <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full">
+                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                    {ad.images?.[0] ? (
+                      <img
+                        src={getOptimizedImageUrl(ad.images[0], { width: 300, quality: 70 })}
+                        alt={ad.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[9px] text-muted-foreground uppercase font-black tracking-widest opacity-30">Нет фото</div>
+                    )}
+                  </div>
+
+                  <div className="p-2.5 flex flex-col flex-1 gap-1">
+                    <div className="text-base font-black tracking-tight text-foreground leading-none">
+                      {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
+                    </div>
+                    <h3 className="text-xs font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em]">
+                      {ad.title}
+                    </h3>
+                    <div className="mt-auto pt-1 flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
+                      <span className="truncate">{ad.city}</span>
+                    </div>
+                  </div>
+                </Link>
+                <button
+                  onClick={(e) => toggleFavorite(e, ad.id)}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-red-500 hover:text-white transition-all active:scale-90"
+                >
+                  <Heart className={cn("h-3.5 w-3.5 transition-all", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
+                </button>
+              </div>
+            ))}
+            {newAds.length === 0 && loading && [1, 2, 3, 4].map(i => (
+              <div key={i} className="shrink-0 w-[160px] h-[220px] bg-muted/20 rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        </section>
 
         <div className="flex items-center justify-between mb-10">
           <h2 className="text-3xl md:text-4xl font-black tracking-tight">Рекомендации для вас</h2>
