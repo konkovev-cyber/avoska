@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff } from 'lucide-react';
+import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,10 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState<any>(null);
     const [myAds, setMyAds] = useState<any[]>([]);
     const [favorites, setFavorites] = useState<any[]>([]);
+    const [isEditing, setIsEditing] = useState(false);
+    const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'my-ads' | 'favorites'>('my-ads');
 
@@ -36,6 +40,8 @@ export default function ProfilePage() {
             .single();
 
         setProfile(profileData);
+        setFullName(profileData?.full_name || '');
+        setPhone(profileData?.phone || '');
 
         // Fetch My Ads
         const { data: adsData } = await supabase
@@ -54,6 +60,69 @@ export default function ProfilePage() {
 
         setFavorites(favsData || []);
         setLoading(false);
+    };
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingAvatar(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        try {
+            const fileName = `avatar-${Date.now()}.jpg`;
+            const filePath = `${session.user.id}/${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            await supabase
+                .from('profiles')
+                .update({ avatar_url: publicUrl })
+                .eq('id', session.user.id);
+
+            toast.success('Аватар обновлен');
+            fetchProfileData();
+        } catch (error: any) {
+            toast.error('Ошибка загрузки аватара');
+            console.error(error);
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
+    const updateProfile = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const { error } = await supabase
+            .from('profiles')
+            .update({
+                full_name: fullName,
+                phone: phone
+            })
+            .eq('id', session.user.id);
+
+        if (error) {
+            if (error.code === '42703') { // Undefined column
+                toast.error('Ошибка: колонка "phone" не создана в БД. Запустите SQL скрипт.');
+            } else {
+                toast.error('Ошибка при обновлении профиля');
+                console.error(error);
+            }
+        } else {
+            toast.success('Профиль обновлен');
+            setIsEditing(false);
+            fetchProfileData();
+        }
     };
 
     const toggleAdStatus = async (adId: string, currentStatus: string) => {
@@ -99,32 +168,79 @@ export default function ProfilePage() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-            {/* Profile Header Card */}
-            <div className="bg-surface border border-border rounded-3xl p-8 mb-8 shadow-sm flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
-                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-accent/10 border-2 border-accent/20 flex items-center justify-center text-4xl font-black text-accent overflow-hidden">
-                    {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
-                    ) : (
-                        profile?.full_name?.charAt(0) || '?'
+            <div className="bg-surface border border-border rounded-3xl p-6 md:p-8 mb-8 shadow-sm">
+                <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
+                    <div className="relative group/avatar">
+                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-accent/10 border-2 border-accent/20 flex items-center justify-center text-4xl font-black text-accent overflow-hidden shrink-0">
+                            {uploadingAvatar ? (
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            ) : profile?.avatar_url ? (
+                                <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                            ) : (
+                                profile?.full_name?.charAt(0) || '?'
+                            )}
+                        </div>
+                        <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer rounded-full">
+                            <Camera className="h-6 w-6" />
+                            <input type="file" className="hidden" onChange={handleAvatarUpload} accept="image/*" />
+                        </label>
+                    </div>
+                    <div className="flex-1 min-w-0 w-full">
+                        {isEditing ? (
+                            <div className="space-y-4 max-w-md mx-auto md:mx-0">
+                                <input
+                                    type="text"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    placeholder="Имя Фамилия"
+                                    className="w-full px-4 py-2 rounded-xl bg-background border border-border focus:border-primary outline-none font-bold"
+                                />
+                                <input
+                                    type="tel"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="Номер телефона"
+                                    className="w-full px-4 py-2 rounded-xl bg-background border border-border focus:border-primary outline-none font-bold"
+                                />
+                                <div className="flex gap-2">
+                                    <button onClick={updateProfile} className="flex-1 py-2 bg-primary text-white rounded-xl font-black">Сохранить</button>
+                                    <button onClick={() => setIsEditing(false)} className="flex-1 py-2 bg-muted rounded-xl font-bold">Отмена</button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <h1 className="text-2xl md:text-3xl font-black mb-1 truncate">{profile?.full_name || 'Пользователь'}</h1>
+                                {profile?.phone && (
+                                    <div className="text-sm font-bold text-foreground/60 mb-3">{profile.phone}</div>
+                                )}
+                                <div className="flex flex-wrap justify-center md:justify-start gap-4 text-[10px] md:text-xs text-muted font-bold uppercase tracking-wider">
+                                    <a
+                                        href={`https://yandex.ru/maps/?text=${encodeURIComponent(profile?.city || 'Горячий Ключ')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1 text-primary hover:underline transition-all"
+                                    >
+                                        <MapPin className="h-4 w-4" />
+                                        <span>{profile?.city || 'Горячий Ключ'}</span>
+                                    </a>
+                                    <div className="flex items-center gap-1 text-orange-500">
+                                        <Star className="h-4 w-4 fill-current" />
+                                        <span>Рейтинг: {profile?.rating || '0.0'}</span>
+                                    </div>
+                                    <div>На Авоське с {new Date(profile?.created_at).getFullYear()}г.</div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    {!isEditing && (
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0"
+                        >
+                            <Settings className="h-6 w-6" />
+                        </button>
                     )}
                 </div>
-                <div className="flex-1">
-                    <h1 className="text-3xl font-black mb-2">{profile?.full_name || 'Пользователь'}</h1>
-                    <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-muted font-medium uppercase tracking-wider">
-                        <div className="flex items-center gap-1 text-orange-500">
-                            <Star className="h-4 w-4 fill-current" />
-                            <span>Рейтинг: {profile?.rating || '0.0'}</span>
-                        </div>
-                        <div>На Авоське с {new Date(profile?.created_at).getFullYear()}г.</div>
-                        <div>ID: {profile?.id.slice(0, 8)}</div>
-                    </div>
-                </div>
-                <button
-                    onClick={() => toast.info('Настройки профиля скоро будут доступны')}
-                    className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all"
-                >
-                    <Settings className="h-6 w-6" />
-                </button>
             </div>
 
             {/* Tabs Navigation */}

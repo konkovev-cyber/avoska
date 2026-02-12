@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.avoska.plus',
-  appName: 'воська+',
+  appName: 'Авоська+',
   webDir: 'out'
 };
 

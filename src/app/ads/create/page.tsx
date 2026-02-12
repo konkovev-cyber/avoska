@@ -26,6 +26,7 @@ const CATEGORIES = [
 export default function CreateAdPage() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [address, setAddress] = useState('');
     const [price, setPrice] = useState('');
     const [salaryFrom, setSalaryFrom] = useState('');
     const [salaryTo, setSalaryTo] = useState('');
@@ -131,6 +132,7 @@ export default function CreateAdPage() {
                 salary_from: category === 'jobs' ? (salaryFrom ? parseFloat(salaryFrom) : null) : null,
                 salary_to: category === 'jobs' ? (salaryTo ? parseFloat(salaryTo) : null) : null,
                 city,
+                address,
                 delivery_possible: delivery,
                 images: uploadedImageUrls,
                 status: 'pending', // Send to moderation by default
@@ -313,6 +315,16 @@ export default function CreateAdPage() {
                         <select value={city} onChange={(e) => setCity(e.target.value)} required className="w-full p-3 rounded-xl border border-border bg-background outline-none">
                             {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
                         </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-bold mb-2">Адрес</label>
+                        <input
+                            type="text"
+                            placeholder="Напр: ул. Ленина, д. 5"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            className="w-full p-3 rounded-xl border border-border bg-background outline-none"
+                        />
                     </div>
                     {category !== 'services' && category !== 'jobs' && (
                         <label className="flex items-center gap-3 p-3 rounded-xl border border-border">

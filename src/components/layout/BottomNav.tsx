@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Heart, PlusSquare, MessageSquare, User } from 'lucide-react';
+import { Search, Heart, PlusSquare, MessageSquare, User as UserIcon, Home as HomeIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
@@ -22,11 +22,11 @@ export default function BottomNav() {
     }, []);
 
     const navItems = [
-        { label: 'Поиск', href: '/', icon: Search },
+        { label: 'Главная', href: '/', icon: HomeIcon },
         { label: 'Избранное', href: '/favorites', icon: Heart },
         { label: 'Разместить', href: '/ads/create', icon: PlusSquare },
         { label: 'Сообщения', href: '/chat', icon: MessageSquare },
-        { label: 'Профиль', href: user ? '/profile' : '/login', icon: User },
+        { label: 'Профиль', href: user ? '/profile' : '/login', icon: UserIcon },
     ];
 
     return (

@@ -155,11 +155,11 @@ function AdContent() {
                     <ChevronLeft className="h-6 w-6" />
                 </button>
                 <div className="flex items-center gap-2">
-                    <button onClick={handleShare} className="p-2 hover:bg-surface rounded-full">
-                        <Share2 className="h-5 w-5" />
+                    <button onClick={toggleFavorite} className="p-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                        <Heart className={cn("h-6 w-6 transition-all", isFavorite ? "fill-red-500 text-red-500" : "text-white drop-shadow-md")} />
                     </button>
-                    <button onClick={toggleFavorite} className="p-2 hover:bg-surface rounded-full">
-                        <Heart className={cn("h-5 w-5", isFavorite && "fill-red-500 text-red-500")} />
+                    <button onClick={handleShare} className="p-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                        <Share2 className="h-6 w-6 text-white drop-shadow-md" />
                     </button>
                 </div>
             </div>
@@ -241,32 +241,37 @@ function AdContent() {
                         </div>
 
                         {/* Essential Info - Price and Title below image on mobile */}
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <div className="text-3xl font-black text-foreground">
+                        <div className="space-y-4 px-1">
+                            <div className="space-y-1">
+                                <div className="text-[28px] font-black text-foreground drop-shadow-sm">
                                     {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}
                                 </div>
-                                <h1 className="text-xl font-bold leading-tight text-foreground/90">{ad.title}</h1>
+                                <h1 className="text-lg font-bold leading-tight text-foreground/90 tracking-tight">{ad.title}</h1>
                             </div>
 
                             {/* Quick Stats */}
-                            <div className="flex flex-wrap gap-4 py-4 border-y border-border/50 text-sm font-medium text-muted">
-                                <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-lg border border-border">
-                                    <MapPin className="h-4 w-4 text-primary" />
-                                    {ad.city}
-                                </div>
-                                <div className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-lg border border-border">
-                                    <ShieldCheck className="h-4 w-4 text-green-500" />
-                                    Сделка на Авоське
-                                </div>
+                            <div className="flex flex-wrap gap-2 pt-2 text-sm">
+                                <a
+                                    href={`https://yandex.ru/maps/?text=${encodeURIComponent(ad.city + (ad.address ? ', ' + ad.address : ''))}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1.5 bg-surface px-3 py-1.5 rounded-full border border-border/60 font-bold text-foreground/70 hover:bg-muted active:scale-95 transition-all"
+                                >
+                                    <MapPin className="h-3.5 w-3.5 text-primary" />
+                                    {ad.city}{ad.address ? `, ${ad.address}` : ''}
+                                </a>
                             </div>
                         </div>
 
                         {/* Action Buttons (Mobile Sticky Footer could also work, but here for now) */}
                         <div className="grid grid-cols-2 gap-3 lg:hidden">
-                            <button className="flex-1 bg-green-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all">
+                            <a
+                                href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'}
+                                onClick={() => !ad.profiles?.phone && toast.info('Телефон не указан')}
+                                className="flex-1 bg-green-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-green-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                            >
                                 Позвонить
-                            </button>
+                            </a>
                             <Link
                                 href={`/chat?adId=${ad.id}&receiverId=${ad.user_id}`}
                                 className="flex-1 bg-blue-600 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
@@ -275,49 +280,85 @@ function AdContent() {
                             </Link>
                         </div>
 
-                        {/* Location Section */}
-                        <div className="space-y-4 pt-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xl font-black">Местоположение</h3>
-                                <button className="text-sm font-bold text-primary">Карта</button>
-                            </div>
-                            <div className="flex items-start gap-3 p-4 bg-surface rounded-2xl border border-border">
-                                <MapPin className="h-6 w-6 text-muted-foreground mt-0.5" />
-                                <div>
-                                    <p className="font-bold text-base">{ad.city}</p>
-                                    <p className="text-sm text-muted">Краснодарский край, Горячий Ключ</p>
+                        {/* Location Section - Simple City & Address */}
+                        <div className="space-y-3 pt-4">
+                            <h3 className="text-xl font-black">Местоположение</h3>
+                            <a
+                                href={`https://yandex.ru/maps/?text=${encodeURIComponent(ad.city + (ad.address ? ', ' + ad.address : ''))}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex flex-col gap-1 group/loc"
+                            >
+                                <div className="flex items-center gap-2 text-foreground/80 font-bold group-hover/loc:text-primary transition-colors">
+                                    <MapPin className="h-5 w-5 text-primary" />
+                                    {ad.city}
                                 </div>
-                            </div>
+                                {ad.address && (
+                                    <div className="pl-7 text-sm text-foreground/50 font-medium">
+                                        {ad.address}
+                                    </div>
+                                )}
+                                <div className="pl-7 text-[10px] font-black uppercase text-primary tracking-widest mt-1">Открыть на карте</div>
+                            </a>
                         </div>
 
                         {/* Details Grid */}
-                        <div className="space-y-4 pt-4">
-                            <h3 className="text-xl font-black">Характеристики</h3>
-                            <div className="bg-surface p-6 rounded-3xl border border-border grid sm:grid-cols-2 gap-y-4 gap-x-10">
-                                <div className="flex justify-between items-center pb-2 border-b border-border/50">
-                                    <span className="text-muted text-sm">Состояние</span>
-                                    <span className="font-bold text-sm tracking-tight">{ad.condition === 'new' ? 'Новое' : 'Б/у'}</span>
+                        <div className="space-y-4 pt-6">
+                            <h3 className="text-[17px] font-black tracking-tight">Характеристики</h3>
+                            <div className="bg-surface/50 rounded-2xl border border-border p-4 space-y-3">
+                                <div className="flex justify-between items-center text-sm py-1 border-b border-border/30">
+                                    <span className="text-foreground/50">Состояние</span>
+                                    <span className="font-bold">{ad.condition === 'new' ? 'Новое' : 'Б/у'}</span>
                                 </div>
                                 {ad.category && (
-                                    <div className="flex justify-between items-center pb-2 border-b border-border/50">
-                                        <span className="text-muted text-sm">Категория</span>
-                                        <span className="font-bold text-sm tracking-tight">{ad.category.name}</span>
+                                    <div className="flex justify-between items-center text-sm py-1 border-b border-border/30">
+                                        <span className="text-foreground/50">Категория</span>
+                                        <span className="font-bold underline decoration-primary/30 underline-offset-4">{ad.category.name}</span>
                                     </div>
                                 )}
                                 {ad.specifications && Object.entries(ad.specifications).map(([key, value]) => (
-                                    <div key={key} className="flex justify-between items-center pb-2 border-b border-border/50">
-                                        <span className="text-muted text-sm capitalize">{key}</span>
-                                        <span className="font-bold text-sm tracking-tight">{String(value)}</span>
+                                    <div key={key} className="flex justify-between items-center text-sm py-1 border-b border-border/30">
+                                        <span className="text-foreground/50 capitalize">{key}</span>
+                                        <span className="font-bold">{String(value)}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Description */}
-                        <div className="space-y-4 pt-4">
+                        <div className="space-y-4 pt-4 pb-8">
                             <h3 className="text-xl font-black">Описание</h3>
                             <div className="prose prose-sm max-w-none text-foreground/80 leading-relaxed font-medium">
                                 <p className="whitespace-pre-wrap">{ad.description}</p>
+                            </div>
+                        </div>
+
+                        {/* Sharing Actions */}
+                        <div className="bg-surface/50 rounded-2xl border border-border p-6 space-y-4">
+                            <h4 className="font-black text-center text-sm uppercase tracking-widest">Поделиться объявлением</h4>
+                            <div className="flex flex-wrap justify-center gap-3">
+                                <a
+                                    href={`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(ad.title)}`}
+                                    target="_blank"
+                                    className="px-6 py-2.5 bg-[#229ED9] text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all text-sm"
+                                >
+                                    Telegram
+                                </a>
+                                <a
+                                    href={`whatsapp://send?text=${encodeURIComponent(ad.title + ' ' + window.location.href)}`}
+                                    className="px-6 py-2.5 bg-[#25D366] text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all text-sm"
+                                >
+                                    WhatsApp
+                                </a>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(window.location.href);
+                                        toast.success('Ссылка скопирована');
+                                    }}
+                                    className="px-6 py-2.5 bg-background border border-border rounded-xl font-bold flex items-center gap-2 hover:bg-muted active:scale-95 transition-all text-sm"
+                                >
+                                    Копировать ссылку
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -325,12 +366,15 @@ function AdContent() {
                     {/* Right Column: Seller & Sticky Actions (Desktop View) */}
                     <div className="w-full lg:w-[320px] shrink-0">
                         <div className="sticky top-24 space-y-4">
-                            {/* Desktop Actions Card */}
                             <div className="hidden lg:block bg-surface p-6 rounded-3xl border border-border shadow-sm space-y-4">
                                 <div className="text-2xl font-black">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}</div>
-                                <button className="w-full py-3.5 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 transition-all shadow-md">
-                                    Показать телефон
-                                </button>
+                                <a
+                                    href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'}
+                                    onClick={() => !ad.profiles?.phone && toast.info('Телефон не указан')}
+                                    className="block w-full text-center py-3.5 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 transition-all shadow-md"
+                                >
+                                    Позвонить
+                                </a>
                                 <Link
                                     href={`/chat?adId=${ad.id}&receiverId=${ad.user_id}`}
                                     className="w-full py-3.5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-md flex items-center justify-center gap-2"
@@ -351,10 +395,10 @@ function AdContent() {
                             </div>
 
                             {/* Seller Card */}
-                            <div className="bg-surface p-6 rounded-3xl border border-border shadow-sm group">
-                                <Link href={`/user?id=${ad.user_id}`} className="flex items-center gap-4 mb-6">
-                                    <div className="w-14 h-14 rounded-full bg-surface border border-border overflow-hidden p-0.5 group-hover:border-primary transition-all">
-                                        <div className="w-full h-full rounded-full bg-muted overflow-hidden">
+                            <div className="bg-surface rounded-2xl border border-border p-5 space-y-5">
+                                <Link href={`/user?id=${ad.user_id}`} className="flex items-center gap-3">
+                                    <div className="relative">
+                                        <div className="w-12 h-12 rounded-full bg-muted overflow-hidden border border-border">
                                             {ad.profiles?.avatar_url ? (
                                                 <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" />
                                             ) : (
@@ -363,34 +407,39 @@ function AdContent() {
                                                 </div>
                                             )}
                                         </div>
+                                        {ad.profiles?.is_verified && (
+                                            <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+                                                <CheckCircle className="h-3.5 w-3.5 text-blue-500 fill-current" />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="min-w-0">
-                                        <div className="font-black text-lg group-hover:text-primary transition-colors truncate">
-                                            {ad.profiles?.full_name?.split(' ')[0] || 'Пользователь'}
+                                        <div className="font-black text-base truncate leading-tight">
+                                            {ad.profiles?.full_name || 'Частное лицо'}
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-orange-500 font-bold">
+                                        <div className="flex items-center gap-1.5 text-xs text-orange-500 font-bold mt-0.5">
                                             <Star className="h-3 w-3 fill-current" />
                                             <span>{ad.profiles?.rating || '5.0'}</span>
-                                            <span className="text-muted text-[10px] font-medium ml-1">42 отзыва</span>
+                                            <span className="text-foreground/30 font-medium">· 42 отзыва</span>
                                         </div>
                                     </div>
                                 </Link>
 
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                                        <ShieldCheck className="h-4 w-4 text-blue-500" />
-                                        Документы проверены
-                                    </div>
-                                    <Link href={`/user?id=${ad.user_id}`} className="block w-full text-center py-2.5 bg-surface border border-border rounded-xl text-sm font-bold hover:bg-muted transition-all">
+                                <div className="space-y-2.5">
+                                    <Link href={`/user?id=${ad.user_id}`} className="block w-full text-center py-2.5 bg-surface border border-border rounded-xl text-[13px] font-black hover:bg-muted transition-all">
                                         Подробности о продавце
                                     </Link>
+                                    <div className="flex items-center justify-center gap-1.5 text-[10px] font-bold text-foreground/40 uppercase tracking-widest pt-1">
+                                        <ShieldCheck className="h-3 w-3 text-blue-500" />
+                                        Документы проверены
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 

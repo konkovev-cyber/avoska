@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">воська+</string>
-    <string name="title_activity_main">воська+</string>
+    <string name="app_name">Авоська+</string>
+    <string name="title_activity_main">Авоська+</string>
     <string name="package_name">com.avoska.plus</string>
     <string name="custom_url_scheme">com.avoska.plus</string>
 </resources>
