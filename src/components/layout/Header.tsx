@@ -40,10 +40,12 @@ export default function Header() {
 
     return (
         <header className="sticky top-0 z-[100] bg-background/95 backdrop-blur-md border-b border-border transition-all">
-            <div className="container mx-auto px-4 h-14 flex items-center gap-3">
-                {/* Logo - Always A+ for maximum space */}
-                <Link href="/" className="shrink-0 flex items-center group">
-                    <span className="text-2xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform">А</span>
+            <div className="container mx-auto px-4 h-14 flex items-center gap-3 max-w-[1400px]">
+                {/* Logo - Conditional: Full on Web, A+ on Mobile */}
+                <Link href="/" className="shrink-0 flex items-center gap-0.5 group">
+                    <span className="text-2xl font-black text-primary tracking-tighter group-hover:opacity-80 transition-opacity">
+                        {typeof window !== 'undefined' && (window.location.protocol === 'capacitor:' || window.location.protocol === 'ionic:') ? 'А' : 'Авоська'}
+                    </span>
                     <span className="text-2xl font-black text-accent">+</span>
                 </Link>
 

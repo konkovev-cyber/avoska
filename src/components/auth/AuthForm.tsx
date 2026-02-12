@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { X } from 'lucide-react';
 
 export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     const [email, setEmail] = useState('');
@@ -48,9 +49,16 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
     };
 
     return (
-        <div className="w-full max-w-md p-8 bg-surface rounded-2xl shadow-xl border border-border">
-            <h2 className="text-3xl font-bold text-center mb-8">
-                {mode === 'login' ? 'Вход в А+' : 'Регистрация в А+'}
+        <div className="w-full max-w-md p-8 bg-surface rounded-[2.5rem] shadow-2xl border border-border relative overflow-hidden">
+            <button
+                onClick={() => router.push('/')}
+                className="absolute top-6 right-6 p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground"
+                title="Закрыть"
+            >
+                <X className="h-6 w-6" />
+            </button>
+            <h2 className="text-3xl font-black text-center mb-8 tracking-tighter">
+                {mode === 'login' ? 'Вход в Авоська+' : 'Регистрация в Авоська+'}
             </h2>
             <form onSubmit={handleAuth} className="space-y-4">
                 {mode === 'register' && (

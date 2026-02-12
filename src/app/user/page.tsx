@@ -7,6 +7,7 @@ import { Star, Package, MapPin, Calendar, MessageSquare, ShieldCheck, Edit3, Tra
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { compressImage } from '@/lib/image-utils';
 
 function UserProfileContent() {
     const searchParams = useSearchParams();
@@ -121,9 +122,16 @@ function UserProfileContent() {
         setUploading(true);
         const toastId = toast.loading('Загрузка фото...');
         try {
+            const compressedFile = await compressImage(file, 400, 0.7);
             const fileName = `${id}-${Math.random()}.jpg`;
-            const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
-            if (uploadError) throw uploadError;
+            const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, compressedFile);
+
+            if (uploadError) {
+                if (uploadError.message.includes('bucket not found')) {
+                    throw new Error('Бакет "avatars" не найден. Создайте его в Storage в Supabase.');
+                }
+                throw uploadError;
+            }
 
             const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
             const { error: profileError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', id);

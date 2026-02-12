@@ -7,6 +7,7 @@ import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, C
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { compressImage } from '@/lib/image-utils';
 
 export default function ProfilePage() {
     const [profile, setProfile] = useState<any>(null);
@@ -71,14 +72,20 @@ export default function ProfilePage() {
         if (!session) return;
 
         try {
+            const compressedFile = await compressImage(file, 400, 0.7);
             const fileName = `avatar-${Date.now()}.jpg`;
             const filePath = `${session.user.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
                 .from('avatars')
-                .upload(filePath, file);
+                .upload(filePath, compressedFile);
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                if (uploadError.message.includes('bucket not found')) {
+                    throw new Error('Бакет "avatars" не найден. Создайте его в панели управления Supabase (Storage).');
+                }
+                throw uploadError;
+            }
 
             const { data: { publicUrl } } = supabase.storage
                 .from('avatars')
@@ -92,7 +99,11 @@ export default function ProfilePage() {
             toast.success('Аватар обновлен');
             fetchProfileData();
         } catch (error: any) {
-            toast.error('Ошибка загрузки аватара');
+            if (error.message?.toLowerCase().includes('bucket not found')) {
+                toast.error('Ошибка: Бакет "avatars" не найден в Supabase. Пожалуйста, создайте публичный бакет с именем "avatars" в разделе Storage.');
+            } else {
+                toast.error(error.message || 'Ошибка загрузки аватара');
+            }
             console.error(error);
         } finally {
             setUploadingAvatar(false);
@@ -100,6 +111,11 @@ export default function ProfilePage() {
     };
 
     const updateProfile = async () => {
+        if (!fullName.trim()) return toast.error('Введите имя');
+        if (phone && phone.replace(/[^\d]/g, '').length < 10) {
+            return toast.error('Номер телефона слишком короткий');
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
@@ -195,13 +211,21 @@ export default function ProfilePage() {
                                     placeholder="Имя Фамилия"
                                     className="w-full px-4 py-2 rounded-xl bg-background border border-border focus:border-primary outline-none font-bold"
                                 />
-                                <input
-                                    type="tel"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    placeholder="Номер телефона"
-                                    className="w-full px-4 py-2 rounded-xl bg-background border border-border focus:border-primary outline-none font-bold"
-                                />
+                                <div className="space-y-1">
+                                    <input
+                                        type="tel"
+                                        value={phone}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^\d+]/g, '');
+                                            setPhone(val);
+                                        }}
+                                        placeholder="+7 (900) 000-00-00"
+                                        className="w-full px-4 py-2 rounded-xl bg-background border border-border focus:border-primary outline-none font-bold"
+                                    />
+                                    <div className="px-2 text-[10px] text-muted-foreground font-medium text-left">
+                                        Пример: +79001112233
+                                    </div>
+                                </div>
                                 <div className="flex gap-2">
                                     <button onClick={updateProfile} className="flex-1 py-2 bg-primary text-white rounded-xl font-black">Сохранить</button>
                                     <button onClick={() => setIsEditing(false)} className="flex-1 py-2 bg-muted rounded-xl font-bold">Отмена</button>

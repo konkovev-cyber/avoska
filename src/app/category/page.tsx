@@ -8,18 +8,18 @@ import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, CheckCir
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
-    { name: 'Транспорт', slug: 'transport', icon: Car, color: 'bg-[#ff9c00]' },
-    { name: 'Недвижимость', slug: 'real-estate', icon: Home, color: 'bg-[#56ccf2]' },
-    { name: 'Работа', slug: 'jobs', icon: Briefcase, color: 'bg-[#eb5757]' },
-    { name: 'Услуги', slug: 'services', icon: Wrench, color: 'bg-[#bb6bd9]' },
-    { name: 'Электроника', slug: 'electronics', icon: Smartphone, color: 'bg-[#27ae60]' },
-    { name: 'Дом и дача', slug: 'home', icon: Armchair, color: 'bg-[#f2994a]' },
-    { name: 'Личные вещи', slug: 'clothing', icon: Shirt, color: 'bg-[#2d9cdb]' },
-    { name: 'Запчасти', slug: 'parts', icon: Settings, color: 'bg-[#597ef7]' },
-    { name: 'Хобби и отдых', slug: 'hobby', icon: Gamepad, color: 'bg-[#9b51e0]' },
-    { name: 'Животные', slug: 'pets', icon: Info, color: 'bg-[#f2c94c]' },
-    { name: 'Красота', slug: 'beauty', icon: Sparkles, color: 'bg-[#ff85c0]' },
-    { name: 'Детские товары', slug: 'kids', icon: Baby, color: 'bg-[#ffc53d]' },
+    { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },
+    { name: 'Недвижимость', slug: 'real-estate', image: '/categories/real-estate.jpg' },
+    { name: 'Работа', slug: 'jobs', image: '/categories/jobs.jpg' },
+    { name: 'Услуги', slug: 'services', image: '/categories/services.jpg' },
+    { name: 'Электроника', slug: 'electronics', image: '/categories/electronics.jpg' },
+    { name: 'Дом и дача', slug: 'home', image: '/categories/home.jpg' },
+    { name: 'Личные вещи', slug: 'clothing', image: '/categories/clothing.jpg' },
+    { name: 'Запчасти', slug: 'parts', image: '/categories/parts.jpg' },
+    { name: 'Хобби и отдых', slug: 'hobby', image: '/categories/hobby.jpg' },
+    { name: 'Животные', slug: 'pets', image: '/categories/pets.jpg' },
+    { name: 'Красота', slug: 'beauty', image: '/categories/beauty.jpg' },
+    { name: 'Детские товары', slug: 'kids', image: '/categories/kids.jpg' },
 ];
 
 function CategoryContent() {
@@ -102,13 +102,17 @@ function CategoryContent() {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
-                <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 ${category.color} bg-opacity-10 rounded-2xl flex items-center justify-center border border-primary/20`}>
-                        <category.icon className="h-7 w-7 text-foreground opacity-80" />
+                <div className="flex items-center gap-6">
+                    <div className="relative w-20 h-20 rounded-[2rem] overflow-hidden shadow-xl border-2 border-primary/20 shrink-0">
+                        <img
+                            src={category.image}
+                            alt={category.name}
+                            className="w-full h-full object-cover"
+                        />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-black">{category.name}</h1>
-                        <p className="text-muted text-sm font-bold uppercase tracking-wider">{ads.length} объявлений</p>
+                        <h1 className="text-4xl font-black tracking-tight">{category.name}</h1>
+                        <p className="text-muted text-[11px] font-black uppercase tracking-[0.2em] mt-1">{ads.length} объявлений</p>
                     </div>
                 </div>
                 <button

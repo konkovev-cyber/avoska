@@ -44,11 +44,14 @@ function ChatContent() {
     }, [activeChat, currentUser]);
 
     useEffect(() => {
-        scrollToBottom();
+        if (messages.length > 0) {
+            // Use instant scroll for initial load, smooth for new messages
+            scrollToBottom(messages.length <= 20 ? 'instant' : 'smooth');
+        }
     }, [messages]);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+        messagesEndRef.current?.scrollIntoView({ behavior });
     };
 
     const initChat = async () => {
@@ -102,13 +105,14 @@ function ChatContent() {
             setNewMessage('');
             // Message will be added via realtime subscription
         } catch (error) {
+            console.error('Send message error:', error);
             toast.error('Ошибка отправки');
         }
     };
 
     return (
-        <div className="container mx-auto px-4 py-4 md:py-8 h-[calc(100vh-80px)]">
-            <div className="bg-surface border border-border rounded-3xl overflow-hidden shadow-xl flex h-full">
+        <div className="container mx-auto px-4 py-4 md:py-6 h-[calc(100vh-120px)] max-h-[750px] max-w-[1100px]">
+            <div className="bg-surface border border-border rounded-[2rem] overflow-hidden shadow-2xl flex h-full">
 
                 {/* Sidebar: Conversations */}
                 <div className={cn(
@@ -166,8 +170,8 @@ function ChatContent() {
                 )}>
                     {activeChat ? (
                         <>
-                            {/* Chat Header */}
-                            <div className="p-4 bg-surface border-b border-border flex items-center gap-4 shadow-sm">
+                            {/* Chat Header - Compact */}
+                            <div className="py-2.5 px-4 bg-surface border-b border-border flex items-center gap-4 shadow-sm">
                                 <button onClick={() => setActiveChat(null)} className="md:hidden p-2 hover:bg-background rounded-full">
                                     <ChevronLeft className="h-6 w-6" />
                                 </button>
@@ -184,19 +188,19 @@ function ChatContent() {
                                 </div>
                             </div>
 
-                            {/* Messages Area */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            {/* Messages Area - Tighter spacing */}
+                            <div className="flex-1 overflow-y-auto p-4 space-y-2">
                                 {messages.map((msg) => (
                                     <div
                                         key={msg.id}
                                         className={cn(
-                                            "flex flex-col max-w-[80%] p-3 rounded-2xl text-sm shadow-sm",
+                                            "flex flex-col w-fit max-w-[85%] lg:max-w-[450px] py-2 px-4 rounded-2xl text-[13px] md:text-sm shadow-sm",
                                             msg.sender_id === currentUser?.id
                                                 ? "ml-auto bg-primary text-white rounded-br-none"
                                                 : "mr-auto bg-surface border border-border rounded-bl-none"
                                         )}
                                     >
-                                        <div className="leading-relaxed">{msg.content}</div>
+                                        <div className="leading-snug">{msg.content}</div>
                                         <div className={cn(
                                             "text-[9px] mt-1 opacity-70 flex items-center gap-1",
                                             msg.sender_id === currentUser?.id ? "justify-end" : "justify-start"
@@ -208,30 +212,33 @@ function ChatContent() {
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            {/* Input Area */}
-                            <form onSubmit={handleSendMessage} className="p-4 bg-surface border-t border-border flex gap-2">
+                            {/* Input Area - Compact */}
+                            <form onSubmit={handleSendMessage} className="p-3 bg-surface border-t border-border flex items-center gap-2">
                                 <input
                                     type="text"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
                                     placeholder="Введите сообщение..."
-                                    className="flex-1 p-3 rounded-xl bg-background border border-border outline-none focus:ring-2 focus:ring-primary transition-all shadow-inner"
+                                    className="flex-1 h-12 px-5 rounded-2xl bg-background border border-border outline-none focus:ring-2 focus:ring-primary transition-all shadow-inner font-medium"
                                 />
                                 <button
                                     type="submit"
                                     disabled={!newMessage.trim()}
-                                    className="p-3 bg-primary text-white rounded-xl hover:bg-opacity-90 transition-all disabled:opacity-50 shadow-lg"
+                                    className="w-12 h-12 flex items-center justify-center bg-primary text-white rounded-2xl hover:opacity-90 transition-all disabled:opacity-30 shadow-lg active:scale-90 shrink-0"
                                 >
                                     <Send className="h-5 w-5" />
                                 </button>
                             </form>
                         </>
                     ) : (
-                        <div className="flex flex-col items-center gap-4 text-muted">
-                            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
-                                <MessageCircle className="h-8 w-8" />
+                        <div className="flex flex-col items-center gap-4 text-muted p-10 text-center">
+                            <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center shadow-inner">
+                                <MessageCircle className="h-10 w-10 opacity-30" />
                             </div>
-                            <p className="font-bold">Выберите чат, чтобы начать общение</p>
+                            <div>
+                                <p className="font-black text-xl text-foreground/70">Ваши сообщения</p>
+                                <p className="text-sm font-medium opacity-60 mt-1">Выберите диалог, чтобы начать общение</p>
+                            </div>
                         </div>
                     )}
                 </div>
