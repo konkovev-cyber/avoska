@@ -39,60 +39,51 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-50 bg-white border-b border-border">
-            {/* Main Header */}
-            <div className="container mx-auto px-4 py-3 flex items-center gap-4">
+        <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+            <div className="container mx-auto px-4 py-2 flex items-center gap-2 sm:gap-4">
                 {/* Logo */}
-                <Link href="/" className="shrink-0 flex items-center gap-1">
-                    <span className="text-2xl font-black text-primary tracking-tighter">Авоська</span>
+                <Link href="/" className="shrink-0 flex items-center gap-0.5 group">
+                    <span className="text-2xl font-black text-primary tracking-tighter group-hover:opacity-80 transition-opacity">
+                        <span className="sm:hidden">А</span>
+                        <span className="hidden sm:inline">Авоська</span>
+                    </span>
                     <span className="text-2xl font-black text-accent">+</span>
                 </Link>
 
-                {/* Categories Button */}
-                <div className="hidden lg:flex items-center gap-4">
-                    <Link href="/categories" className="flex items-center gap-2 bg-primary text-white px-4 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-all text-sm whitespace-nowrap">
-                        <div className="flex flex-col gap-0.5">
-                            <div className="w-4 h-0.5 bg-white rounded-full"></div>
-                            <div className="w-4 h-0.5 bg-white rounded-full"></div>
-                            <div className="w-4 h-0.5 bg-white rounded-full"></div>
+                {/* Search Bar */}
+                <div className="flex-1 flex items-center min-w-0">
+                    <form onSubmit={handleSearch} className="flex-1 relative flex items-center">
+                        <div className="flex-1 relative">
+                            <input
+                                type="text"
+                                placeholder="Поиск"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full py-2 px-10 rounded-xl bg-surface border-2 border-transparent focus:border-primary/50 outline-none text-sm transition-all"
+                            />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted h-4 w-4" />
                         </div>
-                        Все категории
-                    </Link>
-                    <Link href="/help" className="text-sm font-bold text-muted hover:text-primary transition-colors">
-                        Помощь
-                    </Link>
-                </div>
-
-                {/* Search Bar Container */}
-                <div className="flex-1 flex items-center max-w-3xl">
-                    <form onSubmit={handleSearch} className="flex-1 relative group">
-                        <input
-                            type="text"
-                            placeholder="Поиск по объявлениям"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full py-2.5 pl-4 pr-16 rounded-xl border-2 border-primary outline-none text-sm placeholder:text-muted"
-                        />
-                        <button type="submit" className="absolute right-0 top-0 bottom-0 px-5 bg-primary text-white rounded-r-lg font-bold text-sm hover:bg-primary/90 transition-colors">
+                        <button type="submit" className="hidden md:block ml-2 px-5 py-2 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
                             Найти
                         </button>
                     </form>
                 </div>
 
                 {/* Actions */}
-                <div className="flex items-center gap-3 shrink-0">
-                    <Link href="/favorites" className="p-2 hover:bg-surface rounded-full transition-colors relative group" title="Избранное">
-                        <Heart className="h-6 w-6 group-hover:text-red-500 transition-colors" />
+                <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+                    <Link href="/favorites" className="p-2 hover:bg-surface rounded-full transition-colors group" title="Избранное">
+                        <Heart className="h-5 w-5 sm:h-6 sm:w-6 transition-colors group-hover:text-red-500" />
                     </Link>
-                    <Link href="/chat" className="p-2 hover:bg-surface rounded-full transition-colors relative" title="Сообщения">
-                        <MessageSquare className="h-6 w-6" />
+                    <Link href="/chat" className="p-2 hover:bg-surface rounded-full transition-colors" title="Сообщения">
+                        <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
                     </Link>
 
                     <Link
                         href="/ads/create"
-                        className="hidden sm:flex items-center gap-2 bg-accent text-white px-5 py-2.5 rounded-xl font-black hover:bg-opacity-90 transition-all shadow-md text-sm"
+                        className="p-1.5 sm:p-2 sm:bg-accent sm:text-white sm:px-4 sm:py-2 sm:rounded-xl sm:font-black hover:bg-opacity-90 transition-all sm:shadow-sm text-sm flex items-center gap-1.5 sm:gap-2"
                     >
-                        Разместить объявление
+                        <PlusCircle className="h-5 w-5 sm:h-5 sm:w-5" />
+                        <span className="hidden sm:inline">Разместить</span>
                     </Link>
 
                     {user ? (
@@ -100,7 +91,7 @@ export default function Header() {
                             <Link href="/profile" className="p-2 hover:bg-surface rounded-full transition-colors relative" title="Профиль">
                                 <UserIcon className="h-6 w-6" />
                             </Link>
-                            <button onClick={handleLogout} className="p-2 hover:text-destructive transition-colors" title="Выйти">
+                            <button onClick={handleLogout} className="p-2 hover:text-destructive transition-colors hidden sm:block" title="Выйти">
                                 <LogOut className="h-6 w-6" />
                             </button>
                         </>
@@ -111,20 +102,6 @@ export default function Header() {
                         </Link>
                     )}
                 </div>
-            </div>
-
-            {/* Mobile Search Bar Extra */}
-            <div className="md:hidden px-4 pb-3">
-                <form onSubmit={handleSearch} className="relative">
-                    <input
-                        type="text"
-                        placeholder="Поиск..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full p-2.5 pl-10 rounded-xl bg-surface border border-border outline-none text-sm"
-                    />
-                    <Search className="absolute left-3 top-3 text-muted h-4 w-4" />
-                </form>
             </div>
         </header>
     );

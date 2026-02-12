@@ -108,68 +108,28 @@ export default function HomePage() {
     <div className="container mx-auto px-4 py-8">
       {/* Main Content Area */}
       <div className="w-full max-w-7xl mx-auto">
-        {/* Categories Grid - Stories style with Arrows */}
-        <section className="mb-12 relative group/section">
-          <h2 className="text-xl font-black mb-6 flex items-center gap-2">
-            Категории
-          </h2>
-
-          <div className="relative">
-            {showLeftArrow && (
-              <button
-                onClick={() => scroll('left')}
-                className="absolute left-[-25px] top-[46px] -translate-y-1/2 z-10 p-3 bg-white border border-border rounded-full shadow-lg hover:bg-muted transition-all hidden md:block"
+        {/* Categories Chips */}
+        <section className="mb-8 relative overflow-hidden">
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-none snap-x">
+            {categories.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/category?slug=${cat.slug}`}
+                className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full hover:border-primary hover:bg-primary/5 transition-all shrink-0 snap-start active:scale-95"
               >
-                <ChevronLeft className="h-6 w-6" />
-              </button>
-            )}
-
-            <div
-              ref={scrollRef}
-              onScroll={checkScroll}
-              className="flex items-start gap-6 overflow-x-auto py-4 -my-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] md:justify-center md:flex-wrap lg:flex-nowrap lg:justify-start"
-            >
-              {categories.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={`/category?slug=${cat.slug}`}
-                  className="flex flex-col items-center group gap-3 shrink-0 snap-start"
-                >
-                  <div className={`relative p-[3px] rounded-full bg-gradient-to-tr ${cat.color || 'from-orange-400 to-red-500'} group-hover:scale-110 transition-transform duration-300 shadow-md`}>
-                    <div className="w-16 h-16 rounded-full border-4 border-white overflow-hidden bg-white flex items-center justify-center">
-                      <img
-                        src={`/categories/${cat.slug}.jpg`}
-                        alt={cat.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Если локальная картинка не загрузилась
-                          const target = e.currentTarget;
-                          const dbImage = cat.image;
-                          const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=200`;
-
-                          // Если мы еще не пробовали загрузить картинку из БД и она есть
-                          if (dbImage && target.src.indexOf(dbImage) === -1 && target.src.indexOf('ui-avatars') === -1) {
-                            target.src = dbImage;
-                          } else {
-                            target.src = fallback;
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <span className="text-[11px] font-black text-center leading-tight max-w-[72px] text-foreground/80 group-hover:text-primary transition-colors tracking-tight">{cat.name}</span>
-                </Link>
-              ))}
-            </div>
-
-            {showRightArrow && (
-              <button
-                onClick={() => scroll('right')}
-                className="absolute right-[-25px] top-[46px] -translate-y-1/2 z-10 p-3 bg-white border border-border rounded-full shadow-lg hover:bg-muted transition-all hidden md:block"
-              >
-                <ChevronRight className="h-6 w-6" />
-              </button>
-            )}
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <img
+                    src={cat.image || `/categories/${cat.slug}.jpg` || `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=200`}
+                    alt=""
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=200`;
+                    }}
+                  />
+                </div>
+                <span className="text-sm font-bold text-foreground/90 whitespace-nowrap">{cat.name}</span>
+              </Link>
+            ))}
           </div>
         </section>
 
@@ -204,8 +164,8 @@ export default function HomePage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-5">
             {ads.map((ad) => (
               <div key={ad.id} className="group relative flex flex-col h-full">
-                <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-transparent hover:border-border">
-                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/50 hover:border-primary/30">
+                  <div className="aspect-square relative overflow-hidden bg-muted">
                     {ad.images?.[0] ? (
                       <img
                         src={ad.images[0]}
@@ -215,24 +175,24 @@ export default function HomePage() {
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted italic text-xs">Нет фото</div>
                     )}
-                    <button className="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white text-muted hover:text-red-500">
+                    <button className="absolute top-2 right-2 p-1.5 bg-white/70 backdrop-blur-md rounded-full text-foreground/70 hover:text-red-500 hover:bg-white transition-all shadow-sm">
                       <Heart className="h-4 w-4" />
                     </button>
                   </div>
                   <div className="p-3 flex flex-col flex-1">
-                    <h3 className="text-sm font-medium line-clamp-2 mb-1 group-hover:text-primary transition-colors h-10">
+                    <h3 className="text-sm font-bold text-foreground leading-snug line-clamp-2 mb-1 group-hover:text-primary transition-colors h-10">
                       {ad.title}
                     </h3>
-                    <div className="text-lg font-black text-foreground mb-2">
+                    <div className="text-base font-black text-foreground mb-2">
                       {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                     </div>
-                    <div className="mt-auto space-y-1">
-                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground uppercase tracking-tight font-bold">
-                        <span>{ad.city}</span>
+                    <div className="mt-auto pt-2 border-t border-border/20 space-y-0.5">
+                      <div className="flex items-center gap-1 text-[10px] text-muted font-bold uppercase tracking-wide">
+                        <span className="truncate">{ad.city}</span>
                         {ad.profiles?.is_verified && <CheckCircle className="h-2.5 w-2.5 text-blue-500 fill-current" />}
                       </div>
-                      <div className="text-[10px] text-muted-foreground font-medium">
-                        {new Date(ad.created_at).toLocaleDateString()}
+                      <div className="text-[10px] text-muted font-medium">
+                        {new Date(ad.created_at).toLocaleDateString('ru-RU')}
                       </div>
                     </div>
                   </div>
