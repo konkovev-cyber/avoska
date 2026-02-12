@@ -164,8 +164,8 @@ export default function HomePage() {
         </section>
 
         <section className="mb-12">
-          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-4 md:gap-6">
-            {CATEGORIES.map((cat) => (
+          <div className="grid grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
+            {CATEGORIES.slice(0, 8).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}

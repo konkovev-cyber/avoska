@@ -152,10 +152,21 @@ function AdContent() {
     };
 
     const handleShare = async () => {
-        const url = getShareableUrl(id || undefined);
+        const url = window.location.href;
         if (navigator.share) {
-            try { await navigator.share({ title: ad?.title, url }); }
-            catch (e) { navigator.clipboard.writeText(url); toast.success('Ссылка скопирована'); }
+            try {
+                await navigator.share({
+                    title: ad?.title,
+                    text: `Посмотри это объявление на Авоська+: ${ad?.title}`,
+                    url
+                });
+            } catch (e) {
+                // Ignore abort errors
+                if ((e as Error).name !== 'AbortError') {
+                    navigator.clipboard.writeText(url);
+                    toast.success('Ссылка скопирована');
+                }
+            }
         } else {
             navigator.clipboard.writeText(url);
             toast.success('Ссылка скопирована');
@@ -298,9 +309,11 @@ function AdContent() {
                         <div className="bg-surface p-4 rounded-2xl border border-border shadow-sm flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0">
                                 {ad.profiles?.avatar_url ? (
-                                    <img src={getOptimizedImageUrl(ad.profiles.avatar_url, { width: 80, quality: 80 })} className="w-full h-full object-cover" />
+                                    <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" alt={ad.profiles.full_name} />
                                 ) : (
-                                    <User className="p-2 w-full h-full text-muted" />
+                                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold">
+                                        {ad.profiles?.full_name?.charAt(0).toUpperCase() || <User className="h-5 w-5" />}
+                                    </div>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">

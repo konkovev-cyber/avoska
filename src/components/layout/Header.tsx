@@ -117,28 +117,28 @@ export default function Header() {
                 </Link>
 
                 {/* City Picker */}
-                <div className="relative shrink-0 hidden sm:block">
+                <div className="relative shrink-0 hidden md:block">
                     <button
                         onClick={() => setShowCityPicker(!showCityPicker)}
-                        className="flex items-center gap-2 px-4 py-2.5 hover:bg-surface rounded-2xl transition-all active:scale-95 border-2 border-transparent hover:border-border"
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-surface rounded-xl transition-all active:scale-95 border border-transparent hover:border-border max-w-[180px]"
                     >
-                        <MapPin className="h-5 w-5 text-primary" />
-                        <span className="text-xs font-black uppercase tracking-widest max-w-[120px] truncate">{city}</span>
-                        <ChevronDown className={cn("h-4 w-4 text-muted transition-transform", showCityPicker && "rotate-180")} />
+                        <MapPin className="h-4 w-4 text-primary shrink-0" />
+                        <span className="text-[11px] font-black uppercase tracking-wider truncate">{city}</span>
+                        <ChevronDown className={cn("h-3 w-3 text-muted transition-transform shrink-0", showCityPicker && "rotate-180")} />
                     </button>
 
                     {showCityPicker && (
                         <>
                             <div className="fixed inset-0 z-[110]" onClick={() => setShowCityPicker(false)} />
-                            <div className="absolute top-full left-0 mt-3 w-64 bg-background border-2 border-border rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300 z-[120] backdrop-blur-xl">
-                                <div className="max-h-80 overflow-y-auto p-3 space-y-1">
+                            <div className="absolute top-full left-0 mt-2 w-64 bg-background border border-border rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[120]">
+                                <div className="max-h-60 overflow-y-auto p-2 space-y-1">
                                     {cities.map((c) => (
                                         <button
                                             key={c.name}
                                             onClick={() => handleCityChange(c.name)}
                                             className={cn(
-                                                "w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all",
-                                                c.name === city ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-surface text-foreground/70 hover:text-foreground"
+                                                "w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-all",
+                                                c.name === city ? "bg-primary text-white" : "hover:bg-muted"
                                             )}
                                         >
                                             {c.name}
@@ -151,16 +151,16 @@ export default function Header() {
                 </div>
 
                 {/* Search Bar */}
-                <div className="flex-1 min-w-0">
-                    <form onSubmit={handleSearch} className="relative group max-w-2xl">
+                <div className="flex-1 min-w-0 max-w-2xl">
+                    <form onSubmit={handleSearch} className="relative group w-full">
                         <input
                             type="text"
-                            placeholder="Поиск объявлений..."
+                            placeholder="Поиск..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-12 md:h-14 pl-12 pr-12 rounded-2xl bg-surface/50 border-2 border-border/50 group-focus-within:bg-surface group-focus-within:border-primary/50 group-focus-within:shadow-2xl group-focus-within:shadow-primary/5 transition-all text-sm md:text-base font-medium outline-none"
+                            className="w-full h-10 md:h-11 pl-10 pr-10 rounded-xl bg-muted/50 border border-transparent focus:bg-background focus:border-primary/50 focus:shadow-sm transition-all text-sm font-medium outline-none"
                         />
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted h-5 w-5 group-focus-within:text-primary transition-colors" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted h-4 w-4 group-focus-within:text-primary transition-colors" />
                         <button
                             type="submit"
                             className="absolute right-2 top-1/2 -translate-y-1/2 h-8 md:h-10 px-4 md:px-6 bg-primary text-white rounded-xl font-black text-xs md:text-sm active:scale-95 transition-all shadow-lg shadow-primary/20 hover:opacity-90 flex items-center justify-center gap-2"
