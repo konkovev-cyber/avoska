@@ -138,11 +138,21 @@ export default function HomePage() {
                   <div className={`relative p-[3px] rounded-full bg-gradient-to-tr ${cat.color || 'from-orange-400 to-red-500'} group-hover:scale-110 transition-transform duration-300 shadow-md`}>
                     <div className="w-16 h-16 rounded-full border-4 border-white overflow-hidden bg-white flex items-center justify-center">
                       <img
-                        src={cat.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=200`}
+                        src={`/categories/${cat.slug}.jpg`}
                         alt={cat.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=200`;
+                          // Если локальная картинка не загрузилась
+                          const target = e.currentTarget;
+                          const dbImage = cat.image;
+                          const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=200`;
+
+                          // Если мы еще не пробовали загрузить картинку из БД и она есть
+                          if (dbImage && target.src.indexOf(dbImage) === -1 && target.src.indexOf('ui-avatars') === -1) {
+                            target.src = dbImage;
+                          } else {
+                            target.src = fallback;
+                          }
                         }}
                       />
                     </div>

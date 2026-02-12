@@ -47,12 +47,23 @@ export default function CategoriesPage() {
                         className="group relative h-48 rounded-[2rem] overflow-hidden border border-border bg-muted shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500"
                     >
                         {/* Full Card Image */}
+                        {/* Full Card Image */}
                         <img
-                            src={cat.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=400`}
+                            src={`/categories/${cat.slug}.jpg`}
                             alt={cat.name}
                             className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             onError={(e) => {
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=400`;
+                                // Если локальная картинка не загрузилась
+                                const target = e.currentTarget;
+                                const dbImage = cat.image;
+                                const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(cat.name)}&background=f3f4f6&color=666&size=400`;
+
+                                // Если мы еще не пробовали загрузить картинку из БД и она есть
+                                if (dbImage && target.src.indexOf(dbImage) === -1 && target.src.indexOf('ui-avatars') === -1) {
+                                    target.src = dbImage;
+                                } else {
+                                    target.src = fallback;
+                                }
                             }}
                         />
 

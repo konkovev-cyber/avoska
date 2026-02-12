@@ -95,10 +95,20 @@ export default function Header() {
                         Разместить объявление
                     </Link>
 
-                    {user && (
-                        <button onClick={handleLogout} className="p-2 hover:text-destructive transition-colors" title="Выйти">
-                            <LogOut className="h-6 w-6" />
-                        </button>
+                    {user ? (
+                        <>
+                            <Link href="/profile" className="p-2 hover:bg-surface rounded-full transition-colors relative" title="Профиль">
+                                <UserIcon className="h-6 w-6" />
+                            </Link>
+                            <button onClick={handleLogout} className="p-2 hover:text-destructive transition-colors" title="Выйти">
+                                <LogOut className="h-6 w-6" />
+                            </button>
+                        </>
+                    ) : (
+                        <Link href="/login" className="flex items-center gap-2 text-sm font-bold hover:text-primary transition-colors ml-2">
+                            <UserIcon className="h-5 w-5" />
+                            <span>Вход</span>
+                        </Link>
                     )}
                 </div>
             </div>
