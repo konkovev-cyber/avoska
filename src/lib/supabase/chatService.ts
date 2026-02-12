@@ -54,7 +54,7 @@ export const chatService = {
     },
 
     // Send a message
-    async sendMessage(receiverId: string, content: string, adId?: string) {
+    async sendMessage(receiverId: string, content: string, adId?: string, type: 'text' | 'image' = 'text', attachmentUrl?: string) {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return null;
 
@@ -64,13 +64,28 @@ export const chatService = {
                 sender_id: session.user.id,
                 receiver_id: receiverId,
                 content,
-                ad_id: adId
+                ad_id: adId,
+                type,
+                attachment_url: attachmentUrl
             })
             .select()
             .single();
 
         if (error) throw error;
         return data;
+    },
+
+    // Mark messages as read
+    async markAsRead(senderId: string) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        await supabase
+            .from('messages')
+            .update({ is_read: true })
+            .eq('receiver_id', session.user.id)
+            .eq('sender_id', senderId)
+            .eq('is_read', false);
     },
 
     // Realtime subscription

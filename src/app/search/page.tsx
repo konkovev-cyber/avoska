@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { getStoredCity } from '@/lib/geo';
 import { cn } from '@/lib/utils';
+import { recommendationService } from '@/lib/recommendations';
 
 type SortOption = 'newest' | 'cheapest' | 'expensive';
 type ConditionOption = 'all' | 'new' | 'used';
@@ -27,6 +28,19 @@ function SearchContent() {
     const [priceTo, setPriceTo] = useState('');
     const [condition, setCondition] = useState<ConditionOption>('all');
     const [sortBy, setSortBy] = useState<SortOption>('newest');
+    const [categories, setCategories] = useState<any[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+    const [specFilters, setSpecFilters] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const fetchCategories = async () => {
+        const { data } = await supabase.from('categories').select('*').order('name');
+        if (data) setCategories(data);
+    };
 
     useEffect(() => {
         performSearch();
@@ -44,6 +58,11 @@ function SearchContent() {
 
             if (query) {
                 q = q.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
+                recommendationService.saveSearchQuery(query);
+            }
+
+            if (selectedCategoryId) {
+                recommendationService.saveLastCategory(selectedCategoryId);
             }
 
             // Apply global city filter
@@ -60,7 +79,26 @@ function SearchContent() {
                 q = q.eq('condition', condition);
             }
 
-            // Apply sorting
+            // Apply category filter
+            if (selectedCategoryId) {
+                q = q.eq('category_id', selectedCategoryId);
+            }
+
+            // Apply specifications filter (JSONB exact matches)
+            if (Object.keys(specFilters).length > 0) {
+                const cleanSpecs = Object.fromEntries(
+                    Object.entries(specFilters).filter(([_, v]) => v !== '')
+                );
+                if (Object.keys(cleanSpecs).length > 0) {
+                    q = q.contains('specifications', cleanSpecs);
+                }
+            }
+
+            // Primary sorting by VIP and Turbo status
+            q = q.order('is_vip', { ascending: false });
+            q = q.order('is_turbo', { ascending: false });
+
+            // Apply secondary sorting
             if (sortBy === 'newest') {
                 q = q.order('created_at', { ascending: false });
             } else if (sortBy === 'cheapest') {
@@ -97,6 +135,9 @@ function SearchContent() {
         setPriceTo('');
         setCondition('all');
         setSortBy('newest');
+        setSelectedCategory('');
+        setSelectedCategoryId('');
+        setSpecFilters({});
         setShowFilters(false);
         // performSearch will be triggered by useEffect
     };
@@ -264,6 +305,110 @@ function SearchContent() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Category Filter */}
+                            <div>
+                                <label className="block text-xs font-black uppercase text-muted-foreground mb-4 tracking-widest">Категория</label>
+                                <select
+                                    value={selectedCategoryId}
+                                    onChange={(e) => {
+                                        const id = e.target.value;
+                                        setSelectedCategoryId(id);
+                                        const cat = categories.find(c => c.id === id);
+                                        setSelectedCategory(cat?.slug || '');
+                                        setSpecFilters({}); // Reset specs on category change
+                                    }}
+                                    className="w-full h-12 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-sm"
+                                >
+                                    <option value="">Все категории</option>
+                                    {categories.map(c => (
+                                        <option key={c.id} value={c.id}>{c.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Dynamic Specs based on Category Slug */}
+                            {selectedCategory === 'transport' && (
+                                <div className="space-y-4 pt-2">
+                                    <label className="block text-[10px] font-black uppercase text-primary tracking-widest">Параметры авто</label>
+                                    <div className="space-y-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Марка (напр: BMW)"
+                                            value={specFilters.brand || ''}
+                                            onChange={(e) => setSpecFilters({ ...specFilters, brand: e.target.value })}
+                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        />
+                                        <select
+                                            value={specFilters.transmission || ''}
+                                            onChange={(e) => setSpecFilters({ ...specFilters, transmission: e.target.value })}
+                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        >
+                                            <option value="">Любая КПП</option>
+                                            <option value="auto">Автомат</option>
+                                            <option value="manual">Механика</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedCategory === 'real-estate' && (
+                                <div className="space-y-4 pt-2">
+                                    <label className="block text-[10px] font-black uppercase text-primary tracking-widest">Параметры недвижимости</label>
+                                    <div className="space-y-3">
+                                        <select
+                                            value={specFilters.rooms || ''}
+                                            onChange={(e) => setSpecFilters({ ...specFilters, rooms: e.target.value })}
+                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        >
+                                            <option value="">Кол-во комнат</option>
+                                            <option value="studio">Студия</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4+">4+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedCategory === 'electronics' && (
+                                <div className="space-y-4 pt-2">
+                                    <label className="block text-[10px] font-black uppercase text-primary tracking-widest">Параметры техники</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Бренд (Apple, Samsung...)"
+                                        value={specFilters.brand || ''}
+                                        onChange={(e) => setSpecFilters({ ...specFilters, brand: e.target.value })}
+                                        className="w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                    />
+                                </div>
+                            )}
+
+                            {selectedCategory === 'clothing' && (
+                                <div className="space-y-4 pt-2">
+                                    <label className="block text-[10px] font-black uppercase text-primary tracking-widest">Параметры одежды</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Размер"
+                                            value={specFilters.size || ''}
+                                            onChange={(e) => setSpecFilters({ ...specFilters, size: e.target.value })}
+                                            className="h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        />
+                                        <select
+                                            value={specFilters.gender || ''}
+                                            onChange={(e) => setSpecFilters({ ...specFilters, gender: e.target.value })}
+                                            className="h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        >
+                                            <option value="">Пол</option>
+                                            <option value="male">М</option>
+                                            <option value="female">Ж</option>
+                                            <option value="unisex">Унисекс</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Condition */}
                             <div>

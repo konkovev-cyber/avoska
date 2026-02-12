@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin } from 'lucide-react';
+import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X } from 'lucide-react';
+import PromotionModal from '@/components/PromotionModal';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,11 @@ export default function ProfilePage() {
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'my-ads' | 'favorites' | 'reviews'>('my-ads');
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [replyText, setReplyText] = useState('');
+    const [isSubmittingReply, setIsSubmittingReply] = useState(false);
+    const [promotingAd, setPromotingAd] = useState<{ id: string, title: string } | null>(null);
+
 
     const router = useRouter();
 
@@ -48,7 +54,7 @@ export default function ProfilePage() {
         // Fetch My Ads
         const { data: adsData } = await supabase
             .from('ads')
-            .select('*, categories(name)')
+            .select('*, categories:category_id(name), is_vip, is_turbo, pinned_until')
             .eq('user_id', session.user.id)
             .order('created_at', { ascending: false });
 
@@ -120,34 +126,34 @@ export default function ProfilePage() {
         }
     };
 
-    const updateProfile = async () => {
+    const handleSaveProfile = async () => {
         if (!fullName.trim()) return toast.error('Введите имя');
         if (phone && phone.replace(/[^\d]/g, '').length < 10) {
             return toast.error('Номер телефона слишком короткий');
         }
 
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({
+                    full_name: fullName,
+                    phone: phone
+                })
+                .eq('id', profile?.id);
 
-        const { error } = await supabase
-            .from('profiles')
-            .update({
-                full_name: fullName,
-                phone: phone
-            })
-            .eq('id', session.user.id);
-
-        if (error) {
-            if (error.code === '42703') { // Undefined column
-                toast.error('Ошибка: колонка "phone" не создана в БД. Запустите SQL скрипт.');
-            } else {
-                toast.error('Ошибка при обновлении профиля');
-                console.error(error);
+            if (error) {
+                if (error.code === '42703') { // Undefined column
+                    throw new Error('Ошибка: колонка "phone" не создана в БД. Запустите SQL скрипт.');
+                }
+                throw error;
             }
-        } else {
+
             toast.success('Профиль обновлен');
             setIsEditing(false);
             fetchProfileData();
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || 'Ошибка при обновлении профиля');
         }
     };
 
@@ -186,6 +192,33 @@ export default function ProfilePage() {
         }
     };
 
+    const handleSendReply = async (reviewId: string) => {
+        if (!replyText.trim()) return toast.error('Введите текст ответа');
+
+        setIsSubmittingReply(true);
+        try {
+            const { error } = await supabase
+                .from('reviews')
+                .update({
+                    reply: replyText,
+                    reply_date: new Date().toISOString()
+                })
+                .eq('id', reviewId);
+
+            if (error) throw error;
+
+            toast.success('Ответ опубликован');
+            setReplyingTo(null);
+            setReplyText('');
+            fetchProfileData();
+        } catch (error) {
+            console.error(error);
+            toast.error('Ошибка при отправке ответа');
+        } finally {
+            setIsSubmittingReply(false);
+        }
+    };
+
     if (loading) return (
         <div className="container mx-auto px-4 py-20 flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -212,59 +245,28 @@ export default function ProfilePage() {
                         </label>
                     </div>
                     <div className="flex-1 min-w-0 w-full">
-                        {isEditing ? (
-                            <div className="space-y-4 max-w-md mx-auto md:mx-0">
-                                <input
-                                    type="text"
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    placeholder="Имя Фамилия"
-                                    className="w-full px-4 py-2 rounded-xl bg-background border border-border focus:border-primary outline-none font-bold"
-                                />
-                                <div className="space-y-1">
-                                    <input
-                                        type="tel"
-                                        value={phone}
-                                        onChange={(e) => {
-                                            const val = e.target.value.replace(/[^\d+]/g, '');
-                                            setPhone(val);
-                                        }}
-                                        placeholder="+7 (900) 000-00-00"
-                                        className="w-full px-4 py-2 rounded-xl bg-background border border-border focus:border-primary outline-none font-bold"
-                                    />
-                                    <div className="px-2 text-[10px] text-muted-foreground font-medium text-left">
-                                        Пример: +79001112233
-                                    </div>
+                        <>
+                            <h1 className="text-2xl md:text-3xl font-black mb-1 truncate">{profile?.full_name || 'Пользователь'}</h1>
+                            {profile?.phone && (
+                                <div className="text-sm font-bold text-foreground/60 mb-3">{profile.phone}</div>
+                            )}
+                            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-[10px] md:text-xs text-muted font-bold uppercase tracking-wider">
+                                <a
+                                    href={`https://yandex.ru/maps/?text=${encodeURIComponent(profile?.city || 'Горячий Ключ')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-primary hover:underline transition-all"
+                                >
+                                    <MapPin className="h-4 w-4" />
+                                    <span>{profile?.city || 'Горячий Ключ'}</span>
+                                </a>
+                                <div className="flex items-center gap-1 text-orange-500">
+                                    <Star className="h-4 w-4 fill-current" />
+                                    <span>Рейтинг: {profile?.rating || '0.0'}</span>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={updateProfile} className="flex-1 py-2 bg-primary text-white rounded-xl font-black">Сохранить</button>
-                                    <button onClick={() => setIsEditing(false)} className="flex-1 py-2 bg-muted rounded-xl font-bold">Отмена</button>
-                                </div>
+                                <div>На Авоське с {new Date(profile?.created_at).getFullYear()}г.</div>
                             </div>
-                        ) : (
-                            <>
-                                <h1 className="text-2xl md:text-3xl font-black mb-1 truncate">{profile?.full_name || 'Пользователь'}</h1>
-                                {profile?.phone && (
-                                    <div className="text-sm font-bold text-foreground/60 mb-3">{profile.phone}</div>
-                                )}
-                                <div className="flex flex-wrap justify-center md:justify-start gap-4 text-[10px] md:text-xs text-muted font-bold uppercase tracking-wider">
-                                    <a
-                                        href={`https://yandex.ru/maps/?text=${encodeURIComponent(profile?.city || 'Горячий Ключ')}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-1 text-primary hover:underline transition-all"
-                                    >
-                                        <MapPin className="h-4 w-4" />
-                                        <span>{profile?.city || 'Горячий Ключ'}</span>
-                                    </a>
-                                    <div className="flex items-center gap-1 text-orange-500">
-                                        <Star className="h-4 w-4 fill-current" />
-                                        <span>Рейтинг: {profile?.rating || '0.0'}</span>
-                                    </div>
-                                    <div>На Авоське с {new Date(profile?.created_at).getFullYear()}г.</div>
-                                </div>
-                            </>
-                        )}
+                        </>
                     </div>
                     {!isEditing && (
                         <button
@@ -338,8 +340,20 @@ export default function ProfilePage() {
                                         {ad.title}
                                     </Link>
                                     <div className="text-xl font-black mt-1">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
+                                    <div className="flex gap-1 mt-2">
+                                        {ad.is_vip && <span className="bg-purple-100 text-purple-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1"><Crown className="h-2 w-2" /> VIP</span>}
+                                        {ad.is_turbo && <span className="bg-orange-100 text-orange-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2 w-2" /> Turbo</span>}
+                                        {ad.pinned_until && <span className="bg-blue-100 text-blue-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full">Закреплено</span>}
+                                    </div>
                                 </div>
                                 <div className="flex flex-col md:flex-row gap-2">
+                                    <button
+                                        onClick={() => setPromotingAd({ id: ad.id, title: ad.title })}
+                                        className="p-3 rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-all hover:shadow-sm"
+                                        title="Продвинуть"
+                                    >
+                                        <Rocket className="h-5 w-5" />
+                                    </button>
                                     <Link
                                         href={`/ads/edit?id=${ad.id}`}
                                         className="p-3 rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all hover:shadow-sm"
@@ -421,15 +435,15 @@ export default function ProfilePage() {
                             reviews.map(rev => (
                                 <div key={rev.id} className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
                                     <div className="flex items-center gap-4 mb-4">
-                                        <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-accent overflow-hidden shrink-0">
+                                        <Link href={`/user/${rev.reviewer_id}`} className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-accent overflow-hidden shrink-0 hover:opacity-80 transition-opacity">
                                             {rev.reviewer?.avatar_url ? (
                                                 <img src={rev.reviewer.avatar_url} alt={rev.reviewer.full_name} className="w-full h-full object-cover" />
                                             ) : (
                                                 rev.reviewer?.full_name?.charAt(0) || '?'
                                             )}
-                                        </div>
+                                        </Link>
                                         <div className="flex-1">
-                                            <div className="font-bold">{rev.reviewer?.full_name}</div>
+                                            <Link href={`/user/${rev.reviewer_id}`} className="font-bold hover:underline">{rev.reviewer?.full_name}</Link>
                                             <div className="flex gap-0.5">
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star key={i} className={cn("h-3 w-3", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted opacity-30")} />
@@ -440,9 +454,70 @@ export default function ProfilePage() {
                                             {new Date(rev.created_at).toLocaleDateString()}
                                         </div>
                                     </div>
-                                    <p className="text-sm text-foreground/80 leading-relaxed italic">
+                                    <p className="text-sm text-foreground/80 leading-relaxed italic border-l-2 border-border pl-4 mb-4">
                                         «{rev.comment}»
                                     </p>
+
+                                    {rev.images && rev.images.length > 0 && (
+                                        <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-none">
+                                            {rev.images.map((img: string, idx: number) => (
+                                                <div key={idx} className="w-16 h-16 rounded-lg overflow-hidden border border-border shrink-0">
+                                                    <img src={img} className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {rev.reply ? (
+                                        <div className="bg-muted/50 rounded-xl p-4 mt-2 border border-border/50">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="text-[10px] font-black uppercase text-primary">Ваш ответ</div>
+                                                <div className="text-[10px] text-muted font-bold uppercase">
+                                                    {new Date(rev.reply_date).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-foreground/70 leading-relaxed">
+                                                {rev.reply}
+                                            </p>
+                                        </div>
+                                    ) : replyingTo === rev.id ? (
+                                        <div className="mt-4 space-y-3">
+                                            <textarea
+                                                value={replyText}
+                                                onChange={(e) => setReplyText(e.target.value)}
+                                                placeholder="Напишите ответ..."
+                                                className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-primary outline-none text-sm min-h-[100px] resize-none"
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleSendReply(rev.id)}
+                                                    disabled={isSubmittingReply}
+                                                    className="flex-1 py-2 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-wider disabled:opacity-50"
+                                                >
+                                                    {isSubmittingReply ? 'Отправка...' : 'Отправить ответ'}
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setReplyingTo(null);
+                                                        setReplyText('');
+                                                    }}
+                                                    className="px-6 py-2 bg-muted rounded-xl font-bold text-xs uppercase tracking-wider"
+                                                >
+                                                    Отмена
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => {
+                                                setReplyingTo(rev.id);
+                                                setReplyText('');
+                                            }}
+                                            className="text-primary text-xs font-black uppercase tracking-widest hover:underline"
+                                        >
+                                            Ответить на отзыв
+                                        </button>
+                                    )}
                                 </div>
                             ))
                         ) : (

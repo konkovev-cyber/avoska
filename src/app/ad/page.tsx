@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { supabase } from '@/lib/supabase/client';
@@ -18,12 +19,21 @@ import {
     ChevronLeft,
     ChevronRight,
     X,
-    Maximize2
+    Maximize2,
+    Paperclip,
+    Image as ImageIcon,
+    Check,
+    CheckCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { getShareableUrl } from '@/lib/share';
+
+const MapView = dynamic(() => import('@/components/MapView'), {
+    ssr: false,
+    loading: () => <div className="h-[300px] w-full bg-muted animate-pulse rounded-2xl flex items-center justify-center font-bold text-xs uppercase tracking-widest text-muted-foreground">Загрузка карты...</div>
+});
 
 function AdContent() {
     const searchParams = useSearchParams();
@@ -40,6 +50,10 @@ function AdContent() {
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState('');
     const [currentUser, setCurrentUser] = useState<any>(null);
+    const [isUploadingChatImage, setIsUploadingChatImage] = useState(false);
+    const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const chatChannelRef = useRef<any>(null);
 
     useEffect(() => {
         if (id) {
@@ -58,24 +72,56 @@ function AdContent() {
     };
 
     useEffect(() => {
-        if (showChat && ad) {
+        if (showChat && ad && currentUser) {
             fetchMessages();
-            const channel = supabase
-                .channel(`ad_chat_${ad.id}`)
+
+            const channelId = `ad_chat_${ad.id}_${[currentUser.id, ad.user_id].sort().join('_')}`;
+            const channel = supabase.channel(channelId);
+
+            channel
                 .on('postgres_changes', {
                     event: 'INSERT',
                     schema: 'public',
                     table: 'messages',
-                    filter: `sender_id=eq.${currentUser?.id},receiver_id=eq.${ad.user_id}`
-                }, fetchMessages)
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages',
-                    filter: `sender_id=eq.${ad.user_id},receiver_id=eq.${currentUser?.id}`
-                }, fetchMessages)
-                .subscribe();
-            return () => { supabase.removeChannel(channel); };
+                }, (payload) => {
+                    const newMsg = payload.new;
+                    if (
+                        (newMsg.sender_id === currentUser.id && newMsg.receiver_id === ad.user_id) ||
+                        (newMsg.sender_id === ad.user_id && newMsg.receiver_id === currentUser.id)
+                    ) {
+                        fetchMessages();
+                    }
+                })
+                .on('presence', { event: 'sync' }, () => {
+                    const state = channel.presenceState();
+                    const otherTyping = Object.values(state).some((presences: any) =>
+                        presences.some((p: any) => p.user_id === ad.user_id && p.is_typing)
+                    );
+                    setIsOtherUserTyping(otherTyping);
+                })
+                .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+                    console.log('join', key, newPresences);
+                })
+                .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+                    console.log('leave', key, leftPresences);
+                })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await channel.track({
+                            user_id: currentUser.id,
+                            is_typing: false,
+                            online_at: new Date().toISOString(),
+                        });
+                    }
+                });
+
+            chatChannelRef.current = channel;
+
+            return () => {
+                if (chatChannelRef.current) {
+                    supabase.removeChannel(chatChannelRef.current);
+                }
+            };
         }
     }, [showChat, ad, currentUser]);
 
@@ -84,6 +130,13 @@ function AdContent() {
         const msgs = await chatService.getMessages(ad.user_id);
         const filteredMsgs = msgs.filter((m: any) => m.ad_id === ad.id || !m.ad_id);
         setMessages(filteredMsgs);
+
+        // Mark as read if we are the receiver
+        const hasUnread = filteredMsgs.some((m: any) => m.receiver_id === currentUser.id && !m.is_read);
+        if (hasUnread) {
+            await chatService.markAsRead(ad.user_id);
+        }
+
         setTimeout(scrollToBottom, 100);
     };
 
@@ -147,8 +200,68 @@ function AdContent() {
         try {
             await chatService.sendMessage(ad.user_id, newMessage, ad.id);
             setNewMessage('');
+
+            // Stop typing indicator
+            if (chatChannelRef.current) {
+                chatChannelRef.current.track({
+                    user_id: currentUser.id,
+                    is_typing: false,
+                });
+            }
+
             fetchMessages();
         } catch (e) { toast.error('Ошибка'); }
+    };
+
+    const handleTyping = (text: string) => {
+        setNewMessage(text);
+
+        if (!chatChannelRef.current || !currentUser) return;
+
+        // Track typing
+        chatChannelRef.current.track({
+            user_id: currentUser.id,
+            is_typing: true,
+        });
+
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+        typingTimeoutRef.current = setTimeout(() => {
+            if (chatChannelRef.current) {
+                chatChannelRef.current.track({
+                    user_id: currentUser.id,
+                    is_typing: false,
+                });
+            }
+        }, 2000);
+    };
+
+    const handleChatImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !ad || !currentUser) return;
+
+        setIsUploadingChatImage(true);
+        try {
+            const fileName = `${currentUser.id}/${Date.now()}-${file.name}`;
+            const { error: uploadError } = await supabase.storage
+                .from('chat-images')
+                .upload(fileName, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('chat-images')
+                .getPublicUrl(fileName);
+
+            await chatService.sendMessage(ad.user_id, '[Изображение]', ad.id, 'image', publicUrl);
+            fetchMessages();
+            toast.success('Фото отправлено');
+        } catch (error) {
+            console.error(error);
+            toast.error('Ошибка при отправке фото');
+        } finally {
+            setIsUploadingChatImage(false);
+        }
     };
 
     const handleShare = async () => {
@@ -342,12 +455,27 @@ function AdContent() {
                                 })}
                             </div>
                         </div>
+
+                        {/* Interactive Map */}
+                        {ad.latitude && ad.longitude && (
+                            <div className="space-y-3 pt-2">
+                                <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Местоположение</h2>
+                                <MapView
+                                    pos={[ad.latitude, ad.longitude]}
+                                    title={ad.title}
+                                    address={ad.address}
+                                />
+                                <div className="text-[10px] text-muted-foreground font-medium italic">
+                                    {ad.address || ad.city}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Sidebar / Bottom Actions for Mobile */}
                     <div className="w-full lg:w-72 space-y-4">
                         {/* Seller Card - Compact */}
-                        <div className="bg-surface p-4 rounded-2xl border border-border shadow-sm flex items-center gap-3">
+                        <Link href={`/user/${ad.user_id}`} className="bg-surface p-4 rounded-2xl border border-border shadow-sm flex items-center gap-3 hover:bg-muted/50 transition-all active:scale-98">
                             <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0">
                                 {ad.profiles?.avatar_url ? (
                                     <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" alt={ad.profiles.full_name} />
@@ -362,16 +490,22 @@ function AdContent() {
                                 <div className="flex items-center gap-1 text-[10px] text-orange-500 font-bold">
                                     <Star className="h-3 w-3 fill-current" />
                                     <span>{ad.profiles?.rating || '5.0'}</span>
+                                    <span className="text-muted-foreground font-medium ml-1">Открыть профиль</span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* Mini Chat Window */}
                         <div className="bg-surface rounded-2xl border border-border overflow-hidden shadow-sm flex flex-col">
                             {showChat ? (
                                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col h-[380px]">
                                     <div className="p-3 border-b border-border flex justify-between items-center bg-muted/5">
-                                        <span className="text-xs font-black uppercase tracking-wider">Чат с продавцом</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-black uppercase tracking-wider">Чат с продавцом</span>
+                                            {isOtherUserTyping && (
+                                                <span className="text-[10px] text-primary animate-pulse font-bold">печатает...</span>
+                                            )}
+                                        </div>
                                         <button onClick={() => setShowChat(false)} className="p-1 hover:bg-muted rounded-full">
                                             <X className="h-4 w-4 text-muted-foreground" />
                                         </button>
@@ -381,14 +515,30 @@ function AdContent() {
                                         {messages.length > 0 ? (
                                             messages.map((msg) => (
                                                 <div key={msg.id} className={cn(
-                                                    "max-w-[85%] p-2.5 rounded-2xl text-[13px] leading-tight shadow-sm",
+                                                    "max-w-[85%] p-2.5 rounded-2xl text-[13px] leading-tight shadow-sm overflow-hidden",
                                                     msg.sender_id === currentUser?.id
                                                         ? "ml-auto bg-primary text-white rounded-br-none"
                                                         : "mr-auto bg-surface border border-border rounded-bl-none"
                                                 )}>
-                                                    {msg.content}
-                                                    <div className="text-[9px] opacity-60 mt-1 text-right">
+                                                    {msg.type === 'image' ? (
+                                                        <a href={msg.attachment_url} target="_blank" className="block -m-1">
+                                                            <img src={msg.attachment_url} className="w-full max-h-60 object-cover rounded-xl" alt="Chat" />
+                                                        </a>
+                                                    ) : (
+                                                        msg.content
+                                                    )}
+                                                    <div className={cn(
+                                                        "text-[9px] mt-1 flex items-center justify-end gap-1",
+                                                        msg.sender_id === currentUser?.id ? "text-white/70" : "text-muted"
+                                                    )}>
                                                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        {msg.sender_id === currentUser?.id && (
+                                                            msg.is_read ? (
+                                                                <CheckCheck className="h-3 w-3 text-white" />
+                                                            ) : (
+                                                                <Check className="h-3 w-3 text-white/50" />
+                                                            )
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))
@@ -400,10 +550,18 @@ function AdContent() {
                                         )}
                                     </div>
 
-                                    <form onSubmit={handleSendMessage} className="p-2 border-t border-border bg-muted/5 flex gap-2">
+                                    <form onSubmit={handleSendMessage} className="p-2 border-t border-border bg-muted/5 flex gap-2 items-center">
+                                        <label className="p-2 text-muted-foreground hover:text-primary cursor-pointer transition-colors">
+                                            {isUploadingChatImage ? (
+                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                                            ) : (
+                                                <Paperclip className="h-4 w-4" />
+                                            )}
+                                            <input type="file" className="hidden" accept="image/*" onChange={handleChatImageUpload} disabled={isUploadingChatImage} />
+                                        </label>
                                         <input
                                             value={newMessage}
-                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            onChange={(e) => handleTyping(e.target.value)}
                                             className="flex-1 h-9 bg-background border border-border rounded-xl px-3 text-xs font-bold outline-none focus:ring-1 focus:ring-primary"
                                             placeholder="Сообщение..."
                                         />

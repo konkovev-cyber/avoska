@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -8,6 +9,11 @@ import { Camera, X, MessageCircle, AlertCircle, Briefcase, Wrench, MapPin } from
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import { getCurrentCity } from '@/lib/geo';
+
+const MapPicker = dynamic(() => import('@/components/MapPicker'), {
+    ssr: false,
+    loading: () => <div className="h-[300px] w-full bg-muted animate-pulse rounded-2xl flex items-center justify-center font-bold text-xs uppercase tracking-widest text-muted-foreground">Загрузка карты...</div>
+});
 
 const CATEGORIES = [
     { name: 'Транспорт', slug: 'transport' },
@@ -40,6 +46,8 @@ export default function CreateAdPage() {
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [specifications, setSpecifications] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
+    const [lat, setLat] = useState<number | null>(null);
+    const [lng, setLng] = useState<number | null>(null);
     const [limitReached, setLimitReached] = useState(false);
 
     const router = useRouter();
@@ -149,7 +157,9 @@ export default function CreateAdPage() {
                 images: uploadedImageUrls,
                 status: 'pending', // Send to moderation by default
                 condition: (category === 'jobs' || category === 'services') ? 'new' : condition,
-                specifications: cleanSpecs
+                specifications: cleanSpecs,
+                latitude: lat,
+                longitude: lng
             });
 
             if (insertError) {
@@ -433,6 +443,15 @@ export default function CreateAdPage() {
                             <span className="text-sm font-bold">Доставка</span>
                         </label>
                     )}
+                </div>
+
+                <div className="space-y-4">
+                    <label className="block text-sm font-bold">Точное местоположение на карте</label>
+                    <MapPicker onChange={(pos) => {
+                        setLat(pos[0]);
+                        setLng(pos[1]);
+                    }} />
+                    <p className="text-[10px] text-muted-foreground font-medium italic">Кликните по карте, чтобы установить маркер</p>
                 </div>
 
                 <div>

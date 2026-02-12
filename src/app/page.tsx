@@ -14,6 +14,7 @@ import {
   Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { recommendationService } from '@/lib/recommendations';
 
 const CATEGORIES = [
   { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },
@@ -40,6 +41,7 @@ export default function HomePage() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [city, setCity] = useState<string | null>(null);
+  const [personalCategory, setPersonalCategory] = useState<any>(null);
   const PAGE_SIZE = 14;
 
   const router = useRouter();
@@ -67,7 +69,18 @@ export default function HomePage() {
       setBanners(bannersRes.data || []);
       setNewAds(newAdsRes.data || []);
 
-      await fetchAds(0, true, currentCity);
+      // Smart feed: check last category
+      const lastCatId = recommendationService.getLastCategory();
+      let pCat = null;
+      if (lastCatId) {
+        const { data: catData } = await supabase.from('categories').select('*').eq('id', lastCatId).single();
+        if (catData) {
+          setPersonalCategory(catData);
+          pCat = catData.id;
+        }
+      }
+
+      await fetchAds(0, true, currentCity, pCat);
     } catch (error) {
       console.error('Initial fetch error:', error);
     } finally {
@@ -75,7 +88,7 @@ export default function HomePage() {
     }
   };
 
-  const fetchAds = async (pageNum: number, isInitial = false, cityOverride?: string) => {
+  const fetchAds = async (pageNum: number, isInitial = false, cityOverride?: string, categoryIdOverride?: string) => {
     try {
       const currentCity = cityOverride || city || getStoredCity();
       const from = pageNum * PAGE_SIZE;
@@ -90,6 +103,10 @@ export default function HomePage() {
 
       if (currentCity && currentCity !== 'Все города') {
         q = q.eq('city', currentCity);
+      }
+
+      if (categoryIdOverride) {
+        q = q.eq('category_id', categoryIdOverride);
       }
 
       const { data, error } = await q
@@ -288,7 +305,9 @@ export default function HomePage() {
         </section>
 
         <div className="flex items-center justify-between mb-10">
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight">Рекомендации для вас</h2>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+            {personalCategory ? `Специально для вас в «${personalCategory.name}»` : 'Рекомендации для вас'}
+          </h2>
           <div className="h-1 flex-1 bg-border mx-8 rounded-full hidden md:block opacity-30" />
         </div>
 
