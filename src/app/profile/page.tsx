@@ -340,6 +340,15 @@ export default function ProfilePage() {
                                     <div className="text-xl font-black mt-1">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
                                 </div>
                                 <div className="flex flex-col md:flex-row gap-2">
+                                    <Link
+                                        href={`/ads/edit?id=${ad.id}`}
+                                        className="p-3 rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all hover:shadow-sm"
+                                        title="Редактировать"
+                                    >
+                                        <div className="h-5 w-5">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+                                        </div>
+                                    </Link>
                                     <button
                                         onClick={() => toggleAdStatus(ad.id, ad.status)}
                                         className={cn(

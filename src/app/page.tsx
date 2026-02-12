@@ -225,9 +225,6 @@ export default function HomePage() {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl md:text-3xl font-black tracking-tight">Новое</h2>
-            <Link href="/search?sort=newest" className="text-sm font-bold text-primary hover:underline">
-              Смотреть все
-            </Link>
           </div>
 
           <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-none">
@@ -270,6 +267,16 @@ export default function HomePage() {
             {newAds.length === 0 && loading && [1, 2, 3, 4].map(i => (
               <div key={i} className="shrink-0 w-[160px] h-[220px] bg-muted/20 rounded-2xl animate-pulse" />
             ))}
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <Link
+              href="/search?sort=newest"
+              className="flex items-center gap-2 px-8 py-3 bg-surface border-2 border-border rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:border-primary hover:text-white transition-all shadow-md active:scale-95"
+            >
+              <span>Смотреть все</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
           </div>
         </section>
 
