@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { chatService } from '@/lib/supabase/chatService';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Send, User as UserIcon, ChevronLeft, Search, MessageCircle } from 'lucide-react';
+import Link from 'next/link';
+import { Send, User as UserIcon, ChevronLeft, Search, MessageCircle, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -94,6 +95,19 @@ function ChatContent() {
         const msgs = await chatService.getMessages(chat.userId);
         setMessages(msgs);
         setLoading(false);
+        markAsRead(chat.userId);
+    };
+
+    const markAsRead = async (otherUserId: string) => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        await supabase
+            .from('messages')
+            .update({ is_read: true })
+            .eq('receiver_id', session.user.id)
+            .eq('sender_id', otherUserId)
+            .eq('is_read', false);
     };
 
     const handleSendMessage = async (e: React.FormEvent) => {
@@ -111,8 +125,8 @@ function ChatContent() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-4 md:py-6 h-[calc(100vh-120px)] max-h-[750px] max-w-[1100px]">
-            <div className="bg-surface border border-border rounded-[2rem] overflow-hidden shadow-2xl flex h-full">
+        <div className="max-w-[1000px] mx-auto px-4 py-8">
+            <div className="bg-surface border border-border rounded-[2.5rem] overflow-hidden shadow-2xl flex h-[650px] md:h-[700px]">
 
                 {/* Sidebar: Conversations */}
                 <div className={cn(
@@ -183,7 +197,12 @@ function ChatContent() {
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <div className="font-bold leading-tight">{activeChat.user.full_name}</div>
+                                    <div className="font-bold leading-tight flex items-center gap-2">
+                                        {activeChat.user.full_name}
+                                        <Link href={`/user?id=${activeChat.userId}`} className="p-1 hover:bg-background rounded-full transition-colors">
+                                            <Star className="h-4 w-4 text-orange-400 fill-current" />
+                                        </Link>
+                                    </div>
                                     <div className="text-[10px] uppercase text-primary font-black tracking-widest">Онлайн</div>
                                 </div>
                             </div>

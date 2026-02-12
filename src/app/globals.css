@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -26,19 +27,32 @@
   --color-muted: var(--muted);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, monospace;
 }
 
+.dark {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --surface: #1e293b;
+  --border: #334155;
+  --primary: #22c55e;
+  --primary-foreground: #020617;
+  --accent: #f97316;
+  --muted: #94a3b8;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --surface: #171717;
-    --border: #262626;
-    --primary: #2E7D32;
-    /* Keep branding */
-    --accent: #FF6D00;
+  :root:not([data-theme="light"]) {
+    /* Same as .dark for auto-detection */
+    --background: #020617;
+    --foreground: #f8fafc;
+    --surface: #1e293b;
+    --border: #334155;
+    --primary: #22c55e;
+    --primary-foreground: #020617;
+    --accent: #f97316;
+    --muted: #94a3b8;
   }
 }
 

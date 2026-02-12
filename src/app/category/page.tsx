@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { getStoredCity } from '@/lib/geo';
+import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +42,10 @@ function CategoryContent() {
 
     useEffect(() => {
         fetchCities();
+        const stored = getStoredCity();
+        if (stored && stored !== 'Все города') {
+            setSelectedCity(stored);
+        }
     }, []);
 
     useEffect(() => {
@@ -232,7 +238,7 @@ function CategoryContent() {
                                     <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                                         {ad.images?.[0] ? (
                                             <img
-                                                src={ad.images[0]}
+                                                src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
                                                 alt={ad.title}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                             />

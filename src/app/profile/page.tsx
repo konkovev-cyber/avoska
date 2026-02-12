@@ -13,12 +13,13 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState<any>(null);
     const [myAds, setMyAds] = useState<any[]>([]);
     const [favorites, setFavorites] = useState<any[]>([]);
+    const [reviews, setReviews] = useState<any[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'my-ads' | 'favorites'>('my-ads');
+    const [activeTab, setActiveTab] = useState<'my-ads' | 'favorites' | 'reviews'>('my-ads');
 
     const router = useRouter();
 
@@ -60,6 +61,15 @@ export default function ProfilePage() {
             .eq('user_id', session.user.id);
 
         setFavorites(favsData || []);
+
+        // Fetch Reviews
+        const { data: reviewsData } = await supabase
+            .from('reviews')
+            .select('*, reviewer:profiles!reviewer_id(full_name, avatar_url)')
+            .eq('target_user_id', session.user.id)
+            .order('created_at', { ascending: false });
+
+        setReviews(reviewsData || []);
         setLoading(false);
     };
 
@@ -289,6 +299,16 @@ export default function ProfilePage() {
                     <Heart className="h-5 w-5" />
                     Избранное ({favorites.length})
                 </button>
+                <button
+                    onClick={() => setActiveTab('reviews')}
+                    className={cn(
+                        "px-6 py-4 font-black flex items-center gap-2 border-b-4 transition-all whitespace-nowrap",
+                        activeTab === 'reviews' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground"
+                    )}
+                >
+                    <Star className="h-5 w-5" />
+                    Отзывы ({reviews.length})
+                </button>
             </div>
 
             {/* Content Grid */}
@@ -385,6 +405,45 @@ export default function ProfilePage() {
                             <Link href="/" className="text-primary font-bold hover:underline mt-2 inline-block">Перейти к покупкам</Link>
                         </div>
                     )
+                )}
+                {activeTab === 'reviews' && (
+                    <div className="space-y-6">
+                        {reviews.length > 0 ? (
+                            reviews.map(rev => (
+                                <div key={rev.id} className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-accent overflow-hidden shrink-0">
+                                            {rev.reviewer?.avatar_url ? (
+                                                <img src={rev.reviewer.avatar_url} alt={rev.reviewer.full_name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                rev.reviewer?.full_name?.charAt(0) || '?'
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-bold">{rev.reviewer?.full_name}</div>
+                                            <div className="flex gap-0.5">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star key={i} className={cn("h-3 w-3", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted opacity-30")} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="text-[10px] text-muted font-bold uppercase">
+                                            {new Date(rev.created_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-foreground/80 leading-relaxed italic">
+                                        «{rev.comment}»
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-border">
+                                <Star className="h-12 w-12 text-muted mx-auto mb-4" />
+                                <div className="font-bold text-lg">У вас пока нет отзывов</div>
+                                <div className="text-sm text-muted mt-2">Они появятся здесь, когда другие пользователи оставят мнение о сделке</div>
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

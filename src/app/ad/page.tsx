@@ -37,16 +37,60 @@ function AdContent() {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isZoomed, setIsZoomed] = useState(false);
     const [showChat, setShowChat] = useState(false);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [currentUser, setCurrentUser] = useState<any>(null);
 
     useEffect(() => {
         if (id) {
             fetchAd();
             checkFavorite();
             checkAdminStatus();
+            getCurrentUser();
         } else {
             setLoading(false);
         }
     }, [id]);
+
+    const getCurrentUser = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        setCurrentUser(session?.user || null);
+    };
+
+    useEffect(() => {
+        if (showChat && ad) {
+            fetchMessages();
+            const channel = supabase
+                .channel(`ad_chat_${ad.id}`)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `sender_id=eq.${currentUser?.id},receiver_id=eq.${ad.user_id}`
+                }, fetchMessages)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'messages',
+                    filter: `sender_id=eq.${ad.user_id},receiver_id=eq.${currentUser?.id}`
+                }, fetchMessages)
+                .subscribe();
+            return () => { supabase.removeChannel(channel); };
+        }
+    }, [showChat, ad, currentUser]);
+
+    const fetchMessages = async () => {
+        if (!currentUser || !ad) return;
+        const msgs = await chatService.getMessages(ad.user_id);
+        const filteredMsgs = msgs.filter((m: any) => m.ad_id === ad.id || !m.ad_id);
+        setMessages(filteredMsgs);
+        setTimeout(scrollToBottom, 100);
+    };
+
+    const scrollToBottom = () => {
+        const el = document.getElementById('mini-chat-messages');
+        if (el) el.scrollTop = el.scrollHeight;
+    };
 
     const checkAdminStatus = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -95,16 +139,15 @@ function AdContent() {
         setIsFavorite(!!data);
     };
 
-    const handleQuickMsg = async () => {
-        const textarea = document.getElementById('quick-msg-input') as HTMLTextAreaElement;
-        const msg = textarea?.value;
-        if (!msg?.trim()) return;
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return router.push('/login');
+    const handleSendMessage = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        if (!newMessage.trim() || !ad) return;
+        if (!currentUser) return router.push('/login');
+
         try {
-            await chatService.sendMessage(ad.user_id, msg, ad.id);
-            toast.success('Отправлено');
-            router.push(`/chat?adId=${ad.id}&receiverId=${ad.user_id}`);
+            await chatService.sendMessage(ad.user_id, newMessage, ad.id);
+            setNewMessage('');
+            fetchMessages();
         } catch (e) { toast.error('Ошибка'); }
     };
 
@@ -269,35 +312,72 @@ function AdContent() {
                             </div>
                         </div>
 
-                        {/* Quick Message / Chat Window */}
-                        <div className="bg-surface rounded-2xl border border-border p-3 shadow-sm">
+                        {/* Mini Chat Window */}
+                        <div className="bg-surface rounded-2xl border border-border overflow-hidden shadow-sm flex flex-col">
                             {showChat ? (
-                                <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-xs font-black">Сообщение</span>
+                                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col h-[380px]">
+                                    <div className="p-3 border-b border-border flex justify-between items-center bg-muted/5">
+                                        <span className="text-xs font-black uppercase tracking-wider">Чат с продавцом</span>
                                         <button onClick={() => setShowChat(false)} className="p-1 hover:bg-muted rounded-full">
                                             <X className="h-4 w-4 text-muted-foreground" />
                                         </button>
                                     </div>
-                                    <textarea
-                                        id="quick-msg-input"
-                                        className="w-full h-24 rounded-xl bg-background border border-border p-2.5 text-xs font-bold focus:ring-1 focus:ring-primary outline-none resize-none"
-                                        placeholder="Напишите сообщение..."
-                                    />
-                                    <button onClick={handleQuickMsg} className="w-full h-9 bg-primary text-white text-xs font-black rounded-xl">
-                                        Отправить
-                                    </button>
+
+                                    <div id="mini-chat-messages" className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-none bg-background/30">
+                                        {messages.length > 0 ? (
+                                            messages.map((msg) => (
+                                                <div key={msg.id} className={cn(
+                                                    "max-w-[85%] p-2.5 rounded-2xl text-[13px] leading-tight shadow-sm",
+                                                    msg.sender_id === currentUser?.id
+                                                        ? "ml-auto bg-primary text-white rounded-br-none"
+                                                        : "mr-auto bg-surface border border-border rounded-bl-none"
+                                                )}>
+                                                    {msg.content}
+                                                    <div className="text-[9px] opacity-60 mt-1 text-right">
+                                                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="h-full flex flex-col items-center justify-center opacity-30 text-center px-4">
+                                                <User className="h-8 w-8 mb-2" />
+                                                <p className="text-[10px] font-bold">Начните общение первым!</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <form onSubmit={handleSendMessage} className="p-2 border-t border-border bg-muted/5 flex gap-2">
+                                        <input
+                                            value={newMessage}
+                                            onChange={(e) => setNewMessage(e.target.value)}
+                                            className="flex-1 h-9 bg-background border border-border rounded-xl px-3 text-xs font-bold outline-none focus:ring-1 focus:ring-primary"
+                                            placeholder="Сообщение..."
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={!newMessage.trim()}
+                                            className="w-9 h-9 bg-primary text-white rounded-xl flex items-center justify-center active:scale-90 transition-all disabled:opacity-50"
+                                        >
+                                            <ChevronRight className="h-5 w-5" />
+                                        </button>
+                                    </form>
                                 </div>
                             ) : (
-                                <div className="space-y-2">
-                                    <div className="text-xs font-bold text-muted-foreground mb-2">Связаться с продавцом:</div>
+                                <div className="p-3 space-y-3">
+                                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                                        <ShieldCheck className="h-4 w-4 text-primary" />
+                                        <span>Связаться с продавцом:</span>
+                                    </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <a href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'} className="h-10 bg-green-600 text-white text-xs font-black rounded-xl flex items-center justify-center hover:bg-green-700 transition-all">
+                                        <a href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'} className="h-11 bg-green-600 text-white text-[13px] font-black rounded-xl flex items-center justify-center hover:bg-green-700 transition-all shadow-lg shadow-green-600/10 active:scale-95">
                                             Позвонить
                                         </a>
-                                        <button onClick={() => setShowChat(true)} className="h-10 bg-primary text-white text-xs font-black rounded-xl hover:bg-primary/90 transition-all">
+                                        <button onClick={() => setShowChat(true)} className="h-11 bg-primary text-white text-[13px] font-black rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 active:scale-95">
                                             Написать
                                         </button>
+                                    </div>
+                                    <div className="text-[10px] text-center text-muted-foreground font-medium italic">
+                                        Безопасная сделка через Авоська+
                                     </div>
                                 </div>
                             )}

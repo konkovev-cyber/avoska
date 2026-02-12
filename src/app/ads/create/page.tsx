@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Camera, X, MessageCircle, AlertCircle, Briefcase, Wrench } from 'lucide-react';
+import { Camera, X, MessageCircle, AlertCircle, Briefcase, Wrench, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
+import { getCurrentCity } from '@/lib/geo';
 
 const CATEGORIES = [
     { name: 'Транспорт', slug: 'transport' },
@@ -59,6 +60,17 @@ export default function CreateAdPage() {
     const fetchCities = async () => {
         const { data } = await supabase.from('cities').select('name').order('is_default', { ascending: false });
         if (data) setCities(data);
+    };
+
+    const handleLocate = async () => {
+        const toastId = toast.loading('Определяем город...');
+        const detectedCity = await getCurrentCity();
+        if (detectedCity) {
+            setCity(detectedCity);
+            toast.success(`Ваш город: ${detectedCity}`, { id: toastId });
+        } else {
+            toast.error('Не удалось определить город', { id: toastId });
+        }
     };
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -312,9 +324,25 @@ export default function CreateAdPage() {
                 <div className="grid md:grid-cols-2 gap-6 items-end">
                     <div>
                         <label className="block text-sm font-bold mb-2">Город</label>
-                        <select value={city} onChange={(e) => setCity(e.target.value)} required className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                            {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                        </select>
+                        <div className="flex gap-2">
+                            <select
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                required
+                                className="flex-1 p-3 rounded-xl border border-border bg-background outline-none font-medium"
+                            >
+                                {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                                {!cities.find(c => c.name === city) && <option value={city}>{city}</option>}
+                            </select>
+                            <button
+                                type="button"
+                                onClick={handleLocate}
+                                title="Определить местоположение"
+                                className="w-12 h-12 flex items-center justify-center bg-surface border border-border rounded-xl hover:text-primary transition-all active:scale-95"
+                            >
+                                <MapPin className="h-5 w-5" />
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label className="block text-sm font-bold mb-2">Адрес</label>
