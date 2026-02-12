@@ -68,7 +68,7 @@ export default function AdminDashboard() {
 
         const { data: profile } = await supabase.from('profiles').select('role, email').eq('id', session.user.id).single();
 
-        const ADMIN_EMAILS = ['ht-elk@yandex.ru', 'dron-vbg@yandex.ru', 'konkev@bk.ru'];
+        const ADMIN_EMAILS = ['ht-elk@yandex.ru', 'dron-vbg@yandex.ru', 'konkev@bk.ru', 'konkovev@gmail.com'];
         const userEmail = session.user.email || profile?.email;
 
         if (profile?.role !== 'admin' && !ADMIN_EMAILS.includes(userEmail || '')) {
@@ -208,6 +208,17 @@ export default function AdminDashboard() {
     const handleBanUser = async (user: any) => {
         const { error } = await supabase.from('profiles').update({ is_banned: !user.is_banned }).eq('id', user.id);
         if (!error) { toast.success(user.is_banned ? 'Разбанен' : 'Забанен'); fetchData(); }
+    };
+
+    const handleMakeAdmin = async (user: any) => {
+        const newRole = user.role === 'admin' ? 'user' : 'admin';
+        const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', user.id);
+        if (!error) {
+            toast.success(`Роль ${newRole === 'admin' ? 'администратора выдана' : 'пользователя возвращена'}`);
+            fetchData();
+        } else {
+            toast.error('Ошибка смены роли: ' + error.message);
+        }
     };
 
     const addCity = async () => {
@@ -411,6 +422,11 @@ export default function AdminDashboard() {
                                     </button>
                                     <button onClick={() => handleBanUser(u)} className={cn("flex-1 py-2 rounded-xl text-xs font-bold", u.is_banned ? "bg-green-100 text-green-700" : "bg-red-50 text-red-600")}>
                                         {u.is_banned ? "Разбанить" : "Бан"}
+                                    </button>
+                                </div>
+                                <div className="mt-2 text-center">
+                                    <button onClick={() => handleMakeAdmin(u)} className={cn("w-full py-2 rounded-xl text-xs font-bold transition-colors", u.role === 'admin' ? "bg-purple-100 text-purple-700 hover:bg-purple-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}>
+                                        {u.role === 'admin' ? "Снять админа" : "Сделать админом"}
                                     </button>
                                 </div>
                             </div>
