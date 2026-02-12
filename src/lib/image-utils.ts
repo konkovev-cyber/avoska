@@ -59,3 +59,20 @@ export async function compressImage(file: File, maxWidth = 1200, quality = 0.8):
         reader.onerror = (err) => reject(err);
     });
 }
+/**
+ * Utility to get optimized Supabase image URL if possible
+ */
+export function getOptimizedImageUrl(url: string, opts: { width?: number; quality?: number } = {}) {
+    if (!url || !url.includes('supabase.co')) return url;
+
+    const { width = 500, quality = 80 } = opts;
+
+    // Check if it's already a transformed URL
+    if (url.includes('/render/image/')) return url;
+
+    // Supabase transformation URL structure
+    // From: https://[project].supabase.co/storage/v1/object/public/[bucket]/[path]
+    // To:   https://[project].supabase.co/storage/v1/render/image/public/[bucket]/[path]?width=[w]&quality=[q]
+
+    return url.replace('/object/public/', '/render/image/public/') + `?width=${width}&quality=${quality}`;
+}

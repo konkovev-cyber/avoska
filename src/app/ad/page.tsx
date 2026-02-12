@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { supabase } from '@/lib/supabase/client';
 import { chatService } from '@/lib/supabase/chatService';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -117,7 +119,34 @@ function AdContent() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center font-bold">Загрузка...</div>;
+    if (loading) return (
+        <div className="max-w-[1000px] mx-auto px-3 py-4 space-y-6">
+            <div className="space-y-4">
+                <Skeleton className="h-8 w-3/4 md:h-10" />
+                <div className="flex justify-between items-center">
+                    <Skeleton className="h-8 w-32" />
+                    <div className="flex gap-2">
+                        <Skeleton className="w-10 h-10 rounded-full" />
+                        <Skeleton className="w-10 h-10 rounded-full" />
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-col lg:flex-row gap-6">
+                <div className="flex-1 space-y-6">
+                    <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
+                    <div className="space-y-4">
+                        <Skeleton className="h-6 w-1/4" />
+                        <Skeleton className="h-20 w-full" />
+                    </div>
+                </div>
+                <div className="w-full lg:w-72 space-y-4">
+                    <Skeleton className="h-24 w-full rounded-2xl" />
+                    <Skeleton className="h-32 w-full rounded-2xl" />
+                </div>
+            </div>
+        </div>
+    );
     if (!ad) return <div className="p-10 text-center font-bold">Не найдено</div>;
 
     return (
@@ -164,7 +193,7 @@ function AdContent() {
                         {/* Image - Compact Aspect with brighter frame */}
                         <div className="relative aspect-[4/3] bg-muted/10 rounded-2xl overflow-hidden group border-2 border-primary/10 shadow-md">
                             <img
-                                src={ad.images[currentImageIndex]}
+                                src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
                                 className="w-full h-full object-contain"
                                 alt=""
                                 onClick={() => setIsZoomed(true)}
@@ -185,7 +214,7 @@ function AdContent() {
                         <div className="flex gap-2 overflow-x-auto scrollbar-none">
                             {ad.images.map((img: string, i: number) => (
                                 <button key={i} onClick={() => setCurrentImageIndex(i)} className={cn("w-12 h-12 rounded-lg border-2 shrink-0 overflow-hidden", currentImageIndex === i ? "border-primary" : "border-transparent opacity-60")}>
-                                    <img src={img} className="w-full h-full object-cover" />
+                                    <img src={getOptimizedImageUrl(img, { width: 100, quality: 60 })} className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
@@ -225,7 +254,11 @@ function AdContent() {
                         {/* Seller Card - Compact */}
                         <div className="bg-surface p-4 rounded-2xl border border-border shadow-sm flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0">
-                                {ad.profiles?.avatar_url ? <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" /> : <User className="p-2 w-full h-full text-muted" />}
+                                {ad.profiles?.avatar_url ? (
+                                    <img src={getOptimizedImageUrl(ad.profiles.avatar_url, { width: 80, quality: 80 })} className="w-full h-full object-cover" />
+                                ) : (
+                                    <User className="p-2 w-full h-full text-muted" />
+                                )}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <div className="font-black text-sm truncate">{ad.profiles?.full_name || 'Продавец'}</div>

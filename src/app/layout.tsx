@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import Header from "@/components/layout/Header";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import BottomNav from "@/components/layout/BottomNav";
+import PageAnimatePresence from "@/components/layout/PageAnimatePresence";
 import "./globals.css";
 
 // const geistSans = Geist({
@@ -47,7 +48,9 @@ export default function RootLayout({
       >
         <Header />
         <main className="flex-1 pb-20 lg:pb-0">
-          {children}
+          <PageAnimatePresence>
+            {children}
+          </PageAnimatePresence>
         </main>
         <BottomNav />
         <ConditionalFooter />
