@@ -158,15 +158,14 @@ export default function Header() {
                             placeholder="Поиск..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 md:h-11 pl-10 pr-10 rounded-xl bg-muted/50 border border-transparent focus:bg-background focus:border-primary/50 focus:shadow-sm transition-all text-sm font-medium outline-none"
+                            className="w-full h-10 md:h-12 pl-5 pr-14 rounded-2xl bg-background border-2 border-muted hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-sm font-bold outline-none placeholder:text-muted-foreground/60"
                         />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted h-4 w-4 group-focus-within:text-primary transition-colors" />
                         <button
                             type="submit"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 md:h-10 px-4 md:px-6 bg-primary text-white rounded-xl font-black text-xs md:text-sm active:scale-95 transition-all shadow-lg shadow-primary/20 hover:opacity-90 flex items-center justify-center gap-2"
+                            title="Найти"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 md:h-9 w-9 md:w-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all"
                         >
-                            <span className="hidden md:inline">Найти</span>
-                            <Search className="h-4 w-4 md:hidden" />
+                            <Search className="h-4 w-4 md:h-5 md:w-5" />
                         </button>
                     </form>
                 </div>
@@ -188,14 +187,16 @@ export default function Header() {
                         {theme === 'dark' ? <Sun className="h-6 w-6 text-orange-400" /> : <Moon className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />}
                     </button>
 
-                    {user && (
-                        <Link href="/notifications" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Уведомления">
-                            <Bell className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-2.5 right-2.5 w-3 h-3 bg-red-500 rounded-full border-2 border-background animate-pulse" />
-                            )}
-                        </Link>
-                    )}
+                    {
+                        user && (
+                            <Link href="/notifications" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Уведомления">
+                                <Bell className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-2.5 right-2.5 w-3 h-3 bg-red-500 rounded-full border-2 border-background animate-pulse" />
+                                )}
+                            </Link>
+                        )
+                    }
 
                     <div className="mx-2 w-px h-8 bg-border/50" />
 
@@ -206,10 +207,50 @@ export default function Header() {
                         Разместить
                     </Link>
 
-                    {user ? (
-                        <div className="flex items-center gap-2 ml-2">
-                            <Link href="/profile" className="p-1 rounded-2xl overflow-hidden border-2 border-primary/20 hover:border-primary transition-all shadow-sm">
-                                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center overflow-hidden">
+                    {
+                        user ? (
+                            <div className="flex items-center gap-2 ml-2">
+                                <Link href="/profile" className="p-1 rounded-2xl overflow-hidden border-2 border-primary/20 hover:border-primary transition-all shadow-sm">
+                                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center overflow-hidden">
+                                        {user.user_metadata?.avatar_url ? (
+                                            <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <UserIcon className="h-5 w-5 text-accent" />
+                                        )}
+                                    </div>
+                                </Link>
+                                <button onClick={handleLogout} className="p-3 hover:text-destructive transition-colors" title="Выйти">
+                                    <LogOut className="h-5 w-5" />
+                                </button>
+                            </div>
+                        ) : (
+                            <Link href="/login" className="text-sm font-black uppercase tracking-widest hover:text-primary px-4 py-2 border-2 border-transparent hover:border-primary/20 rounded-2xl transition-all ml-2">Войти</Link>
+                        )
+                    }
+                </div >
+
+                {/* Mobile Actions Drawer Toggler (simplified for now) */}
+                < div className="xl:hidden flex items-center gap-1" >
+                    <button
+                        onClick={toggleTheme}
+                        className="p-2.5 hover:bg-surface rounded-xl transition-colors"
+                    >
+                        {theme === 'dark' ? <Sun className="h-6 w-6 text-orange-400" /> : <Moon className="h-6 w-6 text-muted-foreground" />}
+                    </button>
+                    {
+                        user && (
+                            <Link href="/notifications" className="p-2.5 hover:bg-surface rounded-xl block relative">
+                                <Bell className="h-6 w-6 text-muted-foreground" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background animate-pulse" />
+                                )}
+                            </Link>
+                        )
+                    }
+                    {
+                        user ? (
+                            <Link href="/profile" className="p-1 px-2 hover:bg-surface rounded-xl flex items-center">
+                                <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center overflow-hidden border border-border shadow-sm">
                                     {user.user_metadata?.avatar_url ? (
                                         <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
                                     ) : (
@@ -217,48 +258,14 @@ export default function Header() {
                                     )}
                                 </div>
                             </Link>
-                            <button onClick={handleLogout} className="p-3 hover:text-destructive transition-colors" title="Выйти">
-                                <LogOut className="h-5 w-5" />
-                            </button>
-                        </div>
-                    ) : (
-                        <Link href="/login" className="text-sm font-black uppercase tracking-widest hover:text-primary px-4 py-2 border-2 border-transparent hover:border-primary/20 rounded-2xl transition-all ml-2">Войти</Link>
-                    )}
-                </div>
-
-                {/* Mobile Actions Drawer Toggler (simplified for now) */}
-                <div className="xl:hidden flex items-center gap-1">
-                    <button
-                        onClick={toggleTheme}
-                        className="p-2.5 hover:bg-surface rounded-xl transition-colors"
-                    >
-                        {theme === 'dark' ? <Sun className="h-6 w-6 text-orange-400" /> : <Moon className="h-6 w-6 text-muted-foreground" />}
-                    </button>
-                    {user && (
-                        <Link href="/notifications" className="p-2.5 hover:bg-surface rounded-xl block relative">
-                            <Bell className="h-6 w-6 text-muted-foreground" />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background animate-pulse" />
-                            )}
-                        </Link>
-                    )}
-                    {user ? (
-                        <Link href="/profile" className="p-1 px-2 hover:bg-surface rounded-xl flex items-center">
-                            <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center overflow-hidden border border-border shadow-sm">
-                                {user.user_metadata?.avatar_url ? (
-                                    <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
-                                ) : (
-                                    <UserIcon className="h-5 w-5 text-accent" />
-                                )}
-                            </div>
-                        </Link>
-                    ) : (
-                        <Link href="/login" className="p-2.5 hover:bg-surface rounded-xl text-primary" title="Войти">
-                            <UserCircle className="h-8 w-8" />
-                        </Link>
-                    )}
-                </div>
-            </div>
-        </header>
+                        ) : (
+                            <Link href="/login" className="p-2.5 hover:bg-surface rounded-xl text-primary" title="Войти">
+                                <UserCircle className="h-8 w-8" />
+                            </Link>
+                        )
+                    }
+                </div >
+            </div >
+        </header >
     );
 }
