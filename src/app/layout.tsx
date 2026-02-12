@@ -53,7 +53,6 @@ export default function RootLayout({
           </PageAnimatePresence>
         </main>
         <BottomNav />
-        <ConditionalFooter />
         <Toaster />
       </body>
     </html>

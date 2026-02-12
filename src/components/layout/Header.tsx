@@ -112,8 +112,10 @@ export default function Header() {
         <header className="sticky top-0 z-[100] bg-background/80 backdrop-blur-2xl border-b border-border/50">
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-20 md:h-24 flex items-center gap-4 md:gap-8">
                 {/* Logo */}
+                {/* Logo */}
                 <Link href="/" className="shrink-0 flex items-center gap-0.5 group">
-                    <span className="text-2xl md:text-3xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform inline-block">Авоська+</span>
+                    <span className="hidden md:inline-block text-2xl md:text-3xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform">Авоська+</span>
+                    <span className="md:hidden text-2xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform border-2 border-primary rounded-lg px-1">A+</span>
                 </Link>
 
                 {/* City Picker */}
@@ -178,13 +180,17 @@ export default function Header() {
                     <Link href="/chat" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Сообщения">
                         <MessageSquare className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
                     </Link>
-
+                    {/* Theme Toggle - Hidden on mobile to save space */}
                     <button
                         onClick={toggleTheme}
-                        className="p-3 hover:bg-surface rounded-2xl transition-all group"
-                        title={theme === 'dark' ? 'Светлая тема' : 'Темная тема'}
+                        className="hidden md:block p-3 hover:bg-surface rounded-2xl transition-all group relative"
+                        title="Сменить тему"
                     >
-                        {theme === 'dark' ? <Sun className="h-6 w-6 text-orange-400" /> : <Moon className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />}
+                        {theme === 'light' ? (
+                            <Moon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-transform group-hover:-rotate-12" />
+                        ) : (
+                            <Sun className="h-6 w-6 text-yellow-400 group-hover:text-yellow-300 transition-transform group-hover:rotate-12" />
+                        )}
                     </button>
 
                     {

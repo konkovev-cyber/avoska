@@ -167,37 +167,38 @@ function SearchContent() {
                             ))}
                         </div>
                     ) : ads.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                             {ads.map((ad) => (
                                 <Link
                                     key={ad.id}
                                     href={`/ad?id=${ad.id}`}
-                                    className="group flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/50"
+                                    className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200"
                                 >
-                                    <div className="aspect-square relative overflow-hidden bg-muted">
+                                    <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                                         <img
                                             src={getOptimizedImageUrl(ad.images?.[0] || '', { width: 400, quality: 75 })}
                                             alt={ad.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            loading="lazy"
                                         />
-                                        <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[10px] text-white font-black px-2 py-1 rounded-lg uppercase tracking-wider">
+                                        <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[9px] text-white font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
                                             {ad.category?.name}
                                         </div>
                                     </div>
 
-                                    <div className="p-3 md:p-4 flex flex-col flex-1">
-                                        <div className="text-lg md:text-xl font-black mb-1">
+                                    <div className="p-3 flex flex-col flex-1 gap-1">
+                                        <div className="text-lg font-black tracking-tight text-foreground leading-none">
                                             {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                                         </div>
-                                        <h3 className="text-xs md:text-sm font-medium line-clamp-2 mb-3 group-hover:text-primary transition-colors h-8 md:h-10">
+
+                                        <h3 className="text-sm font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em]">
                                             {ad.title}
                                         </h3>
 
-                                        <div className="mt-auto pt-2 border-t border-border/30 flex items-center justify-between text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
-                                            <div className="flex items-center gap-1 truncate">
-                                                <MapPin className="h-3 w-3 text-primary" />
-                                                <span className="truncate">{ad.city}</span>
-                                            </div>
+                                        <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
+                                            <MapPin className="h-3 w-3 shrink-0" />
+                                            <span className="truncate">{ad.city}</span>
+                                            <span className="mx-1">•</span>
                                             <span className="shrink-0">{new Date(ad.created_at).toLocaleDateString()}</span>
                                         </div>
                                     </div>

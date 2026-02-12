@@ -219,59 +219,67 @@ export default function HomePage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-              <div key={i} className="space-y-4">
-                <Skeleton className="aspect-square w-full rounded-[2.5rem]" />
-                <div className="space-y-3 px-2">
+              <div key={i} className="flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm border border-border/40 h-full">
+                <Skeleton className="aspect-[4/3] w-full" />
+                <div className="p-3 space-y-2">
                   <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-7 w-1/2" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-1/2" />
                 </div>
               </div>
             ))}
           </div>
         ) : ads.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
             {ads.map((ad) => (
-              <div key={ad.id} className="group relative flex flex-col h-full animate-in fade-in zoom-in duration-500">
-                <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full bg-surface rounded-[2.5rem] overflow-hidden hover:shadow-2xl transition-all border-2 border-transparent hover:border-primary/20 p-2">
-                  <div className="aspect-square bg-muted rounded-[2rem] relative overflow-hidden shadow-inner">
+              <div key={ad.id} className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200">
+                <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full">
+                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                     {ad.images?.[0] ? (
                       <img
-                        src={getOptimizedImageUrl(ad.images[0], { width: 600, quality: 75 })}
+                        src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
                         alt={ad.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-muted uppercase font-black tracking-widest opacity-30">Нет фото</div>
+                      <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-30">Нет фото</div>
                     )}
-                    <button
-                      onClick={(e) => toggleFavorite(e, ad.id)}
-                      className="absolute top-4 right-4 p-2.5 bg-white/95 dark:bg-black/95 backdrop-blur-xl rounded-2xl transition-all shadow-xl active:scale-90 z-10 hover:bg-primary hover:text-white group/fav"
-                    >
-                      <Heart className={cn("h-5 w-5 transition-all", favorites.has(ad.id) ? "fill-red-500 text-red-500 scale-110" : "text-muted-foreground group-hover/fav:text-white")} />
-                    </button>
                     {ad.condition === 'new' && (
-                      <div className="absolute bottom-4 left-4 px-3 py-1 bg-primary/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-lg">
+                      <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-green-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-lg">
                         Новое
                       </div>
                     )}
                   </div>
-                  <div className="p-4 flex flex-col flex-1">
-                    <h3 className="text-base md:text-lg font-bold text-foreground leading-[1.2] line-clamp-2 mb-2 group-hover:text-primary transition-colors h-12 md:h-14">
+
+                  <div className="p-3 flex flex-col flex-1 gap-1">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="text-lg font-black tracking-tight text-foreground leading-none">
+                        {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
+                      </div>
+                    </div>
+
+                    <h3 className="text-sm font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em]">
                       {ad.title}
                     </h3>
-                    <div className="text-2xl font-black text-foreground mb-3 tracking-tighter">
-                      {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
-                    </div>
-                    <div className="mt-auto flex items-center gap-2 text-xs text-muted-foreground font-bold uppercase tracking-wider opacity-60">
-                      <div className="p-1 px-2 bg-muted/50 rounded-lg flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span className="truncate max-w-[120px]">{ad.city}</span>
-                      </div>
+
+                    <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{ad.city}</span>
+                      <span className="mx-1">•</span>
+                      <span className="shrink-0">{new Date(ad.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </Link>
+
+                <button
+                  onClick={(e) => toggleFavorite(e, ad.id)}
+                  className="absolute top-2 right-2 p-2 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-red-500 hover:text-white transition-all active:scale-90"
+                >
+                  <Heart className={cn("h-4 w-4 transition-all", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
+                </button>
               </div>
             ))}
           </div>
@@ -288,15 +296,16 @@ export default function HomePage() {
           </div>
         )}
 
-        <div ref={loadMoreRef} className="h-32 flex items-center justify-center mt-12">
+        <div ref={loadMoreRef} className="h-32 flex items-center justify-center mt-8">
           {loadingMore && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 md:gap-8 w-full opacity-50">
+            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 w-full opacity-50">
               {[1, 2, 3, 4, 5].map(i => (
-                <div key={`more-${i}`} className="space-y-4">
-                  <Skeleton className="aspect-square w-full rounded-[2.5rem]" />
-                  <div className="space-y-3 px-2">
+                <div key={`more-${i}`} className="flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm border border-border/40 h-full">
+                  <Skeleton className="aspect-[4/3] w-full" />
+                  <div className="p-3 space-y-2">
                     <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-7 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 w-1/2" />
                   </div>
                 </div>
               ))}
