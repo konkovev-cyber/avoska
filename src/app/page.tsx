@@ -10,7 +10,8 @@ import { useRouter } from 'next/navigation';
 import {
   ChevronRight,
   Heart,
-  MapPin
+  MapPin,
+  Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -58,7 +59,7 @@ export default function HomePage() {
       const [bannersRes, newAdsRes] = await Promise.all([
         supabase.from('banners').select('*').eq('is_active', true),
         supabase.from('ads')
-          .select('*, profiles!user_id(full_name, avatar_url, is_verified)')
+          .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
           .limit(8)
@@ -84,7 +85,7 @@ export default function HomePage() {
 
       let q = supabase
         .from('ads')
-        .select('*, profiles!user_id(full_name, avatar_url, is_verified)')
+        .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
         .eq('status', 'active');
 
       if (currentCity && currentCity !== 'Все города') {
@@ -251,8 +252,14 @@ export default function HomePage() {
                     <h3 className="text-xs font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em]">
                       {ad.title}
                     </h3>
-                    <div className="mt-auto pt-1 flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
+                    <div className="mt-auto pt-1 flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
                       <span className="truncate">{ad.city}</span>
+                      {ad.profiles?.rating && (
+                        <div className="flex items-center gap-0.5 text-orange-500">
+                          <Star className="h-2.5 w-2.5 fill-current" />
+                          <span>{ad.profiles.rating}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </Link>
