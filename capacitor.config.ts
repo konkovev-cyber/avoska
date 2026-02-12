@@ -7,6 +7,16 @@ const config: CapacitorConfig = {
   plugins: {
     App: {
       hardwareBackButton: true
+    },
+    SplashScreen: {
+      launchShowDuration: 0,
+      launchAutoHide: true,
+      backgroundColor: "#ffffffff",
+      androidSplashResourceName: "splash",
+      androidScaleType: "CENTER_CROP",
+      showSpinner: false,
+      splashFullScreen: true,
+      splashImmersive: true,
     }
   }
 };

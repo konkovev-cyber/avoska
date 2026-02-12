@@ -5,14 +5,14 @@ import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Camera, X, MessageCircle, AlertCircle, Briefcase, Wrench, MapPin } from 'lucide-react';
+import { Camera, X, Briefcase, Wrench, MapPin, PlusSquare, Rocket, Navigation, ChevronDown, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import { getCurrentCity } from '@/lib/geo';
 
 const MapPicker = dynamic(() => import('@/components/MapPicker'), {
     ssr: false,
-    loading: () => <div className="h-[300px] w-full bg-muted animate-pulse rounded-2xl flex items-center justify-center font-bold text-xs uppercase tracking-widest text-muted-foreground">Загрузка карты...</div>
+    loading: () => <div className="h-[300px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest text-muted-foreground opacity-50">Загрузка карты...</div>
 });
 
 const CATEGORIES = [
@@ -22,12 +22,12 @@ const CATEGORIES = [
     { name: 'Услуги', slug: 'services' },
     { name: 'Электроника', slug: 'electronics' },
     { name: 'Дом и дача', slug: 'home' },
-    { name: 'Личные вещи', slug: 'clothing' },
+    { name: 'Одежда', slug: 'clothing' },
     { name: 'Запчасти', slug: 'parts' },
-    { name: 'Хобби и отдых', slug: 'hobby' },
+    { name: 'Хобби', slug: 'hobby' },
     { name: 'Животные', slug: 'pets' },
     { name: 'Красота', slug: 'beauty' },
-    { name: 'Детские товары', slug: 'kids' },
+    { name: 'Детское', slug: 'kids' },
 ];
 
 export default function CreateAdPage() {
@@ -109,17 +109,18 @@ export default function CreateAdPage() {
     };
 
     const removeImage = (index: number) => {
-        const newImages = [...images];
-        newImages.splice(index, 1);
-        setImages(newImages);
-        const newUrls = [...previewUrls];
-        newUrls.splice(index, 1);
-        setPreviewUrls(newUrls);
+        setImages(prev => prev.filter((_, i) => i !== index));
+        setPreviewUrls(prev => prev.filter((_, i) => i !== index));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
+        if (!title || !category || !description) {
+            toast.error('Заполните обязательные поля');
+            return;
+        }
+
         setLoading(true);
+        const toastId = toast.loading('Создаем объявление...');
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
@@ -127,18 +128,13 @@ export default function CreateAdPage() {
 
             const uploadedImageUrls: string[] = [];
             for (const file of images) {
-                const fileName = `${Math.random()}.jpg`;
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
                 const filePath = `${session.user.id}/${fileName}`;
                 const { error: uploadError } = await supabase.storage.from('ad-images').upload(filePath, file);
                 if (uploadError) throw uploadError;
                 const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(filePath);
                 uploadedImageUrls.push(publicUrl);
             }
-
-            // Cleanup specifications by removing empty values
-            const cleanSpecs = Object.fromEntries(
-                Object.entries(specifications).filter(([_, v]) => v !== '')
-            );
 
             const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).single();
             if (!catData) throw new Error('Категория не найдена');
@@ -155,37 +151,20 @@ export default function CreateAdPage() {
                 address,
                 delivery_possible: delivery,
                 images: uploadedImageUrls,
-                status: 'pending', // Send to moderation by default
+                status: 'active', // For now, direct post
                 condition: (category === 'jobs' || category === 'services') ? 'new' : condition,
-                specifications: cleanSpecs,
+                specifications,
                 latitude: lat,
                 longitude: lng
             });
 
-            if (insertError) {
-                if (insertError.message.includes('Limit reached')) {
-                    setLimitReached(true);
-                    return;
-                }
-                throw insertError;
-            }
+            if (insertError) throw insertError;
 
-            toast.success('Объявление опубликовано!');
-
-            // Notify via Telegram (Fire and forget)
-            fetch('/api/notify-ad', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ad: { id: (insertError as any)?.id || 'new', title, price, city },
-                    author: session.user.email
-                }),
-            }).catch(console.error);
-
+            toast.success('Объявление опубликовано!', { id: toastId });
             router.push('/');
             router.refresh();
         } catch (error: any) {
-            toast.error(error.message);
+            toast.error(error.message, { id: toastId });
         } finally {
             setLoading(false);
         }
@@ -195,287 +174,225 @@ export default function CreateAdPage() {
         return (
             <div className="container mx-auto px-4 py-20 flex flex-col items-center text-center">
                 <AlertCircle className="h-16 w-16 text-destructive mb-6" />
-                <h1 className="text-3xl font-black mb-4">Лимит превышен</h1>
-                <p className="text-muted mb-8">У вас уже 10 объявлений. Свяжитесь с нами для расширения.</p>
-                <a href="https://t.me/HT_Elk" className="bg-[#229ED9] text-white px-8 py-4 rounded-full font-bold shadow-xl">Написать админу</a>
+                <h1 className="text-3xl font-black mb-4 uppercase tracking-tighter">Лимит достигнут</h1>
+                <p className="text-muted-foreground mb-8 font-medium">Вы достигли предела бесплатных объявлений. Обратитесь в поддержку для расширения.</p>
+                <a href="https://t.me/HT_Elk" className="bg-primary text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/30 active:scale-95 transition-all">Написать админу</a>
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-3xl">
-            <h1 className="text-3xl font-black mb-8">Создать объявление</h1>
-            <form onSubmit={handleSubmit} className="space-y-8 bg-surface p-6 md:p-8 rounded-3xl border border-border shadow-sm">
-                <div>
-                    <label className="block text-sm font-bold mb-2">Название</label>
-                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                </div>
+        <div className="container mx-auto px-4 py-8 max-w-4xl pb-32">
+            <h1 className="text-3xl md:text-5xl font-black mb-8 tracking-tighter flex items-center gap-4">
+                Подать объявление
+                <CheckCircle2 className="h-8 w-8 text-primary opacity-20" />
+            </h1>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Категория</label>
-                        <select value={category} onChange={(e) => setCategory(e.target.value)} required className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                            <option value="">Выберите...</option>
-                            {CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
-                        </select>
+            <div className="space-y-8">
+                {/* Section 1: Categories */}
+                <section className="bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <Briefcase className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-xl font-black uppercase tracking-tight">Категория</h2>
                     </div>
 
-                    {category === 'jobs' ? (
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Зарплата (₽)</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <input type="number" placeholder="От" value={salaryFrom} onChange={(e) => setSalaryFrom(e.target.value)} className="p-3 rounded-xl border border-border bg-background outline-none" />
-                                <input type="number" placeholder="До" value={salaryTo} onChange={(e) => setSalaryTo(e.target.value)} className="p-3 rounded-xl border border-border bg-background outline-none" />
-                            </div>
-                        </div>
-                    ) : (
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Цена (₽)</label>
-                            <input type="number" placeholder="0" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                    )}
-                </div>
-
-                {/* Dynamic Specifications */}
-                {category === 'transport' && (
-                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Марка</label>
-                            <input type="text" placeholder="Напр: Toyota" value={specifications.brand || ''} onChange={(e) => setSpecifications({ ...specifications, brand: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Год выпуска</label>
-                            <input type="number" placeholder="2020" value={specifications.year || ''} onChange={(e) => setSpecifications({ ...specifications, year: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Пробег (км)</label>
-                            <input type="number" placeholder="50000" value={specifications.mileage || ''} onChange={(e) => setSpecifications({ ...specifications, mileage: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold mb-2">КПП</label>
-                            <select value={specifications.transmission || ''} onChange={(e) => setSpecifications({ ...specifications, transmission: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                                <option value="">Не выбрано</option>
-                                <option value="auto">Автомат</option>
-                                <option value="manual">Механика</option>
-                            </select>
-                        </div>
-                    </div>
-                )}
-
-                {category === 'real-estate' && (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Тип недвижимости</label>
-                            <select
-                                value={specifications.type || ''}
-                                onChange={(e) => setSpecifications({ ...specifications, type: e.target.value })}
-                                className="w-full p-3 rounded-xl border border-border bg-background outline-none"
-                            >
-                                <option value="">Выберите...</option>
-                                <option value="apartment">Квартира</option>
-                                <option value="house">Дом, дача, коттедж</option>
-                                <option value="plot">Земельный участок</option>
-                                <option value="garage">Гараж и машиноместо</option>
-                                <option value="commercial">Коммерческая недвижимость</option>
-                            </select>
-                        </div>
-
-                        {specifications.type === 'apartment' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Кол-во комнат</label>
-                                    <select value={specifications.rooms || ''} onChange={(e) => setSpecifications({ ...specifications, rooms: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                                        <option value="">Не выбрано</option>
-                                        <option value="studio">Студия</option>
-                                        <option value="1">1 комната</option>
-                                        <option value="2">2 комнаты</option>
-                                        <option value="3">3 комнаты</option>
-                                        <option value="4+">4+ комнат</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Общая площадь (м²)</label>
-                                    <input type="number" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Этаж</label>
-                                    <input type="number" value={specifications.floor || ''} onChange={(e) => setSpecifications({ ...specifications, floor: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Этажей в доме</label>
-                                    <input type="number" value={specifications.total_floors || ''} onChange={(e) => setSpecifications({ ...specifications, total_floors: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                                </div>
-                            </div>
-                        )}
-
-                        {specifications.type === 'house' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Площадь дома (м²)</label>
-                                    <input type="number" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Площадь участка (сот.)</label>
-                                    <input type="number" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Этажей в доме</label>
-                                    <input type="number" value={specifications.total_floors || ''} onChange={(e) => setSpecifications({ ...specifications, total_floors: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Материал стен</label>
-                                    <select value={specifications.material || ''} onChange={(e) => setSpecifications({ ...specifications, material: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                                        <option value="">Выберите...</option>
-                                        <option value="brick">Кирпич</option>
-                                        <option value="wood">Брус/Бревно</option>
-                                        <option value="block">Газоблоки</option>
-                                        <option value="panel">Панель</option>
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-
-                        {specifications.type === 'plot' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Площадь (сот.)</label>
-                                    <input type="number" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2">Статус участка</label>
-                                    <select value={specifications.status || ''} onChange={(e) => setSpecifications({ ...specifications, status: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                                        <option value="">Выберите...</option>
-                                        <option value="izhs">ИЖС</option>
-                                        <option value="snt">СНТ/ДНП</option>
-                                        <option value="prom">Промназначения</option>
-                                    </select>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {category === 'electronics' && (
-                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Бренд</label>
-                            <input type="text" placeholder="Apple, Samsung..." value={specifications.brand || ''} onChange={(e) => setSpecifications({ ...specifications, brand: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Модель</label>
-                            <input type="text" placeholder="iPhone 15..." value={specifications.model || ''} onChange={(e) => setSpecifications({ ...specifications, model: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                    </div>
-                )}
-
-                {category === 'clothing' && (
-                    <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Размер</label>
-                            <input type="text" placeholder="M, 42, XL..." value={specifications.size || ''} onChange={(e) => setSpecifications({ ...specifications, size: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-bold mb-2">Пол</label>
-                            <select value={specifications.gender || ''} onChange={(e) => setSpecifications({ ...specifications, gender: e.target.value })} className="w-full p-3 rounded-xl border border-border bg-background outline-none">
-                                <option value="">Не выбрано</option>
-                                <option value="male">Мужской</option>
-                                <option value="female">Женский</option>
-                                <option value="unisex">Унисекс</option>
-                            </select>
-                        </div>
-                    </div>
-                )}
-
-                {category !== 'jobs' && category !== 'services' && (
-                    <div>
-                        <label className="block text-sm font-bold mb-3">Состояние</label>
-                        <div className="flex gap-4">
-                            {['used', 'new'].map(c => (
-                                <button key={c} type="button" onClick={() => setCondition(c)} className={cn("flex-1 p-3 rounded-xl border font-bold", condition === c ? "bg-primary text-white" : "bg-surface")}>
-                                    {c === 'used' ? 'Б/у' : 'Новое'}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                <div>
-                    <label className="block text-sm font-bold mb-2">Описание</label>
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} required rows={6} className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6 items-end">
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Город</label>
-                        <div className="flex gap-2">
-                            <select
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                                required
-                                className="flex-1 p-3 rounded-xl border border-border bg-background outline-none font-medium"
-                            >
-                                {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                                {!cities.find(c => c.name === city) && <option value={city}>{city}</option>}
-                            </select>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                        {CATEGORIES.map((cat) => (
                             <button
-                                type="button"
-                                onClick={handleLocate}
-                                title="Определить местоположение"
-                                className="w-12 h-12 flex items-center justify-center bg-surface border border-border rounded-xl hover:text-primary transition-all active:scale-95"
+                                key={cat.slug}
+                                onClick={() => setCategory(cat.slug)}
+                                className={cn(
+                                    "px-3 py-3.5 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all text-center flex flex-col items-center justify-center gap-1",
+                                    category === cat.slug
+                                        ? "border-primary bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]"
+                                        : "border-border bg-surface hover:border-primary/50 text-muted-foreground"
+                                )}
                             >
-                                <MapPin className="h-5 w-5" />
+                                <span>{cat.name}</span>
                             </button>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Section 2: Photos */}
+                <section className="bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+                            <Camera className="h-5 w-5" />
                         </div>
+                        <h2 className="text-xl font-black uppercase tracking-tight">Фотографии</h2>
                     </div>
-                    <div>
-                        <label className="block text-sm font-bold mb-2">Адрес</label>
-                        <input
-                            type="text"
-                            placeholder="Напр: ул. Ленина, д. 5"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            className="w-full p-3 rounded-xl border border-border bg-background outline-none"
-                        />
-                    </div>
-                    {category !== 'services' && category !== 'jobs' && (
-                        <label className="flex items-center gap-3 p-3 rounded-xl border border-border">
-                            <input type="checkbox" checked={delivery} onChange={(e) => setDelivery(e.target.checked)} className="w-5 h-5 accent-primary" />
-                            <span className="text-sm font-bold">Доставка</span>
-                        </label>
-                    )}
-                </div>
 
-                <div className="space-y-4">
-                    <label className="block text-sm font-bold">Точное местоположение на карте</label>
-                    <MapPicker onChange={(pos) => {
-                        setLat(pos[0]);
-                        setLng(pos[1]);
-                    }} />
-                    <p className="text-[10px] text-muted-foreground font-medium italic">Кликните по карте, чтобы установить маркер</p>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-bold mb-4">Фото (до 3-х)</label>
-                    <div className="flex gap-4">
-                        {previewUrls.map((url, i) => (
-                            <div key={i} className="relative w-24 h-24 rounded-xl overflow-hidden">
-                                <img src={url} className="w-full h-full object-cover" />
-                                <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-black/50 p-1 rounded-full text-white"><X className="h-4 w-4" /></button>
+                    <div className="grid grid-cols-3 gap-4">
+                        {previewUrls.map((url, index) => (
+                            <div key={index} className="relative aspect-square rounded-2xl overflow-hidden border border-border shadow-sm group">
+                                <img src={url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                <button
+                                    onClick={() => removeImage(index)}
+                                    className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full shadow-lg active:scale-90"
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
                             </div>
                         ))}
                         {images.length < 3 && (
-                            <label className="w-24 h-24 rounded-xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer hover:text-primary">
-                                <Camera className="h-8 w-8" />
-                                <input type="file" multiple onChange={handleImageChange} className="hidden" />
+                            <label className="relative aspect-square rounded-2xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/30 hover:border-primary/50 transition-all text-muted-foreground active:scale-95 group">
+                                <PlusSquare className="h-8 w-8 opacity-40 group-hover:text-primary group-hover:opacity-100 transition-all" />
+                                <span className="text-[10px] font-black uppercase tracking-widest">Добавить</span>
+                                <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
                             </label>
                         )}
                     </div>
-                </div>
+                </section>
 
-                <button type="submit" disabled={loading} className="w-full py-4 bg-primary text-white font-black text-lg rounded-2xl shadow-xl disabled:opacity-50">
-                    {loading ? 'Публикация...' : 'Опубликовать'}
-                </button>
-            </form>
+                {/* Section 3: Details */}
+                <section className="bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                            <Wrench className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-xl font-black uppercase tracking-tight">Описание</h2>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Заголовок</label>
+                            <input
+                                type="text"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full h-14 px-5 rounded-2xl bg-surface border border-border outline-none focus:border-primary font-bold text-lg transition-all"
+                                placeholder="Например: iPhone 13 Pro"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            {category === 'jobs' ? (
+                                <div className="col-span-2 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">З/П От</label>
+                                        <input type="number" value={salaryFrom} onChange={(e) => setSalaryFrom(e.target.value)} className="w-full h-14 px-5 rounded-2xl bg-surface border border-border outline-none focus:border-primary font-black text-xl transition-all" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">З/П До</label>
+                                        <input type="number" value={salaryTo} onChange={(e) => setSalaryTo(e.target.value)} className="w-full h-14 px-5 rounded-2xl bg-surface border border-border outline-none focus:border-primary font-black text-xl transition-all" />
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Цена (₽)</label>
+                                        <input
+                                            type="number"
+                                            value={price}
+                                            onChange={(e) => setPrice(e.target.value)}
+                                            className="w-full h-14 px-5 rounded-2xl bg-surface border border-border outline-none focus:border-primary font-black text-xl transition-all"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Состояние</label>
+                                        <div className="flex bg-muted p-1 rounded-2xl h-14">
+                                            <button onClick={() => setCondition('used')} className={cn("flex-1 rounded-xl text-[10px] font-black uppercase transition-all", condition === 'used' ? "bg-white shadow-sm text-primary" : "text-muted-foreground")}>Б/У</button>
+                                            <button onClick={() => setCondition('new')} className={cn("flex-1 rounded-xl text-[10px] font-black uppercase transition-all", condition === 'new' ? "bg-white shadow-sm text-primary" : "text-muted-foreground")}>Новое</button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Подробное описание</label>
+                            <textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                className="w-full p-5 rounded-2xl bg-surface border border-border outline-none focus:border-primary font-medium text-lg min-h-[160px] transition-all resize-none"
+                                placeholder="Расскажите подробнее о товаре..."
+                            />
+                        </div>
+                    </div>
+                </section>
+
+                {/* Section 4: Location */}
+                <section className="bg-surface border border-border rounded-3xl p-6 md:p-8 shadow-sm">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
+                            <MapPin className="h-5 w-5" />
+                        </div>
+                        <h2 className="text-xl font-black uppercase tracking-tight">Локация</h2>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Город</label>
+                                <div className="relative group/city">
+                                    <select
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                        className="w-full h-14 px-5 rounded-2xl bg-surface border border-border outline-none focus:border-primary font-bold text-lg appearance-none transition-all"
+                                    >
+                                        {cities.map((c) => (
+                                            <option key={c.name} value={c.name}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">&nbsp;</label>
+                                <button
+                                    onClick={handleLocate}
+                                    className="w-full h-14 rounded-2xl border-2 border-primary/20 text-primary font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 hover:bg-primary/5 active:scale-95 transition-all"
+                                >
+                                    <Navigation className="h-4 w-4" />
+                                    Моё местоположение
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Адрес</label>
+                            <input
+                                type="text"
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
+                                className="w-full h-14 px-5 rounded-2xl bg-surface border border-border outline-none focus:border-primary font-bold text-lg transition-all"
+                                placeholder="Улица, дом..."
+                            />
+                        </div>
+
+                        <div className="rounded-3xl overflow-hidden border border-border">
+                            <MapPicker onChange={(pos: [number, number]) => {
+                                setLat(pos[0]);
+                                setLng(pos[1]);
+                            }} />
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            {/* Bottom sticky wrapper for button */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t border-border z-50 md:static md:bg-transparent md:border-none md:p-0 md:mt-12">
+                <div className="max-w-4xl mx-auto">
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading}
+                        className="w-full h-16 md:h-20 bg-primary text-white rounded-2xl md:rounded-3xl font-black text-xl uppercase tracking-widest shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                    >
+                        {loading ? (
+                            <div className="animate-spin rounded-full h-8 w-8 border-4 border-white/20 border-t-white" />
+                        ) : (
+                            <>
+                                <Rocket className="h-6 w-6" />
+                                <span>Опубликовать</span>
+                            </>
+                        )}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

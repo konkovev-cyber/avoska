@@ -109,8 +109,8 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-[100] bg-background/80 backdrop-blur-2xl border-b border-border/50">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-20 md:h-24 flex items-center gap-4 md:gap-8">
+        <header className="sticky top-0 z-[100] bg-background/80 backdrop-blur-2xl border-b border-border/50 pt-safe">
+            <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 md:h-24 flex items-center gap-3 md:gap-8">
                 {/* Logo */}
                 {/* Logo */}
                 <Link href="/" className="shrink-0 flex items-center gap-0.5 group">
@@ -139,7 +139,7 @@ export default function Header() {
                                             key={c.name}
                                             onClick={() => handleCityChange(c.name)}
                                             className={cn(
-                                                "w-full text-left px-3 py-2 rounded-lg text-xs font-bold transition-all",
+                                                "w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98]",
                                                 c.name === city ? "bg-primary text-white" : "hover:bg-muted"
                                             )}
                                         >
@@ -157,10 +157,10 @@ export default function Header() {
                     <form onSubmit={handleSearch} className="relative group w-full">
                         <input
                             type="text"
-                            placeholder="Поиск..."
+                            placeholder="Поиск товаров..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 md:h-12 pl-5 pr-14 rounded-2xl bg-background border-2 border-muted hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-sm font-bold outline-none placeholder:text-muted-foreground/60"
+                            className="w-full h-11 md:h-12 pl-4 md:pl-5 pr-12 md:pr-14 rounded-2xl bg-surface border border-border hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-[16px] md:text-sm font-bold outline-none placeholder:text-muted-foreground/60"
                         />
                         <button
                             type="submit"

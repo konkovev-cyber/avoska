@@ -244,8 +244,45 @@ export default function ProfilePage() {
                             <input type="file" className="hidden" onChange={handleAvatarUpload} accept="image/*" />
                         </label>
                     </div>
-                    <div className="flex-1 min-w-0 w-full">
-                        <>
+                    {isEditing ? (
+                        <div className="flex-1 w-full space-y-4 animate-in slide-in-from-top-2 duration-300">
+                            <div>
+                                <label className="block text-[10px] font-black uppercase text-muted-foreground mb-1 tracking-widest ml-1">Как вас зовут?</label>
+                                <input
+                                    type="text"
+                                    value={fullName}
+                                    onChange={(e) => setFullName(e.target.value)}
+                                    className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                                    placeholder="Ваше имя"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black uppercase text-muted-foreground mb-1 tracking-widest ml-1">Телефон для связи</label>
+                                <input
+                                    type="tel"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                                    placeholder="+7 (___) ___-__-__"
+                                />
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                <button
+                                    onClick={handleSaveProfile}
+                                    className="flex-1 h-12 bg-primary text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all"
+                                >
+                                    Сохранить
+                                </button>
+                                <button
+                                    onClick={() => setIsEditing(false)}
+                                    className="px-6 h-12 bg-muted text-muted-foreground font-black uppercase text-[10px] tracking-widest rounded-xl active:scale-95 transition-all"
+                                >
+                                    Отмена
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 min-w-0 w-full">
                             <h1 className="text-2xl md:text-3xl font-black mb-1 truncate">{profile?.full_name || 'Пользователь'}</h1>
                             {profile?.phone && (
                                 <div className="text-sm font-bold text-foreground/60 mb-3">{profile.phone}</div>
@@ -264,14 +301,17 @@ export default function ProfilePage() {
                                     <Star className="h-4 w-4 fill-current" />
                                     <span>Рейтинг: {profile?.rating || '0.0'}</span>
                                 </div>
-                                <div>На Авоське с {new Date(profile?.created_at).getFullYear()}г.</div>
+                                <div className="flex items-center gap-1 text-muted">
+                                    <Rocket className="h-4 w-4" />
+                                    На Авоське с {new Date(profile?.created_at).getFullYear()}г.
+                                </div>
                             </div>
-                        </>
-                    </div>
+                        </div>
+                    )}
                     {!isEditing && (
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0"
+                            className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
                         >
                             <Settings className="h-6 w-6" />
                         </button>
