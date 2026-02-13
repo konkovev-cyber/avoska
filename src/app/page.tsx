@@ -183,7 +183,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 md:py-12">
+    <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 md:py-12 pb-32">
       <div className="w-full">
         <section className="mb-6 md:mb-10 hidden md:block">
           <h1 className="text-4xl md:text-6xl font-black text-foreground mb-3 tracking-tighter">Все категории</h1>

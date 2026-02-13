@@ -317,7 +317,7 @@ function AdContent() {
     if (!ad) return <div className="p-10 text-center font-bold">Не найдено</div>;
 
     return (
-        <div className="bg-background min-h-screen pb-10">
+        <div className="bg-background min-h-screen pb-40">
             {isZoomed && (
                 <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-2 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsZoomed(false)}>
                     <button className="absolute top-4 right-4 p-2 bg-white/10 rounded-full text-white hover:bg-white/20">

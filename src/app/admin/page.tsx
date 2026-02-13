@@ -51,12 +51,10 @@ export default function AdminDashboard() {
     const [bannerContent, setBannerContent] = useState('');
     const [bannerImage, setBannerImage] = useState('');
     const [bannerLink, setBannerLink] = useState('');
+    const [editingBanner, setEditingBanner] = useState<any>(null);
 
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-
-    // Banner form state
-
 
     useEffect(() => {
         checkAdmin();
@@ -259,26 +257,50 @@ export default function AdminDashboard() {
 
     const addBanner = async (e: React.FormEvent) => {
         e.preventDefault();
-        const { error } = await supabase.from('banners').insert({
+        const payload = {
             title: bannerTitle,
             content: bannerContent,
             image_url: bannerImage,
             link_url: bannerLink,
             is_active: true
-        });
-        if (!error) {
-            toast.success('Баннер добавлен');
-            setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
-            fetchData();
+        };
+
+        if (editingBanner) {
+            const { error } = await supabase.from('banners').update(payload).eq('id', editingBanner.id);
+            if (!error) {
+                toast.success('Баннер обновлен');
+                setEditingBanner(null);
+                setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
+                fetchData();
+            } else {
+                console.error('Banner update error:', error);
+                toast.error('Ошибка обновления: ' + error.message);
+            }
         } else {
-            console.error('Banner error:', error);
-            toast.error('Ошибка создания: ' + error.message);
+            const { error } = await supabase.from('banners').insert(payload);
+            if (!error) {
+                toast.success('Баннер добавлен');
+                setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
+                fetchData();
+            } else {
+                console.error('Banner error:', error);
+                toast.error('Ошибка создания: ' + error.message);
+            }
         }
     };
 
     const deleteBanner = async (id: string) => {
         const { error } = await supabase.from('banners').delete().eq('id', id);
         if (!error) fetchData();
+    };
+
+    const startEditingBanner = (b: any) => {
+        setEditingBanner(b);
+        setBannerTitle(b.title);
+        setBannerContent(b.content || '');
+        setBannerImage(b.image_url || '');
+        setBannerLink(b.link_url || '');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     if (!isAdmin || loading) return <div className="p-20 text-center flex flex-col items-center gap-4">
@@ -502,20 +524,31 @@ export default function AdminDashboard() {
                 {activeTab === 'banners' && (
                     <div className="p-6 space-y-8">
                         <form onSubmit={addBanner} className="grid md:grid-cols-2 gap-4 bg-surface p-6 rounded-3xl border border-border">
+                            <div className="md:col-span-2 flex justify-between items-center mb-1">
+                                <h3 className="font-black text-xl">{editingBanner ? 'Редактировать баннер' : 'Создать новый баннер'}</h3>
+                                {editingBanner && (
+                                    <button type="button" onClick={() => { setEditingBanner(null); setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink(''); }} className="text-sm text-primary font-bold">Отменить</button>
+                                )}
+                            </div>
                             <input value={bannerTitle} onChange={e => setBannerTitle(e.target.value)} placeholder="Заголовок" className="p-3 rounded-xl border border-border bg-background outline-none" required />
                             <input value={bannerImage} onChange={e => setBannerImage(e.target.value)} placeholder="URL картинки" className="p-3 rounded-xl border border-border bg-background outline-none" />
                             <input value={bannerLink} onChange={e => setBannerLink(e.target.value)} placeholder="URL ссылки" className="p-3 rounded-xl border border-border bg-background outline-none" />
                             <textarea value={bannerContent} onChange={e => setBannerContent(e.target.value)} placeholder="Текст баннера" className="p-3 rounded-xl border border-border bg-background outline-none md:col-span-2" />
-                            <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-xl font-black">Создать баннер</button>
+                            <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-xl font-black">
+                                {editingBanner ? 'Обновить баннер' : 'Создать баннер'}
+                            </button>
                         </form>
                         <div className="space-y-4">
                             {banners.map(b => (
-                                <div key={b.id} className="bg-background p-6 rounded-3xl border border-border flex items-center justify-between">
+                                <div key={b.id} className="bg-background p-6 rounded-3xl border border-border flex items-center justify-between group">
                                     <div className="flex items-center gap-4">
                                         {b.image_url && <img src={b.image_url} className="w-12 h-12 rounded-lg object-cover" />}
                                         <div><div className="font-bold">{b.title}</div><div className="text-sm text-muted">{b.content}</div></div>
                                     </div>
-                                    <button onClick={() => deleteBanner(b.id)} className="text-destructive"><Trash2 /></button>
+                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => startEditingBanner(b)} className="text-primary"><Settings className="h-4 w-4" /></button>
+                                        <button onClick={() => deleteBanner(b.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

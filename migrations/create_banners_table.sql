@@ -13,9 +13,12 @@ CREATE TABLE IF NOT EXISTS public.banners (
 ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 
 -- Create policies
+-- Create policies
+DROP POLICY IF EXISTS "Public banners are viewable by everyone" ON public.banners;
 CREATE POLICY "Public banners are viewable by everyone" ON public.banners
     FOR SELECT USING (true); -- Or (is_active = true)
 
+DROP POLICY IF EXISTS "Admins can manage banners" ON public.banners;
 CREATE POLICY "Admins can manage banners" ON public.banners
     FOR ALL USING (
         auth.uid() IN (
