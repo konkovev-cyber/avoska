@@ -59,15 +59,19 @@ export default function HomePage() {
       const currentCity = await initCity();
       setCity(currentCity);
 
-      const [bannersRes, newAdsRes] = await Promise.all([
-        supabase.from('banners').select('*').eq('is_active', true),
+      const [bannersRes, newAdsRes, settingsRes] = await Promise.all([
+        supabase.from('banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(5),
         supabase.from('ads')
           .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
-          .limit(8)
+          .limit(8),
+        supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
       ]);
-      setBanners(bannersRes.data || []);
+
+      // Only set banners if they're enabled globally
+      const bannersEnabled = settingsRes.data?.value === 'true';
+      setBanners(bannersEnabled ? (bannersRes.data || []) : []);
       setNewAds(newAdsRes.data || []);
 
       // Smart feed: check last category
@@ -238,28 +242,31 @@ export default function HomePage() {
           </div>
         </section>
 
-
+        {/* Banners Section - Desktop Only, 5 max */}
         {banners.filter(b => b.image_url).length > 0 && (
-          <section className="mb-10">
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none -mx-4 px-4">
-              {banners.filter(b => b.image_url).map(banner => (
+          <section className="mb-10 hidden md:block">
+            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none">
+              {banners.filter(b => b.image_url).slice(0, 5).map(banner => (
                 <a
                   key={banner.id}
                   href={banner.link_url || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="shrink-0 w-[280px] md:w-[400px] h-40 md:h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border/50 group shadow-md hover:shadow-xl transition-all relative"
+                  className="shrink-0 w-[220px] h-32 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border/50 group shadow-sm hover:shadow-lg transition-all relative"
                 >
                   <img
                     src={banner.image_url}
                     alt={banner.title || 'Баннер'}
                     className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent p-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                    <h3 className="text-white font-bold text-sm line-clamp-1">{banner.title}</h3>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-3 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                    <h3 className="text-white font-bold text-xs line-clamp-1">{banner.title}</h3>
                     {banner.content && (
-                      <p className="text-white/80 text-xs line-clamp-2 mt-1">{banner.content}</p>
+                      <p className="text-white/80 text-[10px] line-clamp-1 mt-0.5">{banner.content}</p>
                     )}
+                  </div>
+                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/40 backdrop-blur-sm rounded text-[8px] font-bold text-white/60 uppercase tracking-wider">
+                    Реклама
                   </div>
                 </a>
               ))}

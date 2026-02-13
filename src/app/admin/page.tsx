@@ -33,6 +33,7 @@ export default function AdminDashboard() {
     const [reports, setReports] = useState<any[]>([]);
     const [banners, setBanners] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
+    const [bannersEnabled, setBannersEnabled] = useState(true);
 
     // City form state
     const [newCity, setNewCity] = useState('');
@@ -81,13 +82,14 @@ export default function AdminDashboard() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes] = await Promise.all([
+            const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes, settingsRes] = await Promise.all([
                 supabase.from('ads').select('*, profiles!user_id(full_name, email)').order('created_at', { ascending: false }),
                 supabase.from('profiles').select('*').order('created_at', { ascending: false }),
                 supabase.from('cities').select('*').order('name'),
                 supabase.from('reports').select('*, reporter:profiles(full_name), ad:ads(title)').order('created_at', { ascending: false }),
                 supabase.from('banners').select('*').order('created_at', { ascending: false }),
-                supabase.from('categories').select('*').order('name')
+                supabase.from('categories').select('*').order('name'),
+                supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
             ]);
 
             if (adsRes.error) {
@@ -104,6 +106,7 @@ export default function AdminDashboard() {
             setReports(reportsRes.data || []);
             setBanners(bannersRes.data || []);
             setCategories(categoriesRes.data || []);
+            setBannersEnabled(settingsRes.data?.value === 'true');
 
             const allAdsCount = adsRes.data?.length || 0;
             const pendingAdsCount = (adsRes.data || []).filter((a: any) => a.status === 'pending').length;
@@ -301,6 +304,21 @@ export default function AdminDashboard() {
         setBannerImage(b.image_url || '');
         setBannerLink(b.link_url || '');
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const toggleBannersEnabled = async () => {
+        const newValue = !bannersEnabled;
+        const { error } = await supabase
+            .from('app_settings')
+            .update({ value: newValue.toString(), updated_at: new Date().toISOString() })
+            .eq('key', 'banners_enabled');
+
+        if (!error) {
+            setBannersEnabled(newValue);
+            toast.success(newValue ? 'Баннеры включены' : 'Баннеры выключены');
+        } else {
+            toast.error('Ошибка обновления настроек');
+        }
     };
 
     if (!isAdmin || loading) return <div className="p-20 text-center flex flex-col items-center gap-4">
@@ -505,7 +523,7 @@ export default function AdminDashboard() {
                             {categories.map(c => (
                                 <div key={c.id} className="bg-background p-4 rounded-3xl border border-border flex items-center gap-3 group">
                                     <div className="w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0">
-                                        {c.image ? <img src={c.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs text-muted">No img</div>}
+                                        {c.image ? <img src={c.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs text-muted">Нет фото</div>}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="font-bold truncate">{c.name}</div>
@@ -523,6 +541,28 @@ export default function AdminDashboard() {
 
                 {activeTab === 'banners' && (
                     <div className="p-6 space-y-8">
+                        {/* Global Banner Toggle */}
+                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-2xl border border-primary/20">
+                            <div>
+                                <h3 className="font-black text-lg">Отображение баннеров</h3>
+                                <p className="text-sm text-muted">Глобально включить/выключить показ баннеров на главной странице</p>
+                            </div>
+                            <button
+                                onClick={toggleBannersEnabled}
+                                className={cn(
+                                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
+                                    bannersEnabled ? "bg-primary" : "bg-muted"
+                                )}
+                            >
+                                <span
+                                    className={cn(
+                                        "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-lg",
+                                        bannersEnabled ? "translate-x-7" : "translate-x-1"
+                                    )}
+                                />
+                            </button>
+                        </div>
+
                         <form onSubmit={addBanner} className="grid md:grid-cols-2 gap-4 bg-surface p-6 rounded-3xl border border-border">
                             <div className="md:col-span-2 flex justify-between items-center mb-1">
                                 <h3 className="font-black text-xl">{editingBanner ? 'Редактировать баннер' : 'Создать новый баннер'}</h3>
