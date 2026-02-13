@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { getShareableUrl } from '@/lib/share';
+import RightSidebar from '@/components/layout/RightSidebar';
 
 const MapView = dynamic(() => import('@/components/MapView'), {
     ssr: false,
@@ -316,6 +317,7 @@ function AdContent() {
     );
     if (!ad) return <div className="p-10 text-center font-bold">Не найдено</div>;
 
+
     return (
         <div className="bg-background min-h-screen pb-40">
             {isZoomed && (
@@ -445,6 +447,20 @@ function AdContent() {
                                         if (v === 'unisex') displayValue = 'Унисекс';
                                     }
                                     if (k === 'rooms' && v === 'studio') displayValue = 'Студия';
+
+                                    // Land and Building translations
+                                    if (k === 'type') {
+                                        if (v === 'plot') displayValue = 'Участок';
+                                        if (v === 'house') displayValue = 'Дом';
+                                        if (v === 'apartment') displayValue = 'Квартира';
+                                        if (v === 'commercial') displayValue = 'Коммерция';
+                                    }
+                                    if (k === 'status') {
+                                        if (v === 'izhs') displayValue = 'ИЖС';
+                                        if (v === 'snt') displayValue = 'СНТ';
+                                        if (v === 'dnp') displayValue = 'ДНП';
+                                        if (v === 'prom') displayValue = 'Промназначение';
+                                    }
 
                                     return (
                                         <div key={k} className="flex justify-between py-1 border-b border-border/50 text-xs">
@@ -594,9 +610,92 @@ function AdContent() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Banners and Footer Links moved here - below chat */}
+                        <div className="hidden lg:block space-y-4 pt-4 border-t border-border/50">
+                            <div className="text-[10px] font-black tracking-widest text-muted-foreground uppercase mb-2 px-1">Реклама</div>
+                            <div className="space-y-3">
+                                <AdPageBanners />
+                            </div>
+                            <div className="pt-6 text-[10px] text-muted-foreground font-medium text-center opacity-60">
+                                © 2026 Авоська+ <br />
+                                <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    );
+}
+
+// Separate component for banners in ad page to keep things clean
+function AdPageBanners() {
+    const [banners, setBanners] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchBanners();
+    }, []);
+
+    const fetchBanners = async () => {
+        try {
+            const { data } = await supabase
+                .from('banners')
+                .select('*')
+                .eq('is_active', true);
+
+            if (data) {
+                // Shuffle and limit to 2 for ad page sidebar
+                const shuffled = data.sort(() => Math.random() - 0.5).slice(0, 2);
+                setBanners(shuffled);
+
+                // Track impressions
+                shuffled.forEach(banner => {
+                    supabase.rpc('increment_banner_impression', { banner_id: banner.id }).then(({ error }) => {
+                        if (error) {
+                            supabase.from('banners').update({ impressions_count: (banner.impressions_count || 0) + 1 }).eq('id', banner.id);
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) return (
+        <div className="space-y-3">
+            <div className="w-full aspect-video bg-muted/20 animate-pulse rounded-2xl" />
+        </div>
+    );
+
+    return (
+        <div className="space-y-3">
+            {banners.filter(b => b.image_url).map(banner => (
+                <a
+                    key={banner.id}
+                    href={banner.link_url || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => {
+                        supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
+                            if (error) {
+                                supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
+                            }
+                        });
+                    }}
+                    className="group relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/50 bg-surface block"
+                >
+                    <img
+                        src={banner.image_url}
+                        alt={banner.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                </a>
+            ))}
         </div>
     );
 }
@@ -608,3 +707,4 @@ export default function AdPage() {
         </Suspense>
     );
 }
+

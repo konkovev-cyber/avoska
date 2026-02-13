@@ -71,7 +71,22 @@ export default function HomePage() {
 
       // Only set banners if they're enabled globally
       const bannersEnabled = settingsRes.data?.value === 'true';
-      setBanners(bannersEnabled ? (bannersRes.data || []) : []);
+      let fetchedBanners = bannersRes.data || [];
+      if (bannersEnabled && fetchedBanners.length > 0) {
+        // Shuffle and take 4 to align with grid better
+        fetchedBanners = fetchedBanners.sort(() => Math.random() - 0.5).slice(0, 4);
+
+        // Track impressions
+        fetchedBanners.forEach(banner => {
+          supabase.rpc('increment_banner_impression', { banner_id: banner.id }).then(({ error }) => {
+            if (error) {
+              // Fallback if RPC not exists, just direct update (not ideal but works for now)
+              supabase.from('banners').update({ impressions_count: (banner.impressions_count || 0) + 1 }).eq('id', banner.id);
+            }
+          });
+        });
+      }
+      setBanners(bannersEnabled ? fetchedBanners : []);
       setNewAds(newAdsRes.data || []);
 
       // Smart feed: check last category
@@ -187,16 +202,62 @@ export default function HomePage() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 md:py-12 pb-32">
+    <div className="max-w-[1400px] mx-auto px-2 md:px-8 py-1 md:py-6 pb-20">
       <div className="w-full">
-        <section className="mb-6 md:mb-10 hidden md:block">
-          <h1 className="text-4xl md:text-6xl font-black text-foreground mb-3 tracking-tighter">Все категории</h1>
-          <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl">Найдите то, что нужно именно вам среди тысяч объявлений</p>
+        {/* Banners Section - Desktop Only */}
+        {banners.length > 0 && (
+          <section className="mb-6 px-1 hidden md:block">
+            <div className="grid grid-cols-4 gap-3">
+              {banners.map(banner => (
+                <a
+                  key={banner.id}
+                  href={banner.link_url || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
+                      if (error) {
+                        supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
+                      }
+                    });
+                  }}
+                  className="relative aspect-[2.4/1] rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/10 border border-border/40 group shadow-sm hover:shadow-xl transition-all duration-300"
+                >
+                  {banner.image_url ? (
+                    <img
+                      src={banner.image_url}
+                      alt={banner.title || 'Баннер'}
+                      className="w-full h-full object-cover transition-opacity duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.opacity = '0';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/5" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3 flex flex-col justify-end">
+                    <h3 className="text-white font-bold text-xs md:text-sm line-clamp-2 leading-tight drop-shadow-md">{banner.title}</h3>
+                    {banner.content && (
+                      <p className="text-white/80 text-[10px] line-clamp-1 mt-0.5 hidden md:block">{banner.content}</p>
+                    )}
+                  </div>
+                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/40 backdrop-blur-md rounded-[3px] text-[8px] font-black text-white/80 uppercase tracking-widest border border-white/10">
+                    Реклама
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <section className="mb-2 hidden md:block">
+          <h1 className="text-xl md:text-5xl font-black text-foreground mb-0.5 tracking-tighter">Все категории</h1>
+          <p className="text-[11px] md:text-lg text-muted-foreground font-medium max-w-2xl">Найдите то, что нужно именно вам</p>
         </section>
 
-        <section className="mb-12">
+        <section className="mb-6">
           {/* Desktop Categories Grid */}
-          <div className="hidden md:grid grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
+          <div className="hidden md:grid grid-cols-4 lg:grid-cols-10 gap-2 md:gap-4">
             {CATEGORIES.slice(0, 8).map((cat) => (
               <Link
                 key={cat.slug}
@@ -218,120 +279,78 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Mobile Categories - Horizontal Scroll Pills */}
-          <div className="md:hidden flex gap-2 overflow-x-auto pb-4 scrollbar-none -mx-4 px-4">
+          {/* Mobile Categories - Horizontal Cards with Images */}
+          <div className="md:hidden flex gap-3 overflow-x-auto pb-4 scrollbar-none -mx-2 px-2 snap-x snap-mandatory">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}
-                className="shrink-0 flex items-center justify-center px-4 py-2.5 bg-surface border border-border rounded-xl active:bg-primary active:text-white active:border-primary transition-colors shadow-sm"
+                className="shrink-0 w-[100px] flex flex-col gap-2 snap-start"
               >
-                <span className="text-xs font-bold whitespace-nowrap">{cat.name}</span>
+                <div className="aspect-square bg-surface border border-border rounded-2xl overflow-hidden shadow-sm active:scale-95 transition-transform flex items-center justify-center">
+                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                </div>
+                <span className="text-[10px] font-bold text-center leading-tight">{cat.name}</span>
               </Link>
             ))}
           </div>
 
-          <div className="mt-8 flex justify-center">
+          <div className="mt-4 flex justify-start md:justify-center px-1">
             <Link
               href="/categories"
-              className="flex items-center gap-2 px-8 py-3 bg-surface border-2 border-border rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:border-primary hover:text-white transition-all shadow-md active:scale-95"
+              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
-              <span>Все категории</span>
+              <span>Показать все категории</span>
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
         </section>
 
-        {/* Banners Section - Desktop Only, 5 max */}
-        {banners.filter(b => b.image_url).length > 0 && (
-          <section className="mb-10 hidden md:block">
-            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none">
-              {banners.filter(b => b.image_url).slice(0, 5).map(banner => (
-                <a
-                  key={banner.id}
-                  href={banner.link_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0 w-[220px] h-32 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border/50 group shadow-sm hover:shadow-lg transition-all relative"
-                >
-                  <img
-                    src={banner.image_url}
-                    alt={banner.title || 'Баннер'}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-3 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                    <h3 className="text-white font-bold text-xs line-clamp-1">{banner.title}</h3>
-                    {banner.content && (
-                      <p className="text-white/80 text-[10px] line-clamp-1 mt-0.5">{banner.content}</p>
-                    )}
-                  </div>
-                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/40 backdrop-blur-sm rounded text-[8px] font-bold text-white/60 uppercase tracking-wider">
-                    Реклама
-                  </div>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Fresh Ads Section - 8 items */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight">Новое</h2>
+        {/* Fresh Ads Section */}
+        <section className="mb-10">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-xl md:text-3xl font-black tracking-tight">Новое</h2>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-none">
+          <div className="flex gap-2.5 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-none snap-x snap-mandatory touch-pan-x">
             {newAds.map((ad) => (
-              <div key={ad.id} className="shrink-0 w-[160px] md:w-[200px] group relative flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200">
+              <div key={ad.id} className="shrink-0 w-[120px] md:w-[180px] group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-sm border border-border/40 active:scale-[0.98] duration-200 snap-start">
                 <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full">
-                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                  <div className="aspect-square relative overflow-hidden bg-muted">
                     {ad.images?.[0] ? (
                       <img
-                        src={getOptimizedImageUrl(ad.images[0], { width: 300, quality: 70 })}
+                        src={getOptimizedImageUrl(ad.images[0], { width: 240, quality: 70 })}
                         alt={ad.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover"
                         loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[9px] text-muted-foreground uppercase font-black tracking-widest opacity-30">Нет фото</div>
+                      <div className="w-full h-full flex items-center justify-center text-[8px] text-muted-foreground uppercase font-black opacity-30">Нет фото</div>
                     )}
                   </div>
 
-                  <div className="p-2.5 flex flex-col flex-1 gap-1">
-                    <div className="text-base font-black tracking-tight text-foreground leading-none">
+                  <div className="p-2 flex flex-col flex-1">
+                    <div className="text-[13px] font-black tracking-tight text-foreground leading-none">
                       {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                     </div>
-                    <h3 className="text-xs font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em]">
+                    <h3 className="text-[9px] font-medium leading-[1.3] line-clamp-2 text-foreground/80 mt-1 min-h-[2.6em]">
                       {ad.title}
                     </h3>
-                    <div className="mt-auto pt-1 flex items-center justify-between text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
-                      <span className="truncate">{ad.city}</span>
-                      {ad.profiles?.rating && (
-                        <div className="flex items-center gap-0.5 text-orange-500">
-                          <Star className="h-2.5 w-2.5 fill-current" />
-                          <span>{ad.profiles.rating}</span>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </Link>
                 <button
                   onClick={(e) => toggleFavorite(e, ad.id)}
-                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 backdrop-blur-md text-white hover:bg-red-500 hover:text-white transition-all active:scale-90"
+                  className="absolute top-1 right-1 p-1.5 rounded-full bg-black/20 backdrop-blur-md text-white active:scale-90"
                 >
-                  <Heart className={cn("h-3.5 w-3.5 transition-all", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
+                  <Heart className={cn("h-3 w-3", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
                 </button>
               </div>
             ))}
-            {newAds.length === 0 && loading && [1, 2, 3, 4].map(i => (
-              <div key={i} className="shrink-0 w-[160px] h-[220px] bg-muted/20 rounded-2xl animate-pulse" />
-            ))}
           </div>
-
-          <div className="mt-6 flex justify-center">
+          <div className="mt-4 flex justify-start md:justify-center px-1">
             <Link
               href="/search?sort=newest"
-              className="flex items-center gap-2 px-8 py-3 bg-surface border-2 border-border rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary hover:border-primary hover:text-white transition-all shadow-md active:scale-95"
+              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
               <span>Смотреть все</span>
               <ChevronRight className="h-4 w-4" />
@@ -339,81 +358,72 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="flex items-center justify-between mb-10">
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight">
-            {personalCategory ? `Специально для вас в «${personalCategory.name}»` : 'Рекомендации для вас'}
-          </h2>
-          <div className="h-1 flex-1 bg-border mx-8 rounded-full hidden md:block opacity-30" />
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-              <div key={i} className="flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm border border-border/40 h-full">
-                <Skeleton className="aspect-[4/3] w-full" />
-                <div className="p-3 space-y-2">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              </div>
-            ))}
+        {/* Recommendations Section */}
+        <section className="mb-12">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-xl md:text-3xl font-black tracking-tight">Подборка для вас</h2>
           </div>
-        ) : ads.length > 0 ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6">
-            {ads.map((ad) => (
-              <div key={ad.id} className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200">
+
+          <div className="flex gap-2.5 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-none snap-x snap-mandatory touch-pan-x">
+            {loading ? (
+              [1, 2, 3, 4].map(i => (
+                <div key={i} className="shrink-0 w-[140px] md:w-[200px] aspect-[3/4] bg-muted/20 rounded-xl animate-pulse" />
+              ))
+            ) : ads.map((ad) => (
+              <div key={ad.id} className="shrink-0 w-[120px] md:w-[180px] group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-sm border border-border/40 active:scale-[0.98] duration-200 snap-start">
                 <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full">
-                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                    <HoverImageGallery
-                      images={ad.images || []}
+                  <div className="aspect-square relative overflow-hidden bg-muted">
+                    <img
+                      src={getOptimizedImageUrl(ad.images?.[0] || '', { width: 240, quality: 70 })}
                       alt={ad.title}
-                      href={`/ad?id=${ad.id}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                     {ad.condition === 'new' && (
-                      <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-green-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-lg pointer-events-none">
+                      <div className="absolute bottom-1 left-1 px-1 py-0.5 bg-green-500 text-white text-[7px] font-black uppercase rounded shadow-sm">
                         Новое
                       </div>
                     )}
                   </div>
 
-                  <div className="p-3 flex flex-col flex-1 gap-1">
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="text-lg font-black tracking-tight text-foreground leading-none">
-                        {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
-                      </div>
+                  <div className="p-2 flex flex-col flex-1">
+                    <div className="text-[13px] font-black tracking-tight text-foreground leading-none">
+                      {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                     </div>
 
-                    <h3 className="text-sm font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em]">
+                    <h3 className="text-[9px] font-medium leading-[1.3] line-clamp-2 text-foreground/80 mt-1 min-h-[2.6em]">
                       {ad.title}
                     </h3>
-
-                    <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
-                      <MapPin className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{ad.city}</span>
-                      <span className="mx-1">•</span>
-                      <span className="shrink-0">{new Date(ad.created_at).toLocaleDateString()}</span>
-                    </div>
                   </div>
                 </Link>
 
                 <button
                   onClick={(e) => toggleFavorite(e, ad.id)}
-                  className="absolute top-2 right-2 p-2 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-red-500 hover:text-white transition-all active:scale-90"
+                  className="absolute top-1 right-1 p-1.5 rounded-full bg-black/20 backdrop-blur-md text-white active:scale-90"
                 >
-                  <Heart className={cn("h-4 w-4 transition-all", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
+                  <Heart className={cn("h-3 w-3", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
                 </button>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="bg-surface p-20 rounded-[4rem] border-4 border-dashed border-border/50 text-center shadow-inner">
-            <div className="w-24 h-24 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <MapPin className="h-10 w-10 text-muted/40" />
+          <div className="mt-4 flex justify-start md:justify-center px-1">
+            <Link
+              href="/search"
+              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
+            >
+              <span>Показать всё</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+        {!loading && ads.length === 0 && (
+          <div className="bg-surface p-10 md:p-20 rounded-2xl md:rounded-[4rem] border-2 md:border-4 border-dashed border-border/50 text-center shadow-inner mt-8">
+            <div className="w-16 h-16 md:w-24 md:h-24 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <MapPin className="h-6 w-6 md:h-10 md:w-10 text-muted/40" />
             </div>
-            <h3 className="text-3xl font-black mb-3 tracking-tight">В этом городе пока нет объявлений</h3>
-            <p className="text-lg text-muted-foreground mb-10 max-w-md mx-auto italic font-medium">Но мы уже ищем лучшие предложения для вас в других регионах!</p>
-            <Link href="/ads/create" className="inline-flex bg-primary text-white px-10 py-4 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
+            <h3 className="text-xl md:text-3xl font-black mb-2 tracking-tight">В этом городе пока нет объявлений</h3>
+            <p className="text-sm md:text-lg text-muted-foreground mb-6 md:mb-10 max-w-md mx-auto italic font-medium">Но мы уже ищем лучшие предложения для вас!</p>
+            <Link href="/ads/create" className="inline-flex bg-primary text-white px-6 py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
               Стать первым продавцом
             </Link>
           </div>

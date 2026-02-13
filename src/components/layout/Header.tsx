@@ -110,7 +110,7 @@ export default function Header() {
 
     return (
         <header className="sticky top-0 z-[100] bg-background/80 backdrop-blur-2xl border-b border-border/50 pt-safe">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 md:h-24 flex items-center gap-3 md:gap-8">
+            <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-14 md:h-20 flex items-center gap-3 md:gap-8">
                 {/* Logo - Hide on mobile to prioritize Search */}
                 <Link href="/" className="hidden md:flex shrink-0 items-center gap-0.5 group">
                     <span className="text-2xl md:text-3xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform">Авоська+</span>

@@ -15,7 +15,7 @@ export default function Footer() {
                             <span className="text-xl font-black text-accent">+</span>
                         </Link>
                         <p className="text-xs text-muted font-bold">
-                            © {new Date().getFullYear()} Все права защищены.
+                            © 2026 Все права защищены.
                         </p>
                     </div>
 

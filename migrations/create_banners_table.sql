@@ -26,9 +26,9 @@ CREATE POLICY "Admins can manage banners" ON public.banners
         )
     );
 
--- Insert 3 test banners
+-- Insert 3 test banners (RU-friendly)
 INSERT INTO public.banners (title, content, image_url, link_url, is_active)
 VALUES
-    ('Распродажа электроники', 'Скидки до 50% на все гаджеты только в этом месяце!', 'https://images.unsplash.com/photo-1498049381929-c81600b11d61?auto=format&fit=crop&w=800&q=80', '/category/electronics', true),
-    ('Вакансия: Курьер', 'Ищем курьеров на личном авто. Высокая зарплата, свободный график.', 'https://images.unsplash.com/photo-1556740758-90de292080a9?auto=format&fit=crop&w=800&q=80', '/jobs', true),
-    ('Сдайте старые вещи', 'Принимаем одежду в хорошем состоянии. Поможем нуждающимся вместе!', 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=800&q=80', '/help', true);
+    ('Распродажа электроники', 'Скидки до 50% на все гаджеты только в этом месяце!', 'https://avatars.mds.yandex.net/get-mpic/11394341/2a0000019230678e38d745e6566089307c92/600x600', '/category/electronics', true),
+    ('Вакансия: Курьер', 'Ищем курьеров на личном авто. Высокая зарплата, свободный график.', 'https://avatars.mds.yandex.net/get-zen_doc/1585805/pub_5d8091a92beb4900ad30ee7a_5d8092284386a100ad8c0490/scale_1200', '/jobs', true),
+    ('Сдайте старые вещи', 'Принимаем одежду в хорошем состоянии. Поможем нуждающимся вместе!', 'https://avatars.mds.yandex.net/get-pdb/1531633/2c6a0b94-8f9f-44e2-8d76-8d76c66938a9/s1200', '/help', true);

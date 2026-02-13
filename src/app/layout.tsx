@@ -5,7 +5,6 @@ import Header from "@/components/layout/Header";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import BottomNav from "@/components/layout/BottomNav";
 import PageAnimatePresence from "@/components/layout/PageAnimatePresence";
-import RightSidebar from "@/components/layout/RightSidebar";
 import "./globals.css";
 
 // const geistSans = Geist({
@@ -50,17 +49,15 @@ export default function RootLayout({
         <Header />
 
         {/* Main Layout Container */}
-        <div className="flex-1 flex max-w-[1500px] mx-auto w-full">
+        <div className="flex-1 max-w-[1500px] mx-auto w-full">
           <main className="flex-1 min-w-0 pb-32 lg:pb-0">
             <PageAnimatePresence>
               {children}
             </PageAnimatePresence>
           </main>
-
-          {/* Right Sidebar - PC Only */}
-          <RightSidebar />
         </div>
 
+        <ConditionalFooter />
         <BottomNav />
         <Toaster />
       </body>
