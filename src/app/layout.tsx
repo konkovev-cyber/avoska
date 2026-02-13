@@ -51,7 +51,7 @@ export default function RootLayout({
 
         {/* Main Layout Container */}
         <div className="flex-1 flex max-w-[1500px] mx-auto w-full">
-          <main className="flex-1 min-w-0 pb-20 lg:pb-0">
+          <main className="flex-1 min-w-0 pb-32 lg:pb-0">
             <PageAnimatePresence>
               {children}
             </PageAnimatePresence>

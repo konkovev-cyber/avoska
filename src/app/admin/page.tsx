@@ -501,11 +501,11 @@ export default function AdminDashboard() {
 
                 {activeTab === 'banners' && (
                     <div className="p-6 space-y-8">
-                        <form onSubmit={addBanner} className="grid md:grid-cols-2 gap-4 bg-background p-6 rounded-3xl border border-border">
-                            <input value={bannerTitle} onChange={e => setBannerTitle(e.target.value)} placeholder="Заголовок" className="p-3 rounded-xl border border-border bg-surface outline-none" required />
-                            <input value={bannerImage} onChange={e => setBannerImage(e.target.value)} placeholder="URL картинки" className="p-3 rounded-xl border border-border bg-surface outline-none" />
-                            <input value={bannerLink} onChange={e => setBannerLink(e.target.value)} placeholder="URL ссылки" className="p-3 rounded-xl border border-border bg-surface outline-none" />
-                            <textarea value={bannerContent} onChange={e => setBannerContent(e.target.value)} placeholder="Текст баннера" className="p-3 rounded-xl border border-border bg-surface outline-none md:col-span-2" />
+                        <form onSubmit={addBanner} className="grid md:grid-cols-2 gap-4 bg-surface p-6 rounded-3xl border border-border">
+                            <input value={bannerTitle} onChange={e => setBannerTitle(e.target.value)} placeholder="Заголовок" className="p-3 rounded-xl border border-border bg-background outline-none" required />
+                            <input value={bannerImage} onChange={e => setBannerImage(e.target.value)} placeholder="URL картинки" className="p-3 rounded-xl border border-border bg-background outline-none" />
+                            <input value={bannerLink} onChange={e => setBannerLink(e.target.value)} placeholder="URL ссылки" className="p-3 rounded-xl border border-border bg-background outline-none" />
+                            <textarea value={bannerContent} onChange={e => setBannerContent(e.target.value)} placeholder="Текст баннера" className="p-3 rounded-xl border border-border bg-background outline-none md:col-span-2" />
                             <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-xl font-black">Создать баннер</button>
                         </form>
                         <div className="space-y-4">

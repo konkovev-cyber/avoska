@@ -2,81 +2,101 @@
 
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Play, Volume2 } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 export default function RightSidebar() {
     const pathname = usePathname();
-    // Only show on home page or search page or category page
-    // Hide on chat, profile, auth pages, ad details (maybe?)
-    const shouldShow = ['/', '/search', '/category'].some(p => pathname === p || pathname.startsWith('/category'));
-    // Or just show everywhere except admin/auth?
-    // User said "main site web version". Let's show on main pages.
-    // If we want it everywhere on desktop, we can just remove this check.
-    // Usually ads are everywhere.
+    const [banners, setBanners] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    // For now, let's keep it simple and show it everywhere except /admin, /login, /register
     const isHidden = pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/register');
+
+    useEffect(() => {
+        if (!isHidden) {
+            fetchBanners();
+        }
+    }, [isHidden]);
+
+    const fetchBanners = async () => {
+        try {
+            const { data } = await supabase
+                .from('banners')
+                .select('*')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(3);
+
+            if (data) setBanners(data);
+        } catch (e) {
+            console.error('Error fetching banners:', e);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (isHidden) return null;
 
     return (
-        <aside className="hidden xl:flex flex-col gap-4 w-[320px] shrink-0 p-4 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto scrollbar-none">
+        <aside className="hidden xl:flex flex-col gap-4 w-[320px] shrink-0 p-4 sticky top-20 h-[calc(100vh-5rem)] overflow-y-auto scrollbar-none">
 
-            {/* Ad Block 1 - Video Style */}
-            <div className="w-full bg-card rounded-3xl overflow-hidden shadow-sm border border-border/50 group relative aspect-[4/5] flex flex-col">
-                <div className="relative flex-1 bg-black">
-                    <img
-                        src="/categories/hobby.jpg" // Placeholder
-                        alt="Ad"
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity"
-                    />
-                    <div className="absolute top-3 right-3 px-2 py-0.5 bg-black/40 backdrop-blur-md rounded-md text-[9px] font-black uppercase tracking-widest text-white/70">
-                        Реклама
-                    </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                            <Play className="fill-white text-white translate-x-0.5 h-5 w-5" />
+            {/* Dynamic Banners */}
+            {loading ? (
+                // Skeletons
+                [1, 2, 3].map(i => (
+                    <div key={i} className="w-full aspect-video bg-muted/20 animate-pulse rounded-2xl" />
+                ))
+            ) : (
+                banners.map((banner) => (
+                    <a
+                        key={banner.id}
+                        href={banner.link_url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/50 bg-surface block"
+                    >
+                        {banner.image_url ? (
+                            <img
+                                src={banner.image_url}
+                                alt={banner.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center p-4">
+                                <span className="font-bold text-primary text-center">{banner.title}</span>
+                            </div>
+                        )}
+
+                        {/* Overlay Content */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <h3 className="text-white font-bold text-sm line-clamp-1">{banner.title}</h3>
+                            {banner.content && (
+                                <p className="text-white/80 text-xs line-clamp-2 mt-1">{banner.content}</p>
+                            )}
+                            <div className="mt-2 flex items-center gap-1 text-[10px] uppercase font-black tracking-wider text-primary-foreground">
+                                <span>Открыть</span>
+                                <ExternalLink className="h-3 w-3" />
+                            </div>
                         </div>
-                    </div>
-                    <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                        <div className="p-1.5 bg-black/40 backdrop-blur-md rounded-full text-white/70">
-                            <Volume2 className="h-4 w-4" />
+
+                        {/* Always visible title if no image, handled above. If image exists, maybe show badge? */}
+                        <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/30 backdrop-blur-md rounded text-[9px] font-bold text-white/50 uppercase tracking-widest border border-white/10">
+                            Реклама
                         </div>
-                    </div>
-                </div>
-                <div className="p-4 bg-surface">
-                    <button className="w-full py-3 bg-foreground text-background rounded-xl font-black text-sm uppercase tracking-wider hover:opacity-90 transition-opacity">
-                        Перейти
-                    </button>
-                </div>
-            </div>
+                    </a>
+                ))
+            )}
 
-            {/* Ad Block 2 - Bank Style - Sticky bottom of sidebar? */}
-            <div className="w-full bg-[#FFDD2D] rounded-3xl overflow-hidden shadow-sm border border-transparent group relative aspect-square flex flex-col">
-                <div className="absolute top-3 right-3 px-2 py-0.5 bg-black/10 backdrop-blur-md rounded-md text-[9px] font-black uppercase tracking-widest text-black/40">
-                    Реклама
+            {/* Fallback if no banners */}
+            {!loading && banners.length === 0 && (
+                <div className="p-8 text-center bg-muted/5 rounded-2xl border border-border/50 border-dashed">
+                    <p className="text-sm text-muted">Место для вашей рекламы</p>
                 </div>
-                <div className="p-6 flex flex-col h-full relative z-10">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm">
-                        <span className="font-black text-black">T</span>
-                    </div>
-                    <h3 className="text-2xl font-black text-black leading-tight mb-2">
-                        Доходность вклада 15%
-                    </h3>
-                    <p className="text-black/70 font-bold text-xs leading-relaxed mb-auto">
-                        Откройте накопительный вклад на 6 месяцев со ставкой 14.56%
-                    </p>
-                    <button className="mt-4 w-full py-3 bg-black text-white rounded-xl font-black text-sm uppercase tracking-wider hover:scale-[1.02] transition-transform shadow-lg">
-                        Оформить
-                    </button>
-                </div>
-                {/* Decorative image part */}
-                <div className="absolute right-0 bottom-0 w-1/2 h-full opacity-20 bg-gradient-to-l from-black/20 to-transparent pointer-events-none" />
-            </div>
+            )}
 
-            {/* Footer Links / Legal (Optional, often in sidebar) */}
+            {/* Footer Links */}
             <div className="mt-auto pt-4 text-[10px] text-muted-foreground font-medium text-center">
                 © 2024 Авоська+ <br />
                 <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
