@@ -238,16 +238,29 @@ export default function HomePage() {
           </div>
         </section>
 
-        {banners.length > 0 && (
-          <section className="mb-10 overflow-hidden">
-            <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-none px-1">
-              {banners.map(banner => (
+
+        {banners.filter(b => b.image_url).length > 0 && (
+          <section className="mb-10">
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none -mx-4 px-4">
+              {banners.filter(b => b.image_url).map(banner => (
                 <a
                   key={banner.id}
                   href={banner.link_url || '#'}
-                  className="shrink-0 w-[300px] md:w-[800px] h-48 md:h-72 rounded-[2.5rem] overflow-hidden bg-primary/5 border-2 border-border/50 group shadow-lg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 w-[280px] md:w-[400px] h-40 md:h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-border/50 group shadow-md hover:shadow-xl transition-all relative"
                 >
-                  {banner.image_url && <img src={banner.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-all duration-1000" />}
+                  <img
+                    src={banner.image_url}
+                    alt={banner.title || 'Баннер'}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent p-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                    <h3 className="text-white font-bold text-sm line-clamp-1">{banner.title}</h3>
+                    {banner.content && (
+                      <p className="text-white/80 text-xs line-clamp-2 mt-1">{banner.content}</p>
+                    )}
+                  </div>
                 </a>
               ))}
             </div>
