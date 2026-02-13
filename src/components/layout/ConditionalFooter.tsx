@@ -8,5 +8,9 @@ export default function ConditionalFooter() {
     const isAdPage = pathname.startsWith('/ad');
 
     if (isAdPage) return null;
-    return <Footer />;
+    return (
+        <div className="hidden lg:block">
+            <Footer />
+        </div>
+    );
 }

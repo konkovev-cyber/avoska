@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { recommendationService } from '@/lib/recommendations';
+import HoverImageGallery from '@/components/ui/HoverImageGallery';
 
 const CATEGORIES = [
   { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },
@@ -182,15 +183,16 @@ export default function HomePage() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 md:py-12">
+    <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4 md:py-12">
       <div className="w-full">
-        <section className="mb-10">
+        <section className="mb-6 md:mb-10 hidden md:block">
           <h1 className="text-4xl md:text-6xl font-black text-foreground mb-3 tracking-tighter">Все категории</h1>
           <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl">Найдите то, что нужно именно вам среди тысяч объявлений</p>
         </section>
 
         <section className="mb-12">
-          <div className="grid grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
+          {/* Desktop Categories Grid */}
+          <div className="hidden md:grid grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
             {CATEGORIES.slice(0, 8).map((cat) => (
               <Link
                 key={cat.slug}
@@ -208,6 +210,19 @@ export default function HomePage() {
                 <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-center line-clamp-1 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all">
                   {cat.name}
                 </span>
+              </Link>
+            ))}
+          </div>
+
+          {/* Mobile Categories - Horizontal Scroll Pills */}
+          <div className="md:hidden flex gap-2 overflow-x-auto pb-4 scrollbar-none -mx-4 px-4">
+            {CATEGORIES.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/category?slug=${cat.slug}`}
+                className="shrink-0 flex items-center justify-center px-4 py-2.5 bg-surface border border-border rounded-xl active:bg-primary active:text-white active:border-primary transition-colors shadow-sm"
+              >
+                <span className="text-xs font-bold whitespace-nowrap">{cat.name}</span>
               </Link>
             ))}
           </div>
@@ -330,18 +345,13 @@ export default function HomePage() {
               <div key={ad.id} className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200">
                 <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full">
                   <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                    {ad.images?.[0] ? (
-                      <img
-                        src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
-                        alt={ad.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-30">Нет фото</div>
-                    )}
+                    <HoverImageGallery
+                      images={ad.images || []}
+                      alt={ad.title}
+                      href={`/ad?id=${ad.id}`}
+                    />
                     {ad.condition === 'new' && (
-                      <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-green-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-lg">
+                      <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-green-500/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-wider rounded-md shadow-lg pointer-events-none">
                         Новое
                       </div>
                     )}

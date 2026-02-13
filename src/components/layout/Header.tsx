@@ -111,14 +111,54 @@ export default function Header() {
     return (
         <header className="sticky top-0 z-[100] bg-background/80 backdrop-blur-2xl border-b border-border/50 pt-safe">
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 md:h-24 flex items-center gap-3 md:gap-8">
-                {/* Logo */}
-                {/* Logo */}
-                <Link href="/" className="shrink-0 flex items-center gap-0.5 group">
-                    <span className="hidden md:inline-block text-2xl md:text-3xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform">Авоська+</span>
-                    <span className="md:hidden text-2xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform border-2 border-primary rounded-lg px-1">A+</span>
+                {/* Logo - Hide on mobile to prioritize Search */}
+                <Link href="/" className="hidden md:flex shrink-0 items-center gap-0.5 group">
+                    <span className="text-2xl md:text-3xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform">Авоська+</span>
                 </Link>
 
-                {/* City Picker */}
+                {/* Mobile Logo Icon only if needed, but maybe Search is better? 
+                    Let's keep a very small logo or remove it for "App Feel" if Search uses "Search in City".
+                */}
+                <Link href="/" className="hidden shrink-0">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-black text-xs">A+</div>
+                </Link>
+
+                {/* City Picker & Filter - Mobile */}
+                <div className="md:hidden shrink-0">
+                    <button
+                        onClick={() => setShowCityPicker(!showCityPicker)}
+                        className="flex items-center justify-center w-10 h-10 bg-surface rounded-xl border border-border/50 text-muted-foreground active:scale-95 transition-transform"
+                    >
+                        <ChevronDown className={cn("h-5 w-5 transition-transform", showCityPicker && "rotate-180")} />
+                    </button>
+                    {/* Mobile City Dropdown */}
+                    {showCityPicker && (
+                        <>
+                            <div className="fixed inset-0 z-[110] bg-black/20 backdrop-blur-sm" onClick={() => setShowCityPicker(false)} />
+                            <div className="absolute top-[calc(100%+0.5rem)] left-4 w-64 bg-background border border-border rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 z-[120]">
+                                <div className="p-3 border-b border-border/50 bg-muted/30">
+                                    <div className="text-xs font-black uppercase tracking-widest text-muted-foreground">Выберите город</div>
+                                </div>
+                                <div className="max-h-[60vh] overflow-y-auto p-2 space-y-1">
+                                    {cities.map((c) => (
+                                        <button
+                                            key={c.name}
+                                            onClick={() => handleCityChange(c.name)}
+                                            className={cn(
+                                                "w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98]",
+                                                c.name === city ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-muted text-foreground"
+                                            )}
+                                        >
+                                            {c.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* City Picker - Desktop */}
                 <div className="relative shrink-0 hidden md:block">
                     <button
                         onClick={() => setShowCityPicker(!showCityPicker)}
@@ -157,7 +197,7 @@ export default function Header() {
                     <form onSubmit={handleSearch} className="relative group w-full">
                         <input
                             type="text"
-                            placeholder="Поиск товаров..."
+                            placeholder={`Поиск в ${city === '...' || city === 'Все города' ? 'Авоське' : 'г. ' + city}`}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full h-11 md:h-12 pl-4 md:pl-5 pr-12 md:pr-14 rounded-2xl bg-surface border border-border hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-[16px] md:text-sm font-bold outline-none placeholder:text-muted-foreground/60"
@@ -165,7 +205,7 @@ export default function Header() {
                         <button
                             type="submit"
                             title="Найти"
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 md:h-9 w-9 md:w-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all"
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 md:h-9 md:w-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all"
                         >
                             <Search className="h-4 w-4 md:h-5 md:w-5" />
                         </button>
@@ -235,14 +275,9 @@ export default function Header() {
                     }
                 </div >
 
-                {/* Mobile Actions Drawer Toggler (simplified for now) */}
+                {/* Mobile Actions - Simplified */}
                 < div className="xl:hidden flex items-center gap-1" >
-                    <button
-                        onClick={toggleTheme}
-                        className="p-2.5 hover:bg-surface rounded-xl transition-colors"
-                    >
-                        {theme === 'dark' ? <Sun className="h-6 w-6 text-orange-400" /> : <Moon className="h-6 w-6 text-muted-foreground" />}
-                    </button>
+                    {/* Only show Notifications on mobile header, others are in BottomNav */}
                     {
                         user && (
                             <Link href="/notifications" className="p-2.5 hover:bg-surface rounded-xl block relative">
@@ -250,23 +285,6 @@ export default function Header() {
                                 {unreadCount > 0 && (
                                     <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background animate-pulse" />
                                 )}
-                            </Link>
-                        )
-                    }
-                    {
-                        user ? (
-                            <Link href="/profile" className="p-1 px-2 hover:bg-surface rounded-xl flex items-center">
-                                <div className="w-9 h-9 rounded-xl bg-accent/10 flex items-center justify-center overflow-hidden border border-border shadow-sm">
-                                    {user.user_metadata?.avatar_url ? (
-                                        <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <UserIcon className="h-5 w-5 text-accent" />
-                                    )}
-                                </div>
-                            </Link>
-                        ) : (
-                            <Link href="/login" className="p-2.5 hover:bg-surface rounded-xl text-primary" title="Войти">
-                                <UserCircle className="h-8 w-8" />
                             </Link>
                         )
                     }

@@ -13,7 +13,8 @@ export const chatService = {
             .select(`
         *,
         sender:profiles!sender_id(full_name, avatar_url),
-        receiver:profiles!receiver_id(full_name, avatar_url)
+        receiver:profiles!receiver_id(full_name, avatar_url),
+        ad:ads!ad_id(id, title, price, images)
       `)
             .or(`sender_id.eq.${session.user.id},receiver_id.eq.${session.user.id}`)
             .order('created_at', { ascending: false });
