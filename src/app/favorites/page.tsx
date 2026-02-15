@@ -24,11 +24,23 @@ export default function FavoritesPage() {
 
         const { data, error } = await supabase
             .from('favorites')
-            .select('*, ads(*, profiles(is_verified))')
+            .select(`
+                *,
+                ads:ad_id (
+                    *,
+                    profiles:user_id (is_verified)
+                )
+            `)
             .eq('user_id', session.user.id);
 
-        if (!error) {
-            setFavorites(data || []);
+        if (error) {
+            console.error('Error fetching favorites:', error);
+        }
+
+        if (data) {
+            // Filter out favorites where the joined ad is null
+            const validFavorites = data.filter(item => item.ads !== null);
+            setFavorites(validFavorites);
         }
         setLoading(false);
     };
@@ -42,7 +54,7 @@ export default function FavoritesPage() {
     return (
         <div className="bg-background min-h-screen pb-20">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border px-4 h-14 flex items-center gap-4">
+            <header className="sticky top-0 z-50 bg-background border-b border-border px-4 h-14 flex items-center gap-4">
                 <button onClick={() => router.back()} className="p-2 hover:bg-surface rounded-full">
                     <ChevronLeft className="h-6 w-6" />
                 </button>

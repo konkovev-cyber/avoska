@@ -31,7 +31,7 @@
   --font-mono: ui-monospace, monospace;
 }
 
-.dark {
+/* .dark {
   --background: #020617;
   --foreground: #f8fafc;
   --surface: #1e293b;
@@ -44,7 +44,6 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    /* Same as .dark for auto-detection */
     --background: #020617;
     --foreground: #f8fafc;
     --surface: #1e293b;
@@ -54,7 +53,7 @@
     --accent: #f97316;
     --muted: #94a3b8;
   }
-}
+} */
 
 body {
   background: var(--background);

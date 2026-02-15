@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Bell, ChevronLeft, MessageCircle, Star, Package, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function NotificationsPage() {
     const [notifications, setNotifications] = useState<any[]>([]);
@@ -45,18 +46,6 @@ export default function NotificationsPage() {
         setLoading(false);
     };
 
-    const markAllRead = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-
-        await supabase
-            .from('messages')
-            .update({ is_read: true })
-            .eq('receiver_id', session.user.id);
-
-        fetchNotifications();
-    };
-
     return (
         <div className="container mx-auto px-4 py-8 max-w-2xl">
             <div className="flex items-center justify-between mb-8">
@@ -66,12 +55,6 @@ export default function NotificationsPage() {
                     </button>
                     <h1 className="text-2xl font-black">Уведомления</h1>
                 </div>
-                {notifications.some(n => !n.isRead) && (
-                    <button onClick={markAllRead} className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
-                        <Check className="h-4 w-4" />
-                        Прочитать все
-                    </button>
-                )}
             </div>
 
             {loading ? (
@@ -79,27 +62,24 @@ export default function NotificationsPage() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
             ) : notifications.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                     {notifications.map((n) => (
                         <Link
                             key={n.id}
                             href={n.link}
-                            className={`block p-6 rounded-2xl border transition-all hover:shadow-md ${n.isRead ? 'bg-surface border-border opacity-70' : 'bg-background border-primary/20 shadow-sm'}`}
+                            className="block p-4 rounded-2xl border border-border bg-surface transition-all hover:shadow-md active:scale-[0.99]"
                         >
                             <div className="flex gap-4">
-                                <div className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
-                                    <MessageCircle className="h-6 w-6 text-accent" />
+                                <div className="w-10 h-10 rounded-full bg-muted/10 flex items-center justify-center shrink-0">
+                                    <MessageCircle className="h-5 w-5 text-muted-foreground" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <div className="font-black truncate pr-4">{n.title}</div>
+                                    <div className="flex justify-between items-start">
+                                        <div className="font-bold truncate pr-4 text-sm">{n.title}</div>
                                         <div className="text-[10px] text-muted font-bold uppercase shrink-0">{new Date(n.date).toLocaleDateString()}</div>
                                     </div>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">{n.body}</p>
+                                    <p className="text-xs text-muted-foreground line-clamp-1">{n.body}</p>
                                 </div>
-                                {!n.isRead && (
-                                    <div className="w-2 h-2 bg-primary rounded-full mt-2" />
-                                )}
                             </div>
                         </Link>
                     ))}

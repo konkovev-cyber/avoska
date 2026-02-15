@@ -23,7 +23,8 @@ import {
     Paperclip,
     Image as ImageIcon,
     Check,
-    CheckCheck
+    CheckCheck,
+    Ban
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -31,9 +32,9 @@ import Link from 'next/link';
 import { getShareableUrl } from '@/lib/share';
 import RightSidebar from '@/components/layout/RightSidebar';
 
-const MapView = dynamic(() => import('@/components/MapView'), {
+const YandexMapView = dynamic(() => import('@/components/YandexMapView'), {
     ssr: false,
-    loading: () => <div className="h-[300px] w-full bg-muted animate-pulse rounded-2xl flex items-center justify-center font-bold text-xs uppercase tracking-widest text-muted-foreground">Загрузка карты...</div>
+    loading: () => <div className="h-[200px] w-full bg-surface animate-pulse rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest text-muted opacity-30">Карта...</div>
 });
 
 function AdContent() {
@@ -150,7 +151,7 @@ function AdContent() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
-        const ADMIN_EMAILS = ['ht-elk@yandex.ru', 'dron-vbg@yandex.ru', 'konkev@bk.ru'];
+        const ADMIN_EMAILS = ['ht-elk@yandex.ru', 'dron-vbg@yandex.ru', 'konkev@bk.ru', 'konkovev@gmail.com'];
         if (profile?.role === 'admin' || ADMIN_EMAILS.includes(session.user.email || '')) {
             setIsAdmin(true);
         }
@@ -160,7 +161,7 @@ function AdContent() {
         if (!id) return;
         const { data, error } = await supabase
             .from('ads')
-            .select(`*, profiles:user_id (*), category:category_id (*)`)
+            .select(`*, user_id, profiles:user_id (*), category:category_id (*)`)
             .eq('id', id)
             .single();
 
@@ -174,23 +175,71 @@ function AdContent() {
     };
 
     const toggleFavorite = async () => {
+        if (!id) return;
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return router.push('/login');
+        if (!session) {
+            toast.error('Войдите, чтобы добавить в избранное');
+            return router.push('/login');
+        }
 
-        if (isFavorite) {
-            await supabase.from('favorites').delete().eq('user_id', session.user.id).eq('ad_id', id);
-            setIsFavorite(false);
-        } else {
-            await supabase.from('favorites').insert({ user_id: session.user.id, ad_id: id });
-            setIsFavorite(true);
+        const adId = id;
+        const userId = session.user.id;
+        const originalState = isFavorite;
+
+        // Optimistic update
+        setIsFavorite(!originalState);
+
+        try {
+            console.log('Toggling favorite for ad:', adId, 'user:', userId, 'current state:', originalState);
+            if (originalState) {
+                const { error } = await supabase
+                    .from('favorites')
+                    .delete()
+                    .eq('user_id', userId)
+                    .eq('ad_id', adId);
+
+                if (error) throw error;
+                console.log('Successfully removed from favorites');
+                toast.success('Удалено из избранного');
+            } else {
+                const { error } = await supabase
+                    .from('favorites')
+                    .insert({ user_id: userId, ad_id: adId });
+
+                if (error) {
+                    if (error.code === '23505') {
+                        console.log('Favorite already exists in DB');
+                        setIsFavorite(true);
+                        return;
+                    }
+                    throw error;
+                }
+                console.log('Successfully added to favorites');
+                toast.success('Добавлено в избранное');
+            }
+        } catch (error: any) {
+            console.error('Favorite error:', error);
+            setIsFavorite(originalState);
+            toast.error(error.message || 'Ошибка обновления избранного');
         }
     };
 
     const checkFavorite = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session || !id) return;
-        const { data } = await supabase.from('favorites').select('id').eq('user_id', session.user.id).eq('ad_id', id).single();
-        setIsFavorite(!!data);
+
+        try {
+            const { data, error } = await supabase
+                .from('favorites')
+                .select('ad_id')
+                .eq('user_id', session.user.id)
+                .eq('ad_id', id)
+                .maybeSingle();
+
+            setIsFavorite(!!data);
+        } catch (err) {
+            console.error('Check favorite error:', err);
+        }
     };
 
     const handleSendMessage = async (e?: React.FormEvent) => {
@@ -267,23 +316,22 @@ function AdContent() {
 
     const handleShare = async () => {
         const url = window.location.href;
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: ad?.title,
-                    text: `Посмотри это объявление на Авоська+: ${ad?.title}`,
-                    url
-                });
-            } catch (e) {
-                // Ignore abort errors
-                if ((e as Error).name !== 'AbortError') {
-                    navigator.clipboard.writeText(url);
-                    toast.success('Ссылка скопирована');
-                }
+        try {
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(url);
+                toast.success('Ссылка скопирована в буфер обмена');
+            } else {
+                // Fallback for non-secure contexts
+                const input = document.createElement('input');
+                input.value = url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                toast.success('Ссылка скопирована');
             }
-        } else {
-            navigator.clipboard.writeText(url);
-            toast.success('Ссылка скопирована');
+        } catch (err) {
+            toast.error('Не удалось скопировать ссылку');
         }
     };
 
@@ -341,6 +389,12 @@ function AdContent() {
                             {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                         </div>
                         <div className="flex gap-2">
+                            {ad.status === 'rejected' && (
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-wider h-fit mt-1.5">
+                                    <Ban className="h-3 w-3" />
+                                    Заблокировано
+                                </div>
+                            )}
                             <button onClick={toggleFavorite} className={cn("p-2 rounded-full transition-colors", isFavorite ? "text-red-500 bg-red-50" : "text-muted hover:bg-muted/10")}>
                                 <Heart className={cn("h-6 w-6", isFavorite && "fill-current")} />
                             </button>
@@ -387,10 +441,10 @@ function AdContent() {
                             )}
                         </div>
 
-                        {/* Thumbnails - Smaller */}
-                        <div className="flex gap-2 overflow-x-auto scrollbar-none">
+                        {/* Thumbnails - Grid/Wrap for no side scrolling */}
+                        <div className="flex flex-wrap gap-2">
                             {ad.images.map((img: string, i: number) => (
-                                <button key={i} onClick={() => setCurrentImageIndex(i)} className={cn("w-12 h-12 rounded-lg border-2 shrink-0 overflow-hidden", currentImageIndex === i ? "border-primary" : "border-transparent opacity-60")}>
+                                <button key={i} onClick={() => setCurrentImageIndex(i)} className={cn("w-12 h-12 rounded-lg border-2 shrink-0 overflow-hidden transition-all", currentImageIndex === i ? "border-primary" : "border-transparent opacity-60 hover:opacity-100")}>
                                     <img src={getOptimizedImageUrl(img, { width: 100, quality: 60 })} className="w-full h-full object-cover" />
                                 </button>
                             ))}
@@ -406,10 +460,17 @@ function AdContent() {
                         <div className="space-y-2">
                             <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Характеристики</h2>
                             <div className="grid grid-cols-1 gap-1">
-                                <div className="flex justify-between py-1 border-b border-border/50 text-xs">
-                                    <span className="text-muted">Состояние</span>
-                                    <span className="font-bold">{ad.condition === 'new' ? 'Новое' : 'Б/у'}</span>
-                                </div>
+                                {!(ad.category?.slug === 'services' || ad.category?.slug === 'rent-commercial' || (ad.category?.slug === 'real-estate' && (ad.specifications?.type === 'house' || ad.specifications?.type === 'plot'))) && (
+                                    <div className="flex justify-between py-1 border-b border-border/50 text-xs">
+                                        <span className="text-muted">{(ad.category?.slug === 'real-estate' && ad.specifications?.type === 'apartment') || ad.category?.slug === 'rent-apartments' ? 'Тип жилья' : 'Состояние'}</span>
+                                        <span className="font-bold">
+                                            {ad.condition === 'new' ? 'Новое' :
+                                                ad.condition === 'used' ? 'Б/у' :
+                                                    ad.condition === 'secondary' ? 'Вторичка' :
+                                                        ad.condition === 'new_building' ? 'Новостройка' : ad.condition}
+                                        </span>
+                                    </div>
+                                )}
                                 {ad.category && (
                                     <div className="flex justify-between py-1 border-b border-border/50 text-xs">
                                         <span className="text-muted">Категория</span>
@@ -432,7 +493,8 @@ function AdContent() {
                                         type: 'Тип строения',
                                         status: 'Статус участка',
                                         size: 'Размер',
-                                        gender: 'Пол'
+                                        gender: 'Пол',
+                                        rent_type: 'Срок аренды'
                                     };
 
                                     // Translate value for transmission/gender/rooms
@@ -447,6 +509,10 @@ function AdContent() {
                                         if (v === 'unisex') displayValue = 'Унисекс';
                                     }
                                     if (k === 'rooms' && v === 'studio') displayValue = 'Студия';
+                                    if (k === 'rent_type') {
+                                        if (v === 'daily') displayValue = 'Посуточно';
+                                        if (v === 'long_term') displayValue = 'На долгий срок';
+                                    }
 
                                     // Land and Building translations
                                     if (k === 'type') {
@@ -476,11 +542,9 @@ function AdContent() {
                         {ad.latitude && ad.longitude && (
                             <div className="space-y-3 pt-2">
                                 <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Местоположение</h2>
-                                <MapView
-                                    pos={[ad.latitude, ad.longitude]}
-                                    title={ad.title}
-                                    address={ad.address}
-                                />
+                                <div className="h-[200px] w-full rounded-2xl overflow-hidden border border-border shadow-sm">
+                                    <YandexMapView pos={[ad.latitude, ad.longitude]} />
+                                </div>
                                 <div className="text-[10px] text-muted-foreground font-medium italic">
                                     {ad.address || ad.city}
                                 </div>
@@ -490,8 +554,47 @@ function AdContent() {
 
                     {/* Sidebar / Bottom Actions for Mobile */}
                     <div className="w-full lg:w-72 space-y-4">
+                        {/* Admin Controls */}
+                        {isAdmin && (
+                            <div className="bg-red-500/5 backdrop-blur-md border border-red-500/20 p-4 rounded-2xl space-y-3">
+                                <div className="text-[10px] font-black text-red-600/80 uppercase tracking-widest">Панель администратора</div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={async () => {
+                                            if (confirm('Удалить это объявление?')) {
+                                                const { error } = await supabase.from('ads').delete().eq('id', id);
+                                                if (!error) {
+                                                    toast.success('Объявление удалено');
+                                                    router.push('/');
+                                                }
+                                            }
+                                        }}
+                                        className="bg-red-600 text-white text-[11px] font-black h-9 rounded-xl hover:bg-red-700 transition-all active:scale-95 shadow-sm"
+                                    >
+                                        Удалить
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            const newStatus = ad.status === 'rejected' ? 'active' : 'rejected';
+                                            const { error } = await supabase.from('ads').update({ status: newStatus }).eq('id', id);
+                                            if (!error) {
+                                                toast.success(newStatus === 'rejected' ? 'Объявление заблокировано' : 'Объявление разблокировано');
+                                                setAd({ ...ad, status: newStatus });
+                                            }
+                                        }}
+                                        className={cn(
+                                            "text-white text-[11px] font-black h-9 rounded-xl transition-all active:scale-95 shadow-sm",
+                                            ad.status === 'rejected' ? "bg-green-600 hover:bg-green-700" : "bg-orange-500 hover:bg-orange-600"
+                                        )}
+                                    >
+                                        {ad.status === 'rejected' ? 'Разбанить' : 'Бан'}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Seller Card - Compact */}
-                        <Link href={`/user/${ad.user_id}`} className="bg-surface p-4 rounded-2xl border border-border shadow-sm flex items-center gap-3 hover:bg-muted/50 transition-all active:scale-98">
+                        <Link href={`/user?id=${ad.user_id}`} className="bg-white/40 p-4 rounded-2xl border border-white/60 backdrop-blur-xl flex items-center gap-3 hover:bg-white/60 transition-all active:scale-98 shadow-sm">
                             <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0">
                                 {ad.profiles?.avatar_url ? (
                                     <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" alt={ad.profiles.full_name} />
@@ -611,17 +714,8 @@ function AdContent() {
                             )}
                         </div>
 
-                        {/* Banners and Footer Links moved here - below chat */}
-                        <div className="hidden lg:block space-y-4 pt-4 border-t border-border/50">
-                            <div className="text-[10px] font-black tracking-widest text-muted-foreground uppercase mb-2 px-1">Реклама</div>
-                            <div className="space-y-3">
-                                <AdPageBanners />
-                            </div>
-                            <div className="pt-6 text-[10px] text-muted-foreground font-medium text-center opacity-60">
-                                © 2026 Авоська+ <br />
-                                <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
-                            </div>
-                        </div>
+                        {/* Banners and Footer Links - only show when banners are enabled */}
+                        <AdPageSidebar />
                     </div>
                 </div>
             </div>
@@ -629,10 +723,11 @@ function AdContent() {
     );
 }
 
-// Separate component for banners in ad page to keep things clean
-function AdPageBanners() {
+// Separate component for banners in ad page - includes label and footer
+function AdPageSidebar() {
     const [banners, setBanners] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [bannersEnabled, setBannersEnabled] = useState(true);
 
     useEffect(() => {
         fetchBanners();
@@ -640,6 +735,14 @@ function AdPageBanners() {
 
     const fetchBanners = async () => {
         try {
+            // Check global setting first
+            const { data: settings } = await supabase.from('app_settings').select('value').eq('key', 'banners_ad_page_enabled').single();
+            if (settings && settings.value === 'false') {
+                setBannersEnabled(false);
+                setLoading(false);
+                return;
+            }
+
             const { data } = await supabase
                 .from('banners')
                 .select('*')
@@ -666,6 +769,11 @@ function AdPageBanners() {
         }
     };
 
+    // Don't render anything if banners are disabled or no banners
+    if (!bannersEnabled || banners.length === 0) {
+        return null;
+    }
+
     if (loading) return (
         <div className="space-y-3">
             <div className="w-full aspect-video bg-muted/20 animate-pulse rounded-2xl" />
@@ -673,29 +781,36 @@ function AdPageBanners() {
     );
 
     return (
-        <div className="space-y-3">
-            {banners.filter(b => b.image_url).map(banner => (
-                <a
-                    key={banner.id}
-                    href={banner.link_url || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => {
-                        supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
-                            if (error) {
-                                supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
-                            }
-                        });
-                    }}
-                    className="group relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/50 bg-surface block"
-                >
-                    <img
-                        src={banner.image_url}
-                        alt={banner.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                </a>
-            ))}
+        <div className="hidden lg:block space-y-4 pt-4 border-t border-border/50">
+            <div className="text-[10px] font-black tracking-widest text-muted-foreground uppercase mb-2 px-1">Реклама</div>
+            <div className="space-y-3">
+                {banners.filter(b => b.image_url).map(banner => (
+                    <a
+                        key={banner.id}
+                        href={banner.link_url || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                            supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
+                                if (error) {
+                                    supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
+                                }
+                            });
+                        }}
+                        className="group relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/50 bg-surface block"
+                    >
+                        <img
+                            src={banner.image_url}
+                            alt={banner.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                    </a>
+                ))}
+            </div>
+            <div className="pt-6 text-[10px] text-muted-foreground font-medium text-center opacity-60">
+                © 2026 Авоська+ <br />
+                <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
+            </div>
         </div>
     );
 }

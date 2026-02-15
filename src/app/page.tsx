@@ -11,17 +11,23 @@ import {
   ChevronRight,
   Heart,
   MapPin,
-  Star
+  Star,
+  Smartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { recommendationService } from '@/lib/recommendations';
 import HoverImageGallery from '@/components/ui/HoverImageGallery';
 
 const CATEGORIES = [
   { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },
   { name: 'Недвижимость', slug: 'real-estate', image: '/categories/real-estate.jpg' },
+  { name: 'Аренда квартир', slug: 'rent-apartments', image: '/categories/rent-apartments.jpg' },
+  { name: 'Аренда коммерции', slug: 'rent-commercial', image: '/categories/rent-commercial.jpg' },
+  { name: 'Аренда авто', slug: 'rent-cars', image: '/categories/rent-cars.jpg' },
   { name: 'Работа', slug: 'jobs', image: '/categories/jobs.jpg' },
   { name: 'Услуги', slug: 'services', image: '/categories/services.jpg' },
+  { name: 'Аренда инструмента', slug: 'rent-tools', image: '/categories/rent-tools.jpg' },
   { name: 'Электроника', slug: 'electronics', image: '/categories/electronics.jpg' },
   { name: 'Дом и дача', slug: 'home', image: '/categories/home.jpg' },
   { name: 'Одежда', slug: 'clothing', image: '/categories/clothing.jpg' },
@@ -65,7 +71,7 @@ export default function HomePage() {
           .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
-          .limit(8),
+          .limit(5),
         supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
       ]);
 
@@ -185,19 +191,50 @@ export default function HomePage() {
     e.preventDefault();
     e.stopPropagation();
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return router.push('/login');
+    if (!session) {
+      toast.error('Войдите, чтобы добавить в избранное');
+      return router.push('/login');
+    }
 
     const isFav = favorites.has(adId);
-    if (isFav) {
-      await supabase.from('favorites').delete().eq('user_id', session.user.id).eq('ad_id', adId);
+
+    // Optimistic UI
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (isFav) next.delete(adId);
+      else next.add(adId);
+      return next;
+    });
+
+    try {
+      if (isFav) {
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('ad_id', adId);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ user_id: session.user.id, ad_id: adId });
+
+        if (error) {
+          if (error.code === '23505') return; // Already exists
+          throw error;
+        }
+      }
+    } catch (error: any) {
+      console.error('Error toggling favorite:', error);
+      toast.error('Ошибка обновления избранного');
+      // Rollback
       setFavorites(prev => {
         const next = new Set(prev);
-        next.delete(adId);
+        if (isFav) next.add(adId);
+        else next.delete(adId);
         return next;
       });
-    } else {
-      await supabase.from('favorites').insert({ user_id: session.user.id, ad_id: adId });
-      setFavorites(prev => new Set(prev).add(adId));
     }
   };
 
@@ -258,7 +295,7 @@ export default function HomePage() {
         <section className="mb-6">
           {/* Desktop Categories Grid */}
           <div className="hidden md:grid grid-cols-4 lg:grid-cols-10 gap-2 md:gap-4">
-            {CATEGORIES.slice(0, 8).map((cat) => (
+            {CATEGORIES.slice(0, 10).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}
@@ -279,18 +316,18 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Mobile Categories - Horizontal Cards with Images */}
-          <div className="md:hidden flex gap-3 overflow-x-auto pb-4 scrollbar-none -mx-2 px-2 snap-x snap-mandatory">
-            {CATEGORIES.map((cat) => (
+          {/* Mobile Categories - Responsive Grid */}
+          <div className="md:hidden grid grid-cols-5 gap-2 px-1">
+            {CATEGORIES.slice(0, 10).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}
-                className="shrink-0 w-[100px] flex flex-col gap-2 snap-start"
+                className="flex flex-col gap-1 items-center"
               >
-                <div className="aspect-square bg-surface border border-border rounded-2xl overflow-hidden shadow-sm active:scale-95 transition-transform flex items-center justify-center">
+                <div className="aspect-square w-full bg-surface border border-border rounded-xl overflow-hidden shadow-sm active:scale-95 transition-transform flex items-center justify-center">
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
                 </div>
-                <span className="text-[10px] font-bold text-center leading-tight">{cat.name}</span>
+                <span className="text-[9px] font-bold text-center leading-tight line-clamp-1">{cat.name}</span>
               </Link>
             ))}
           </div>
@@ -312,38 +349,49 @@ export default function HomePage() {
             <h2 className="text-xl md:text-3xl font-black tracking-tight">Новое</h2>
           </div>
 
-          <div className="flex gap-2.5 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-none snap-x snap-mandatory touch-pan-x">
-            {newAds.map((ad) => (
-              <div key={ad.id} className="shrink-0 w-[120px] md:w-[180px] group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-sm border border-border/40 active:scale-[0.98] duration-200 snap-start">
-                <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full">
-                  <div className="aspect-square relative overflow-hidden bg-muted">
-                    {ad.images?.[0] ? (
-                      <img
-                        src={getOptimizedImageUrl(ad.images[0], { width: 240, quality: 70 })}
-                        alt={ad.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[8px] text-muted-foreground uppercase font-black opacity-30">Нет фото</div>
-                    )}
-                  </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 px-1">
+            {newAds.slice(0, 5).map((ad) => (
+              <div key={ad.id} className="group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl border border-border/80 transition-all duration-300 active:scale-[0.98]">
+                <div className="aspect-[4/3] relative overflow-hidden bg-secondary/10">
+                  <HoverImageGallery
+                    images={ad.images}
+                    alt={ad.title}
+                    href={`/ad?id=${ad.id}`}
+                  />
+                  {ad.condition === 'new' && (
+                    <div className="absolute bottom-1 left-1 px-1 py-0.5 bg-green-500 text-white text-[7px] font-black uppercase rounded shadow-sm z-20 pointer-events-none">
+                      Новое
+                    </div>
+                  )}
+                </div>
 
-                  <div className="p-2 flex flex-col flex-1">
-                    <div className="text-[13px] font-black tracking-tight text-foreground leading-none">
+                <Link href={`/ad?id=${ad.id}`} className="flex flex-col flex-1">
+                  <div className="p-3 flex flex-col flex-1 gap-1">
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="text-[14px] md:text-base font-medium leading-tight line-clamp-2 text-foreground flex-1 hover:text-primary transition-colors">
+                        {ad.title}
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleFavorite(e, ad.id);
+                        }}
+                        className="p-1 rounded-full text-foreground/50 hover:text-red-500 transition-colors active:scale-90 z-20"
+                      >
+                        <Heart className={cn("h-5 w-5", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
+                      </button>
+                    </div>
+
+                    <div className="text-[15px] md:text-lg font-bold tracking-tight text-foreground">
                       {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                     </div>
-                    <h3 className="text-[9px] font-medium leading-[1.3] line-clamp-2 text-foreground/80 mt-1 min-h-[2.6em]">
-                      {ad.title}
-                    </h3>
+
+                    <div className="text-[12px] md:text-[13px] text-muted-foreground flex items-center gap-1 mt-1 font-medium">
+                      <MapPin className="h-3 w-3 opacity-60" />
+                      <span className="line-clamp-1">{ad.city || 'Город'}</span>
+                    </div>
                   </div>
                 </Link>
-                <button
-                  onClick={(e) => toggleFavorite(e, ad.id)}
-                  className="absolute top-1 right-1 p-1.5 rounded-full bg-black/20 backdrop-blur-md text-white active:scale-90"
-                >
-                  <Heart className={cn("h-3 w-3", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
-                </button>
               </div>
             ))}
           </div>
@@ -358,51 +406,84 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* App Download Section - Slim Version */}
+        <section className="mb-12 px-1">
+          <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-4 md:p-6 text-white relative overflow-hidden shadow-xl shadow-green-900/5">
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0">
+                  <Smartphone className="h-7 w-7 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg md:text-xl font-black tracking-tight">Установите Авоську+</h3>
+                  <p className="text-green-50/70 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Приложение для Android стало быстрее и удобнее</p>
+                </div>
+              </div>
+
+              <a
+                href="https://github.com/konkovev-cyber/avoska/releases/latest/download/avoska.apk"
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
+                <span>Скачать .apk</span>
+                <ChevronRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* Recommendations Section */}
         <section className="mb-12">
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="text-xl md:text-3xl font-black tracking-tight">Подборка для вас</h2>
           </div>
 
-          <div className="flex gap-2.5 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-none snap-x snap-mandatory touch-pan-x">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 px-1">
             {loading ? (
-              [1, 2, 3, 4].map(i => (
-                <div key={i} className="shrink-0 w-[140px] md:w-[200px] aspect-[3/4] bg-muted/20 rounded-xl animate-pulse" />
+              [1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="aspect-[3/4] bg-muted/20 rounded-xl animate-pulse" />
               ))
-            ) : ads.map((ad) => (
-              <div key={ad.id} className="shrink-0 w-[120px] md:w-[180px] group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-sm border border-border/40 active:scale-[0.98] duration-200 snap-start">
-                <Link href={`/ad?id=${ad.id}`} className="flex flex-col h-full">
-                  <div className="aspect-square relative overflow-hidden bg-muted">
-                    <img
-                      src={getOptimizedImageUrl(ad.images?.[0] || '', { width: 240, quality: 70 })}
-                      alt={ad.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    {ad.condition === 'new' && (
-                      <div className="absolute bottom-1 left-1 px-1 py-0.5 bg-green-500 text-white text-[7px] font-black uppercase rounded shadow-sm">
-                        Новое
-                      </div>
-                    )}
-                  </div>
+            ) : ads.slice(0, 5).map((ad) => (
+              <div key={ad.id} className="group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl border border-border/80 transition-all duration-300 active:scale-[0.98]">
+                <div className="aspect-[4/3] relative overflow-hidden bg-secondary/10">
+                  <HoverImageGallery
+                    images={ad.images}
+                    alt={ad.title}
+                    href={`/ad?id=${ad.id}`}
+                  />
+                  {ad.condition === 'new' && (
+                    <div className="absolute bottom-1 left-1 px-1 py-0.5 bg-green-500 text-white text-[7px] font-black uppercase rounded shadow-sm z-20 pointer-events-none">
+                      Новое
+                    </div>
+                  )}
+                </div>
 
-                  <div className="p-2 flex flex-col flex-1">
-                    <div className="text-[13px] font-black tracking-tight text-foreground leading-none">
+                <Link href={`/ad?id=${ad.id}`} className="flex flex-col flex-1">
+                  <div className="p-3 flex flex-col flex-1 gap-1">
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="text-[14px] md:text-base font-medium leading-tight line-clamp-2 text-foreground flex-1 hover:text-primary transition-colors">
+                        {ad.title}
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleFavorite(e, ad.id);
+                        }}
+                        className="p-1 rounded-full text-foreground/50 hover:text-red-500 transition-colors active:scale-90 z-20"
+                      >
+                        <Heart className={cn("h-5 w-5", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
+                      </button>
+                    </div>
+
+                    <div className="text-[15px] md:text-lg font-bold tracking-tight text-foreground">
                       {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                     </div>
 
-                    <h3 className="text-[9px] font-medium leading-[1.3] line-clamp-2 text-foreground/80 mt-1 min-h-[2.6em]">
-                      {ad.title}
-                    </h3>
+                    <div className="text-[12px] md:text-[13px] text-muted-foreground flex items-center gap-1 mt-1 font-medium">
+                      <MapPin className="h-3 w-3 opacity-60" />
+                      <span className="line-clamp-1">{ad.city || 'Город'}</span>
+                    </div>
                   </div>
                 </Link>
-
-                <button
-                  onClick={(e) => toggleFavorite(e, ad.id)}
-                  className="absolute top-1 right-1 p-1.5 rounded-full bg-black/20 backdrop-blur-md text-white active:scale-90"
-                >
-                  <Heart className={cn("h-3 w-3", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
-                </button>
               </div>
             ))}
           </div>
@@ -411,7 +492,7 @@ export default function HomePage() {
               href="/search"
               className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
-              <span>Показать всё</span>
+              <span>Смотреть все</span>
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>

@@ -166,8 +166,16 @@ create table public.favorites (
 
 alter table public.favorites enable row level security;
 
-create policy "Users can manage their favorites"
-  on public.favorites for all
+create policy "Users can view their favorites"
+  on public.favorites for select
+  using ( auth.uid() = user_id );
+
+create policy "Users can insert their favorites"
+  on public.favorites for insert
+  with check ( auth.uid() = user_id );
+
+create policy "Users can delete their favorites"
+  on public.favorites for delete
   using ( auth.uid() = user_id );
 
 

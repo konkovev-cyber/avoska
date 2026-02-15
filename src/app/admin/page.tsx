@@ -17,6 +17,9 @@ import {
     ShieldCheck,
     Ban,
     AlertCircle,
+    Pencil,
+    Upload,
+    X,
     Image as ImageIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,6 +37,7 @@ export default function AdminDashboard() {
     const [banners, setBanners] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [bannersEnabled, setBannersEnabled] = useState(true);
+    const [bannersAdPageEnabled, setBannersAdPageEnabled] = useState(true);
 
     // City form state
     const [newCity, setNewCity] = useState('');
@@ -45,6 +49,8 @@ export default function AdminDashboard() {
     const [catIcon, setCatIcon] = useState('');
     const [catColor, setCatColor] = useState('');
     const [catImage, setCatImage] = useState('');
+    const [catImageFile, setCatImageFile] = useState<File | null>(null);
+    const [catImagePreview, setCatImagePreview] = useState('');
     const [editingCategory, setEditingCategory] = useState<any>(null);
 
     // Banner form state
@@ -89,7 +95,7 @@ export default function AdminDashboard() {
                 supabase.from('reports').select('*, reporter:profiles(full_name), ad:ads(title)').order('created_at', { ascending: false }),
                 supabase.from('banners').select('*').order('created_at', { ascending: false }),
                 supabase.from('categories').select('*').order('name'),
-                supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
+                supabase.from('app_settings').select('*').in('key', ['banners_enabled', 'banners_ad_page_enabled'])
             ]);
 
             if (adsRes.error) {
@@ -106,7 +112,12 @@ export default function AdminDashboard() {
             setReports(reportsRes.data || []);
             setBanners(bannersRes.data || []);
             setCategories(categoriesRes.data || []);
-            setBannersEnabled(settingsRes.data?.value === 'true');
+
+            const bEnabled = (settingsRes.data || []).find((s: any) => s.key === 'banners_enabled')?.value ?? 'true';
+            const bAdEnabled = (settingsRes.data || []).find((s: any) => s.key === 'banners_ad_page_enabled')?.value ?? 'true';
+
+            setBannersEnabled(bEnabled === 'true');
+            setBannersAdPageEnabled(bAdEnabled === 'true');
 
             const allAdsCount = adsRes.data?.length || 0;
             const pendingAdsCount = (adsRes.data || []).filter((a: any) => a.status === 'pending').length;
@@ -128,33 +139,60 @@ export default function AdminDashboard() {
 
     const addCategory = async (e: React.FormEvent) => {
         e.preventDefault();
-        const payload = {
-            name: catName,
-            slug: catSlug || catName.toLowerCase().replace(/ /g, '-'),
-            icon: catIcon,
-            color: catColor,
-            image: catImage
-        };
+        setLoading(true);
+        const toastId = toast.loading(editingCategory ? 'Обновление...' : 'Создание...');
 
-        if (editingCategory) {
-            const { error } = await supabase.from('categories').update(payload).eq('id', editingCategory.id);
-            if (!error) {
-                toast.success('Категория обновлена');
-                setEditingCategory(null);
-                setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage('');
-                fetchData();
-            } else {
-                toast.error('Ошибка обновления: ' + error.message);
+        try {
+            let finalImageUrl = catImage;
+
+            if (catImageFile) {
+                const fileName = `cat-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+                const { error: uploadError } = await supabase.storage
+                    .from('categories')
+                    .upload(fileName, catImageFile);
+
+                if (uploadError) {
+                    // Fallback to ad-images if categories bucket doesn't exist
+                    const { error: fallbackError } = await supabase.storage
+                        .from('ad-images')
+                        .upload(`cats/${fileName}`, catImageFile);
+
+                    if (fallbackError) throw new Error('Ошибка загрузки фото: ' + fallbackError.message);
+
+                    const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(`cats/${fileName}`);
+                    finalImageUrl = publicUrl;
+                } else {
+                    const { data: { publicUrl } } = supabase.storage.from('categories').getPublicUrl(fileName);
+                    finalImageUrl = publicUrl;
+                }
             }
-        } else {
-            const { error } = await supabase.from('categories').insert(payload);
-            if (!error) {
-                toast.success('Категория добавлена');
-                setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage('');
-                fetchData();
+
+            const payload = {
+                name: catName,
+                slug: catSlug || catName.toLowerCase().replace(/ /g, '-'),
+                icon: catIcon,
+                color: catColor,
+                image: finalImageUrl
+            };
+
+            if (editingCategory) {
+                const { error } = await supabase.from('categories').update(payload).eq('id', editingCategory.id);
+                if (error) throw error;
+                toast.success('Категория обновлена', { id: toastId });
             } else {
-                toast.error('Ошибка создания: ' + error.message);
+                const { error } = await supabase.from('categories').insert(payload);
+                if (error) throw error;
+                toast.success('Категория добавлена', { id: toastId });
             }
+
+            setEditingCategory(null);
+            setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage('');
+            setCatImageFile(null); setCatImagePreview('');
+            fetchData();
+        } catch (err: any) {
+            toast.error(err.message, { id: toastId });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -171,6 +209,8 @@ export default function AdminDashboard() {
         setCatIcon(c.icon || '');
         setCatColor(c.color || '');
         setCatImage(c.image || '');
+        setCatImagePreview(c.image || '');
+        setCatImageFile(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -310,12 +350,25 @@ export default function AdminDashboard() {
         const newValue = !bannersEnabled;
         const { error } = await supabase
             .from('app_settings')
-            .update({ value: newValue.toString(), updated_at: new Date().toISOString() })
-            .eq('key', 'banners_enabled');
+            .upsert({ key: 'banners_enabled', value: newValue.toString(), updated_at: new Date().toISOString() }, { onConflict: 'key' });
 
         if (!error) {
             setBannersEnabled(newValue);
-            toast.success(newValue ? 'Баннеры включены' : 'Баннеры выключены');
+            toast.success(newValue ? 'Баннеры на главной включены' : 'Баннеры на главной выключены');
+        } else {
+            toast.error('Ошибка обновления настроек');
+        }
+    };
+
+    const toggleBannersAdPageEnabled = async () => {
+        const newValue = !bannersAdPageEnabled;
+        const { error } = await supabase
+            .from('app_settings')
+            .upsert({ key: 'banners_ad_page_enabled', value: newValue.toString(), updated_at: new Date().toISOString() }, { onConflict: 'key' });
+
+        if (!error) {
+            setBannersAdPageEnabled(newValue);
+            toast.success(newValue ? 'Баннеры в объявлениях включены' : 'Баннеры в объявлениях выключены');
         } else {
             toast.error('Ошибка обновления настроек');
         }
@@ -332,14 +385,16 @@ export default function AdminDashboard() {
                 <h1 className="text-4xl font-black flex items-center gap-3">
                     <Settings className="h-10 w-10 text-primary" /> Админка
                 </h1>
-                <div className="flex gap-2 p-1 rounded-2xl overflow-x-auto max-w-full">
+                <div className="flex flex-wrap gap-2 p-1">
                     {(['ads', 'users', 'cities', 'categories', 'banners', 'reports'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={cn(
-                                "px-6 py-3 rounded-xl text-sm font-black capitalize transition-all whitespace-nowrap",
-                                activeTab === tab ? "bg-primary text-white shadow-lg" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                                "px-6 py-3 rounded-xl text-sm font-black capitalize transition-all whitespace-nowrap border-2",
+                                activeTab === tab
+                                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                                    : "bg-white border-border text-muted-foreground hover:bg-muted/50 hover:border-muted-foreground/20"
                             )}
                         >
                             {tab === 'ads' ? `Объявления (${stats.pending})` :
@@ -427,15 +482,44 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
                                     </Link>
-                                    <div className="flex gap-2 w-full md:w-auto relative z-10">
-                                        {ad.status === 'pending' && (
-                                            <>
-                                                <button onClick={() => handleApprove(ad.id)} className="flex-1 md:flex-none bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-md"><CheckCircle className="h-4 w-4" /> Одобрить</button>
-                                                <button onClick={() => handleReject(ad.id)} className="flex-1 md:flex-none bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-md"><XCircle className="h-4 w-4" /> Отклонить</button>
-                                            </>
+                                    <div className="flex flex-wrap items-center gap-1 w-full md:w-auto relative z-10">
+                                        <Link
+                                            href={`/ads/edit?id=${ad.id}`}
+                                            className="p-2 hover:bg-blue-50 text-blue-500 rounded-lg transition-all"
+                                            title="Редактировать"
+                                        >
+                                            <Pencil className="h-5 w-5" />
+                                        </Link>
+
+                                        {ad.status === 'active' ? (
+                                            <button
+                                                onClick={() => handleReject(ad.id)}
+                                                className="p-2 hover:bg-orange-50 text-orange-500 rounded-lg transition-all"
+                                                title="Забанить"
+                                            >
+                                                <Ban className="h-5 w-5" />
+                                            </button>
+                                        ) : (
+                                            ad.status !== 'pending' && (
+                                                <button
+                                                    onClick={() => handleApprove(ad.id)}
+                                                    className="p-2 hover:bg-green-50 text-green-500 rounded-lg transition-all"
+                                                    title="Активировать"
+                                                >
+                                                    <CheckCircle className="h-5 w-5" />
+                                                </button>
+                                            )
                                         )}
-                                        <button onClick={() => deleteAd(ad.id)} className="p-2.5 text-destructive hover:bg-red-50 rounded-xl transition-colors" title="Удалить"><Trash2 /></button>
-                                        <Link href={`/ad?id=${ad.id}`} target="_blank" className="p-2.5 hover:bg-muted rounded-xl text-primary transition-colors"><ExternalLink /></Link>
+
+                                        {ad.status === 'pending' && (
+                                            <div className="flex gap-1 mr-2">
+                                                <button onClick={() => handleApprove(ad.id)} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-xs font-black transition-all shadow-sm"><CheckCircle className="h-4 w-4" /> ОК</button>
+                                                <button onClick={() => handleReject(ad.id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-xs font-black transition-all shadow-sm"><XCircle className="h-4 w-4" /> НЕТ</button>
+                                            </div>
+                                        )}
+
+                                        <button onClick={() => deleteAd(ad.id)} className="p-2 text-destructive hover:bg-red-50 rounded-lg transition-all" title="Удалить"><Trash2 className="h-5 w-5" /></button>
+                                        <Link href={`/ad?id=${ad.id}`} target="_blank" className="p-2 hover:bg-muted rounded-lg text-primary transition-all"><ExternalLink className="h-5 w-5" /></Link>
                                     </div>
                                 </div>
                             </div>
@@ -510,11 +594,67 @@ export default function AdminDashboard() {
                                     <button type="button" onClick={() => { setEditingCategory(null); setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage(''); }} className="text-sm text-primary font-bold">Отменить редактирование</button>
                                 )}
                             </div>
-                            <input value={catName} onChange={e => setCatName(e.target.value)} placeholder="Название категории" className="p-3 rounded-xl border border-border bg-surface outline-none" required />
-                            <input value={catSlug} onChange={e => setCatSlug(e.target.value)} placeholder="Slug (англ. url)" className="p-3 rounded-xl border border-border bg-surface outline-none" />
-                            <input value={catImage} onChange={e => setCatImage(e.target.value)} placeholder="URL картинки" className="p-3 rounded-xl border border-border bg-surface outline-none" />
-                            <input value={catColor} onChange={e => setCatColor(e.target.value)} placeholder="Цвет (Tailwind, e.g. from-red-500 to-orange-500)" className="p-3 rounded-xl border border-border bg-surface outline-none" />
-                            <input value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="Иконка (не обяз.)" className="p-3 rounded-xl border border-border bg-surface outline-none md:col-span-2" />
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Название категории</label>
+                                <input value={catName} onChange={e => setCatName(e.target.value)} placeholder="Напр: Электроника" className="w-full p-3 rounded-xl border border-border bg-surface outline-none font-bold" required />
+                                <p className="text-[9px] text-muted-foreground ml-1 font-medium">Отображается в меню сайта</p>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Имя для ссылки (латиницей)</label>
+                                <input value={catSlug} onChange={e => setCatSlug(e.target.value)} placeholder="Напр: electronics" className="w-full p-3 rounded-xl border border-border bg-surface outline-none" />
+                                <p className="text-[9px] text-muted-foreground ml-1">Будет в адресе: avoska.com/category/<b>ваше-слово</b></p>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Загрузить картинку</label>
+                                <div className="flex items-center gap-4">
+                                    <label className="flex-1 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:bg-muted/30 transition-all group bg-surface overflow-hidden relative">
+                                        {catImagePreview ? (
+                                            <>
+                                                <img src={catImagePreview} className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-white text-xs font-bold">Изменить</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                                <Upload className="h-8 w-8" />
+                                                <span className="text-[10px] font-black uppercase">Выбрать файл</span>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    setCatImageFile(file);
+                                                    setCatImagePreview(URL.createObjectURL(file));
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                    {catImagePreview && (
+                                        <button
+                                            type="button"
+                                            onClick={() => { setCatImageFile(null); setCatImagePreview(''); setCatImage(''); }}
+                                            className="p-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors"
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Цветовой код градиента</label>
+                                <input value={catColor} onChange={e => setCatColor(e.target.value)} placeholder="from-blue-500 to-cyan-500" className="w-full p-3 rounded-xl border border-border bg-surface outline-none" />
+                                <p className="text-[9px] text-muted-foreground ml-1 font-medium">Стиль заливки кнопок (напр: from-green-500 to-teal-500)</p>
+                            </div>
+                            <div className="space-y-1 md:col-span-2">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Тип иконки (на английском)</label>
+                                <input value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="Напр: Car, Home, Smartphone" className="w-full p-3 rounded-xl border border-border bg-surface outline-none font-mono text-sm" />
+                                <p className="text-[9px] text-muted-foreground ml-1">Название символа из библиотеки (Home, Car, Smartphone, Shirt и др.)</p>
+                            </div>
                             <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-xl font-black transition-all hover:opacity-90">
                                 {editingCategory ? 'Обновить категорию' : 'Добавить категорию'}
                             </button>
@@ -542,25 +682,48 @@ export default function AdminDashboard() {
                 {activeTab === 'banners' && (
                     <div className="p-6 space-y-8">
                         {/* Global Banner Toggle */}
-                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-2xl border border-primary/20">
-                            <div>
-                                <h3 className="font-black text-lg">Отображение баннеров</h3>
-                                <p className="text-sm text-muted">Глобально включить/выключить показ баннеров на главной странице</p>
-                            </div>
-                            <button
-                                onClick={toggleBannersEnabled}
-                                className={cn(
-                                    "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
-                                    bannersEnabled ? "bg-primary" : "bg-muted"
-                                )}
-                            >
-                                <span
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-2xl border border-primary/20">
+                                <div>
+                                    <h3 className="font-black text-lg">Баннеры на главной</h3>
+                                    <p className="text-xs text-muted">Глобальный показ на главной странице</p>
+                                </div>
+                                <button
+                                    onClick={toggleBannersEnabled}
                                     className={cn(
-                                        "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-lg",
-                                        bannersEnabled ? "translate-x-7" : "translate-x-1"
+                                        "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
+                                        bannersEnabled ? "bg-primary" : "bg-muted"
                                     )}
-                                />
-                            </button>
+                                >
+                                    <span
+                                        className={cn(
+                                            "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-lg",
+                                            bannersEnabled ? "translate-x-7" : "translate-x-1"
+                                        )}
+                                    />
+                                </button>
+                            </div>
+
+                            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-2xl border border-accent/20">
+                                <div>
+                                    <h3 className="font-black text-lg">Баннеры в объявлении</h3>
+                                    <p className="text-xs text-muted">Показ в боковой панели объявления</p>
+                                </div>
+                                <button
+                                    onClick={toggleBannersAdPageEnabled}
+                                    className={cn(
+                                        "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
+                                        bannersAdPageEnabled ? "bg-accent" : "bg-muted"
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-lg",
+                                            bannersAdPageEnabled ? "translate-x-7" : "translate-x-1"
+                                        )}
+                                    />
+                                </button>
+                            </div>
                         </div>
 
                         <form onSubmit={addBanner} className="grid md:grid-cols-2 gap-4 bg-surface p-6 rounded-3xl border border-border">

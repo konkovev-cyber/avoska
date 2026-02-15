@@ -93,7 +93,7 @@ export const chatService = {
     subscribe(callback: (payload: any) => void) {
         return supabase
             .channel('messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, callback)
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, callback)
             .subscribe();
     }
 };

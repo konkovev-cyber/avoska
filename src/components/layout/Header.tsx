@@ -17,12 +17,17 @@ export default function Header() {
     const [cities, setCities] = useState<any[]>([]);
     const [showCityPicker, setShowCityPicker] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [favoritesCount, setFavoritesCount] = useState(0);
     const [theme, setInternalTheme] = useState<Theme>('system');
     const router = useRouter();
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
+            if (session?.user) {
+                fetchUnread();
+                fetchFavoritesCount();
+            }
         });
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -51,36 +56,46 @@ export default function Header() {
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
                 fetchUnread();
             })
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
+                fetchUnread();
+            })
+            .subscribe();
+
+        // Subscription for favorites
+        const favChannel = supabase.channel('header-favorites')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'favorites' }, () => {
+                fetchFavoritesCount();
+            })
             .subscribe();
 
         return () => {
             subscription.unsubscribe();
             supabase.removeChannel(channel);
+            supabase.removeChannel(favChannel);
         };
     }, []);
 
-    const fetchUnread = async () => {
+    const fetchFavoritesCount = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
+        const { count } = await supabase
+            .from('favorites')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', session.user.id);
+        if (count !== null) setFavoritesCount(count);
+    };
 
-        try {
-            const { count, error } = await supabase
-                .from('messages')
-                .select('*', { count: 'exact', head: true })
-                .eq('receiver_id', session.user.id)
-                .eq('is_read', false);
-
-            if (!error && count !== null) {
-                setUnreadCount(count);
-            }
-        } catch (err) {
-            // Probably is_read column missing
-            console.log('fetchUnread error (might be missing column):', err);
-        }
+    const fetchUnread = async () => {
+        // Unread status disabled by user request
+        setUnreadCount(0);
     };
 
     const toggleTheme = () => {
-        const newTheme = theme === 'light' ? 'dark' : 'light';
+        let current = theme;
+        if (current === 'system' && typeof window !== 'undefined') {
+            current = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        const newTheme = current === 'light' ? 'dark' : 'light';
         setInternalTheme(newTheme);
         setTheme(newTheme);
     };
@@ -109,18 +124,24 @@ export default function Header() {
     };
 
     return (
-        <header className="sticky top-0 z-[100] bg-background/80 backdrop-blur-2xl border-b border-border/50 pt-safe">
+        <header className="sticky top-0 z-[100] bg-background border-b border-border/50 pt-safe shadow-sm">
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-14 md:h-20 flex items-center gap-3 md:gap-8">
-                {/* Logo - Hide on mobile to prioritize Search */}
-                <Link href="/" className="hidden md:flex shrink-0 items-center gap-0.5 group">
-                    <span className="text-2xl md:text-3xl font-black text-primary tracking-tighter group-hover:scale-105 transition-transform">Авоська+</span>
+                <Link href="/" className="hidden md:flex shrink-0 items-center group gap-2">
+                    <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+                        <span className="text-white font-black text-xl tracking-tighter">А+</span>
+                    </div>
+                    <div className="flex flex-col h-10 justify-between py-0.5">
+                        <span className="text-2xl font-black text-foreground tracking-tighter group-hover:text-primary transition-colors leading-none">Авоська+</span>
+                        <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 leading-none">Полезное совсем рядом</span>
+                    </div>
                 </Link>
 
-                {/* Mobile Logo Icon only if needed, but maybe Search is better? 
-                    Let's keep a very small logo or remove it for "App Feel" if Search uses "Search in City".
-                */}
-                <Link href="/" className="hidden shrink-0">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-black text-xs">A+</div>
+                <Link href="/" className="md:hidden shrink-0 flex items-center group">
+                    <div className="flex items-center gap-1.5 active:scale-95 transition-transform">
+                        <div className="w-9 h-9 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20">
+                            <span className="text-white font-black text-lg tracking-tighter">А+</span>
+                        </div>
+                    </div>
                 </Link>
 
                 {/* City Picker & Filter - Mobile */}
@@ -216,6 +237,11 @@ export default function Header() {
                 <div className="hidden xl:flex items-center gap-2">
                     <Link href="/favorites" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Избранное">
                         <Heart className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
+                        {favoritesCount > 0 && (
+                            <span className="absolute top-2.5 right-2.5 w-4 h-4 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background">
+                                {favoritesCount}
+                            </span>
+                        )}
                     </Link>
                     <Link href="/chat" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Сообщения">
                         <MessageSquare className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
@@ -226,20 +252,23 @@ export default function Header() {
                         className="hidden md:block p-3 hover:bg-surface rounded-2xl transition-all group relative"
                         title="Сменить тему"
                     >
-                        {theme === 'light' ? (
-                            <Moon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-transform group-hover:-rotate-12" />
-                        ) : (
-                            <Sun className="h-6 w-6 text-yellow-400 group-hover:text-yellow-300 transition-transform group-hover:rotate-12" />
-                        )}
+                        {(() => {
+                            let effective = theme;
+                            if (effective === 'system' && typeof window !== 'undefined') {
+                                effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                            }
+                            return effective === 'light' ? (
+                                <Moon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-transform group-hover:-rotate-12" />
+                            ) : (
+                                <Sun className="h-6 w-6 text-yellow-400 group-hover:text-yellow-300 transition-transform group-hover:rotate-12" />
+                            );
+                        })()}
                     </button>
 
                     {
                         user && (
                             <Link href="/notifications" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Уведомления">
                                 <Bell className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute top-2.5 right-2.5 w-3 h-3 bg-red-500 rounded-full border-2 border-background animate-pulse" />
-                                )}
                             </Link>
                         )
                     }
@@ -282,9 +311,6 @@ export default function Header() {
                         user && (
                             <Link href="/notifications" className="p-2.5 hover:bg-surface rounded-xl block relative">
                                 <Bell className="h-6 w-6 text-muted-foreground" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background animate-pulse" />
-                                )}
                             </Link>
                         )
                     }

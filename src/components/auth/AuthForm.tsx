@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { X } from 'lucide-react';
+import { X, ArrowLeft, Mail, ShieldCheck } from 'lucide-react';
 
-export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
+export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgot-password' | 'update-password' }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
@@ -19,19 +19,27 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
 
         try {
             if (mode === 'register') {
-                const { error } = await supabase.auth.signUp({
+                const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
+                        emailRedirectTo: `${window.location.origin}/auth/callback`,
                         data: {
                             full_name: fullName,
                         },
                     },
                 });
                 if (error) throw error;
-                toast.success('Регистрация успешна! Теперь вы можете войти.');
+
+                if (data.user && !data.session) {
+                    toast.success('Почти готово! Проверьте почту для подтверждения.');
+                    router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+                    return;
+                }
+
+                toast.success('Регистрация успешна!');
                 router.push('/login');
-            } else {
+            } else if (mode === 'login') {
                 const { error } = await supabase.auth.signInWithPassword({
                     email,
                     password,
@@ -40,6 +48,21 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                 toast.success('С возвращением!');
                 router.push('/');
                 router.refresh();
+            } else if (mode === 'forgot-password') {
+                const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+                });
+                if (error) throw error;
+                toast.success('Проверьте почту!', {
+                    description: 'Мы отправили ссылку для сброса пароля.'
+                });
+            } else if (mode === 'update-password') {
+                const { error } = await supabase.auth.updateUser({
+                    password: password
+                });
+                if (error) throw error;
+                toast.success('Пароль успешно обновлен!');
+                router.push('/');
             }
         } catch (error: any) {
             toast.error(error.message || 'Произошла ошибка');
@@ -58,7 +81,9 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                 <X className="h-6 w-6" />
             </button>
             <h2 className="text-3xl font-black text-center mb-8 tracking-tighter">
-                {mode === 'login' ? 'С возвращением!' : 'Станьте своим'}
+                {mode === 'login' ? 'С возвращением!' :
+                    mode === 'register' ? 'Станьте своим' :
+                        mode === 'forgot-password' ? 'Сброс пароля' : 'Новый пароль'}
             </h2>
             <form onSubmit={handleAuth} className="space-y-5">
                 {mode === 'register' && (
@@ -74,28 +99,45 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                         />
                     </div>
                 )}
-                <div>
-                    <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Ваша почта (Email)</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-14 px-5 rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
-                        placeholder="example@mail.com"
-                        required
-                    />
-                </div>
-                <div>
-                    <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Пароль</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full h-14 px-5 rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
-                        placeholder="••••••••"
-                        required
-                    />
-                </div>
+                {mode !== 'update-password' && (
+                    <div>
+                        <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Ваша почта (Email)</label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full h-14 px-5 rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                            placeholder="example@mail.com"
+                            required
+                        />
+                    </div>
+                )}
+                {mode !== 'forgot-password' && (
+                    <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-[10px] font-black uppercase text-muted-foreground tracking-[0.2em] ml-1">
+                                {mode === 'update-password' ? 'Новый пароль' : 'Пароль'}
+                            </label>
+                            {mode === 'login' && (
+                                <button
+                                    type="button"
+                                    onClick={() => router.push('/forgot-password')}
+                                    className="text-[10px] font-bold uppercase tracking-wider text-primary hover:underline"
+                                >
+                                    Забыли пароль?
+                                </button>
+                            )}
+                        </div>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full h-14 px-5 rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                            placeholder="••••••••"
+                            required
+                        />
+                    </div>
+                )}
                 <button
                     type="submit"
                     disabled={loading}
@@ -107,8 +149,19 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                             <span>Загрузка...</span>
                         </div>
                     ) : (
-                        mode === 'login' ? 'Войти' : 'Создать аккаунт'
+                        mode === 'login' ? 'Войти' :
+                            mode === 'register' ? 'Создать аккаунт' :
+                                mode === 'forgot-password' ? 'Сбросить пароль' : 'Обновить пароль'
                     )}
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="w-full h-14 bg-muted/30 text-muted-foreground font-black uppercase tracking-widest rounded-2xl hover:bg-muted/50 transition-all flex items-center justify-center gap-2 mt-2"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Назад
                 </button>
             </form>
 
@@ -120,14 +173,21 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' }) {
                             Создать
                         </button>
                     </p>
-                ) : (
+                ) : mode === 'register' ? (
                     <p className="text-sm font-medium text-muted-foreground">
                         Уже есть аккаунт?{' '}
                         <button onClick={() => router.push('/login')} className="text-primary font-black hover:underline uppercase text-xs tracking-wider">
                             Войти
                         </button>
                     </p>
-                )}
+                ) : mode === 'forgot-password' ? (
+                    <p className="text-sm font-medium text-muted-foreground">
+                        Вспомнили пароль?{' '}
+                        <button onClick={() => router.push('/login')} className="text-primary font-black hover:underline uppercase text-xs tracking-wider">
+                            Войти
+                        </button>
+                    </p>
+                ) : null}
             </div>
         </div>
     );

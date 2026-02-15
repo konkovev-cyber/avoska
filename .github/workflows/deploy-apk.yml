@@ -1,0 +1,41 @@
+name: Deploy Android APK
+
+on:
+  push:
+    paths:
+      - 'android/**' # Trigger only if android files change
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Find and Rename APK
+        run: |
+          mkdir -p deploy
+          # Find the first apk in the android folder
+          APK_PATH=$(find android -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "No APK found in android directory. Skipping."
+            exit 0
+          fi
+          echo "Found APK at $APK_PATH"
+          cp "$APK_PATH" deploy/avoska.apk
+
+      - name: Upload to Release
+        if: hashFiles('deploy/avoska.apk') != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Android Version
+          body: "Автоматическое обновление мобильного приложения Авоська+"
+          files: deploy/avoska.apk
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

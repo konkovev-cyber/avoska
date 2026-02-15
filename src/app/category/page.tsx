@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { getStoredCity } from '@/lib/geo';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
-import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles } from 'lucide-react';
+import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
@@ -233,7 +233,7 @@ function CategoryContent() {
                                 <Link
                                     key={ad.id}
                                     href={`/ad?id=${ad.id}`}
-                                    className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-transparent hover:border-border"
+                                    className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40"
                                 >
                                     <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                                         {ad.images?.[0] ? (
@@ -249,21 +249,20 @@ function CategoryContent() {
                                             <Heart className="h-4 w-4" />
                                         </button>
                                     </div>
-                                    <div className="p-3 flex flex-col flex-1">
-                                        <h3 className="text-xs font-medium line-clamp-2 mb-1 group-hover:text-primary transition-colors h-8">
-                                            {ad.title}
-                                        </h3>
-                                        <div className="text-base font-black text-foreground mb-2">
+                                    <div className="p-3 flex flex-col flex-1 gap-1">
+                                        <div className="text-base md:text-lg font-black text-foreground tracking-tight leading-none">
                                             {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                                         </div>
-                                        <div className="mt-auto space-y-1">
-                                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground uppercase tracking-tight font-bold">
-                                                <span>{ad.city}</span>
-                                                {ad.profiles?.is_verified && <CheckCircle className="h-2.5 w-2.5 text-blue-500 fill-current" />}
-                                            </div>
-                                            <div className="text-[10px] text-muted-foreground font-medium">
-                                                {new Date(ad.created_at).toLocaleDateString()}
-                                            </div>
+
+                                        <h3 className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em] group-hover:text-primary transition-colors">
+                                            {ad.title}
+                                        </h3>
+
+                                        <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
+                                            <MapPin className="h-3 w-3 shrink-0" />
+                                            <span className="truncate">{ad.city}</span>
+                                            <span className="mx-1">•</span>
+                                            <span className="shrink-0">{new Date(ad.created_at).toLocaleDateString()}</span>
                                         </div>
                                     </div>
                                 </Link>

@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import BottomNav from "@/components/layout/BottomNav";
 import PageAnimatePresence from "@/components/layout/PageAnimatePresence";
+import AppUpdateCheck from "@/components/ui/AppUpdateCheck";
 import "./globals.css";
 
 // const geistSans = Geist({
@@ -59,7 +60,10 @@ export default function RootLayout({
 
         <ConditionalFooter />
         <BottomNav />
+        <AppUpdateCheck />
         <Toaster />
+        {/* Yandex Maps API */}
+        <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=87870950-716b-4560-9d04-58a44b58153b" type="text/javascript"></script>
       </body>
     </html>
   );

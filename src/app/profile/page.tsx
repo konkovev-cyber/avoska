@@ -60,12 +60,20 @@ export default function ProfilePage() {
 
         setMyAds(adsData || []);
 
-        // Fetch Favorites
-        const { data: favsData } = await supabase
+        // Fetch Favorites with verbose join
+        const { data: favsData, error: favsError } = await supabase
             .from('favorites')
-            .select('*, ads(*, categories(name))')
+            .select(`
+                *,
+                ads:ad_id (
+                    *,
+                    categories:category_id (name)
+                )
+            `)
             .eq('user_id', session.user.id);
 
+        if (favsError) console.error('Favorites fetch error:', favsError);
+        console.log('Processed favorites data:', favsData);
         setFavorites(favsData || []);
 
         // Fetch Reviews
@@ -319,8 +327,8 @@ export default function ProfilePage() {
                 </div>
             </div>
 
-            {/* Tabs Navigation */}
-            <div className="flex border-b border-border mb-8 overflow-x-auto no-scrollbar">
+            {/* Tabs Navigation - Wrap for mobile/APK */}
+            <div className="flex flex-wrap border-b border-border mb-8">
                 <button
                     onClick={() => setActiveTab('my-ads')}
                     className={cn(
@@ -358,74 +366,71 @@ export default function ProfilePage() {
                 {activeTab === 'my-ads' && (
                     myAds.length > 0 ? (
                         myAds.map(ad => (
-                            <div key={ad.id} className="bg-surface border border-border rounded-2xl p-4 flex gap-4 md:gap-6 items-center hover:shadow-md transition-all">
-                                <div className="w-20 h-20 md:w-32 md:h-32 bg-muted rounded-xl overflow-hidden shrink-0 border border-border">
+                            <div key={ad.id} className="bg-surface border border-border rounded-2xl p-3 md:p-4 flex gap-3 md:gap-6 items-center hover:shadow-md transition-all overflow-hidden">
+                                <Link href={`/ad?id=${ad.id}`} className="w-16 h-16 md:w-32 md:h-32 bg-muted rounded-xl overflow-hidden shrink-0 border border-border">
                                     {ad.images?.[0] ? (
                                         <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-[10px] text-muted uppercase">Нет фото</div>
+                                        <div className="w-full h-full flex items-center justify-center text-[8px] text-muted uppercase">Нет фото</div>
                                     )}
-                                </div>
+                                </Link>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
+                                    <div className="flex items-center gap-2 mb-0.5">
                                         <span className={cn(
-                                            "text-[10px] font-black uppercase px-2 py-0.5 rounded-md",
+                                            "text-[8px] font-black uppercase px-1.5 py-0.5 rounded",
                                             ad.status === 'active' ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"
                                         )}>
                                             {ad.status === 'active' ? 'Активно' : 'Снято'}
                                         </span>
-                                        <span className="text-[10px] text-muted font-bold uppercase">{ad.categories.name}</span>
+                                        <span className="text-[8px] text-muted font-bold uppercase truncate">{ad.categories?.name}</span>
                                     </div>
-                                    <Link href={`/ad?id=${ad.id}`} className="block text-lg font-bold truncate hover:text-primary transition-colors">
+                                    <Link href={`/ad?id=${ad.id}`} className="block text-sm md:text-lg font-bold truncate hover:text-primary transition-colors">
                                         {ad.title}
                                     </Link>
-                                    <div className="text-xl font-black mt-1">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
-                                    <div className="flex gap-1 mt-2">
-                                        {ad.is_vip && <span className="bg-purple-100 text-purple-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1"><Crown className="h-2 w-2" /> VIP</span>}
-                                        {ad.is_turbo && <span className="bg-orange-100 text-orange-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2 w-2" /> Turbo</span>}
-                                        {ad.pinned_until && <span className="bg-blue-100 text-blue-600 text-[8px] font-black uppercase px-2 py-0.5 rounded-full">Закреплено</span>}
+                                    <div className="text-base md:text-xl font-black mt-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
+                                    <div className="flex gap-1 mt-1 flex-wrap">
+                                        {ad.is_vip && <span className="bg-purple-100 text-purple-600 text-[7px] font-black uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Crown className="h-2 w-2" /> VIP</span>}
+                                        {ad.is_turbo && <span className="bg-orange-100 text-orange-600 text-[7px] font-black uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2 w-2" /> Turbo</span>}
                                     </div>
                                 </div>
-                                <div className="flex flex-col md:flex-row gap-2">
-                                    <button
-                                        onClick={() => setPromotingAd({ id: ad.id, title: ad.title })}
-                                        className="p-3 rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-all hover:shadow-sm"
-                                        title="Продвинуть"
-                                    >
-                                        <Rocket className="h-5 w-5" />
-                                    </button>
-                                    <Link
-                                        href={`/ads/edit?id=${ad.id}`}
-                                        className="p-3 rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all hover:shadow-sm"
-                                        title="Редактировать"
-                                    >
-                                        <div className="h-5 w-5">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
-                                        </div>
-                                    </Link>
-                                    <button
-                                        onClick={() => toggleAdStatus(ad.id, ad.status)}
-                                        className={cn(
-                                            "p-3 rounded-xl border transition-all hover:shadow-sm",
-                                            ad.status === 'active' ? "text-orange-600 border-orange-200 hover:bg-orange-50" : "text-green-600 border-green-200 hover:bg-green-50"
-                                        )}
-                                        title={ad.status === 'active' ? "Снять с публикации" : "Активировать"}
-                                    >
-                                        <PowerOff className="h-5 w-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => deleteAd(ad.id)}
-                                        className="p-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-all hover:shadow-sm"
-                                        title="Удалить навсегда"
-                                    >
-                                        <Trash2 className="h-5 w-5" />
-                                    </button>
-                                    <Link
-                                        href={`/ad?id=${ad.id}`}
-                                        className="p-3 rounded-xl border border-border hover:bg-muted transition-all"
-                                    >
-                                        <ExternalLink className="h-5 w-5" />
-                                    </Link>
+                                <div className="flex flex-col gap-1.5 md:flex-row md:gap-2 shrink-0">
+                                    <div className="flex gap-1.5 md:contents">
+                                        <button
+                                            onClick={() => setPromotingAd({ id: ad.id, title: ad.title })}
+                                            className="p-2 md:p-3 rounded-lg md:rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-all"
+                                            title="Продвинуть"
+                                        >
+                                            <Rocket className="h-4 w-4 md:h-5 md:w-5" />
+                                        </button>
+                                        <Link
+                                            href={`/ads/edit?id=${ad.id}`}
+                                            className="p-2 md:p-3 rounded-lg md:rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all"
+                                            title="Редактировать"
+                                        >
+                                            <div className="h-4 w-4 md:h-5 md:w-5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" /></svg>
+                                            </div>
+                                        </Link>
+                                    </div>
+                                    <div className="flex gap-1.5 md:contents">
+                                        <button
+                                            onClick={() => toggleAdStatus(ad.id, ad.status)}
+                                            className={cn(
+                                                "p-2 md:p-3 rounded-lg md:rounded-xl border transition-all",
+                                                ad.status === 'active' ? "text-orange-600 border-orange-200 hover:bg-orange-50" : "text-green-600 border-green-200 hover:bg-green-50"
+                                            )}
+                                            title={ad.status === 'active' ? "Снять с публикации" : "Активировать"}
+                                        >
+                                            <PowerOff className="h-4 w-4 md:h-5 md:w-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => deleteAd(ad.id)}
+                                            className="p-2 md:p-3 rounded-lg md:rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-all"
+                                            title="Удалить навсегда"
+                                        >
+                                            <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))
@@ -475,7 +480,7 @@ export default function ProfilePage() {
                             reviews.map(rev => (
                                 <div key={rev.id} className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
                                     <div className="flex items-center gap-4 mb-4">
-                                        <Link href={`/user/${rev.reviewer_id}`} className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-accent overflow-hidden shrink-0 hover:opacity-80 transition-opacity">
+                                        <Link href={`/user?id=${rev.reviewer_id}`} className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-accent overflow-hidden shrink-0 hover:opacity-80 transition-opacity">
                                             {rev.reviewer?.avatar_url ? (
                                                 <img src={rev.reviewer.avatar_url} alt={rev.reviewer.full_name} className="w-full h-full object-cover" />
                                             ) : (
@@ -483,7 +488,7 @@ export default function ProfilePage() {
                                             )}
                                         </Link>
                                         <div className="flex-1">
-                                            <Link href={`/user/${rev.reviewer_id}`} className="font-bold hover:underline">{rev.reviewer?.full_name}</Link>
+                                            <Link href={`/user?id=${rev.reviewer_id}`} className="font-bold hover:underline">{rev.reviewer?.full_name}</Link>
                                             <div className="flex gap-0.5">
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star key={i} className={cn("h-3 w-3", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted opacity-30")} />
@@ -499,7 +504,7 @@ export default function ProfilePage() {
                                     </p>
 
                                     {rev.images && rev.images.length > 0 && (
-                                        <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-none">
+                                        <div className="flex flex-wrap gap-2 mb-4 pb-2">
                                             {rev.images.map((img: string, idx: number) => (
                                                 <div key={idx} className="w-16 h-16 rounded-lg overflow-hidden border border-border shrink-0">
                                                     <img src={img} className="w-full h-full object-cover" />

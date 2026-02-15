@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Package, Star, Share2, MapPin, User as UserIcon, Calendar, MessageCircle, Camera, X } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -33,11 +33,13 @@ function PublicProfileContent() {
         if (id) {
             fetchPublicData();
         } else {
-            router.push('/');
+            // If no ID, maybe it's an error or we should go home
+            setLoading(false);
         }
     }, [id]);
 
     const fetchPublicData = async () => {
+        if (!id) return;
         setLoading(true);
 
         try {
@@ -178,7 +180,12 @@ function PublicProfileContent() {
         </div>
     );
 
-    if (!profile) return null;
+    if (!id || !profile) return (
+        <div className="container mx-auto px-4 py-20 text-center">
+            <h1 className="text-2xl font-black mb-4">Пользователь не указан</h1>
+            <Link href="/" className="text-primary font-bold hover:underline">Вернуться на главную</Link>
+        </div>
+    );
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -279,7 +286,7 @@ function PublicProfileContent() {
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-border mb-8 overflow-x-auto no-scrollbar">
+            <div className="flex flex-wrap border-b border-border mb-8">
                 <button onClick={() => setActiveTab('ads')} className={cn("px-6 py-4 font-black flex items-center gap-2 border-b-4 transition-all text-sm md:text-base uppercase tracking-wider", activeTab === 'ads' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground")}>
                     <Package className="h-5 w-5" /> Объявления <span className="opacity-50 ml-1">{ads.length}</span>
                 </button>
@@ -326,7 +333,7 @@ function PublicProfileContent() {
                                 </div>
                                 <p className="text-sm leading-relaxed">{rev.comment}</p>
                                 {rev.images?.length > 0 && (
-                                    <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                                    <div className="flex flex-wrap gap-2 mt-4 pb-2">
                                         {rev.images.map((img: string, idx: number) => (
                                             <a key={idx} href={img} target="_blank" className="w-20 h-20 rounded-lg overflow-hidden border border-border shrink-0">
                                                 <img src={getOptimizedImageUrl(img, { width: 200, quality: 70 })} className="w-full h-full object-cover" />
@@ -349,7 +356,7 @@ function PublicProfileContent() {
     );
 }
 
-export default function PublicProfilePage() {
+export default function UserPage() {
     return (
         <Suspense fallback={<div className="p-20 text-center font-black uppercase tracking-widest opacity-30 text-xs">Загрузка профиля...</div>}>
             <PublicProfileContent />
