@@ -13,16 +13,32 @@ async function deploy() {
         })
         console.log("FTP connected")
 
-        // Local path
+        // Paths
         const localPath = path.join(__dirname, "out")
         const zipFile = "avoska.zip"
-        const zipPath = path.join(localPath, zipFile)
+        const zipPath = path.join(__dirname, zipFile) // ZIP in root
+
+        console.log("Preparing deployment...")
+
+        // Remove old zip if exists
+        const fs = require('fs');
+        if (fs.existsSync(zipPath)) {
+            fs.unlinkSync(zipPath);
+            console.log("Removed old ZIP archive.")
+        }
 
         console.log("Creating ZIP archive...")
         try {
             const { execSync } = require('child_process');
-            // Create zip of everything inside 'out'
-            execSync(`powershell -Command "Set-Location -Path '${localPath}'; Get-ChildItem -Exclude '${zipFile}' | Compress-Archive -DestinationPath '${zipFile}' -Force"`);
+
+            // Use tar available on Windows 10+ (bsdtar) which handles / paths correctly
+            // -a: auto compress based on .zip extension
+            // -c: create
+            // -f: file
+            // -C: change directory (so we zip relative to 'out')
+            // Using '.' to zip current dir content
+            execSync(`tar -a -c -f "${zipFile}" -C "${localPath}" .`, { stdio: 'inherit' });
+
             console.log(`ZIP archive created at ${zipPath}`)
         } catch (zipErr) {
             console.error("ZIP creation failed:", zipErr.message)

@@ -283,7 +283,7 @@ export default function ProfilePage() {
                                 </button>
                                 <button
                                     onClick={() => setIsEditing(false)}
-                                    className="px-6 h-12 bg-muted text-muted-foreground font-black uppercase text-[10px] tracking-widest rounded-xl active:scale-95 transition-all"
+                                    className="px-6 h-12 bg-white border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-black uppercase text-[10px] tracking-widest rounded-xl active:scale-95 transition-all"
                                 >
                                     Отмена
                                 </button>
