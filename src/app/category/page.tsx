@@ -79,6 +79,25 @@ function CategoryContent() {
 
                 let filteredData = data || [];
 
+                // Fallback: If no ads in selected city, fetch all ads for this category
+                if (filteredData.length === 0 && selectedCity && selectedCity !== 'Все города') {
+                    console.log('No ads in selected city, falling back to all cities');
+                    const { data: allCityData, error: allCityError } = await supabase
+                        .from('ads')
+                        .select('*, profiles!user_id(full_name, avatar_url, is_verified)')
+                        .eq('category_id', catData.id)
+                        .eq('status', 'active')
+                        .order('created_at', { ascending: false });
+
+                    if (!allCityError && allCityData && allCityData.length > 0) {
+                        filteredData = allCityData;
+                        // Optional: Notify user that we switched to all cities
+                        // But for now, let's just show them the ads. 
+                        // Maybe we should update selectedCity to empty string so the UI reflects it?
+                        // setSelectedCity(''); // This might cause a re-render loop if not careful.
+                    }
+                }
+
                 if (Object.keys(specFilters).length > 0) {
                     filteredData = filteredData.filter(ad => {
                         return Object.entries(specFilters).every(([key, value]) => {
@@ -101,6 +120,7 @@ function CategoryContent() {
         setPriceTo('');
         setSelectedCity('');
         setSpecFilters({});
+        fetchAds(); // Re-fetch immediately
     };
 
     if (!category) return <div className="p-20 text-center">Категория не найдена</div>;

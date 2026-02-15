@@ -421,7 +421,7 @@ export default function HomePage() {
               </div>
 
               <a
-                href="https://github.com/konkovev-cyber/avoska/releases/latest/download/avoska.apk"
+                href="https://github.com/konkovev-cyber/avoska/releases/download/v0.1.0/avoska.apk"
                 className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <span>Скачать .apk</span>

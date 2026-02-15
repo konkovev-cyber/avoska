@@ -22,12 +22,17 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
+      - name: Create ZIP archive
+        run: |
+          mkdir -p deploy-ftp
+          cd out && zip -r ../deploy-ftp/avoska.zip . -x avoska.zip
+
       - name: Sync files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: konkevlk.beget.tech
           username: konkevlk_boss
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./out/
+          local-dir: ./deploy-ftp/
           server-dir: /avoska.353290.ru/public_html/
           dangerous-clean-slate: false # Keep existing files (like .htaccess or uploads)

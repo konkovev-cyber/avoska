@@ -30,7 +30,7 @@ export default function Footer() {
                     {/* Social & Beta Badge */}
                     <div className="flex items-center gap-4">
                         <a
-                            href="https://github.com/konkovev-cyber/avoska/releases/latest/download/avoska.apk"
+                            href="https://github.com/konkovev-cyber/avoska/releases/download/v0.1.0/avoska.apk"
                             className="bg-green-50 text-green-600 hover:bg-green-600 hover:text-white p-2 rounded-full transition-all flex items-center justify-center"
                             title="Скачать приложение для Android (.apk)"
                         >
