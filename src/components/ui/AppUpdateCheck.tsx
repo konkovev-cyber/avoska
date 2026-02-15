@@ -13,10 +13,12 @@ export default function AppUpdateCheck() {
     useEffect(() => {
         // Simple check for Capacitor / Mobile environment
         const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;
-        // Also check User Agent for common mobile patterns if needed, but Capacitor is more reliable for APK
         setIsMobileApp(isCapacitor);
 
         if (isCapacitor) {
+            // Force light mode for APK
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
             checkForUpdates();
         }
     }, []);

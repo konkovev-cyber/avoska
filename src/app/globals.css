@@ -11,8 +11,11 @@
   --surface: #FFFFFF;
   --border: #E5E5E5;
   --muted: #737373;
+  --muted-foreground: #737373;
   --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
+  --card: #FFFFFF;
+  --secondary: #F1F5F9;
 }
 
 @theme inline {
@@ -23,37 +26,47 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-secondary: var(--secondary);
   --color-border: var(--border);
   --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, monospace;
 }
 
-/* .dark {
+.dark {
   --background: #020617;
   --foreground: #f8fafc;
   --surface: #1e293b;
+  --card: #1e293b;
+  --secondary: #0f172a;
   --border: #334155;
   --primary: #22c55e;
   --primary-foreground: #020617;
   --accent: #f97316;
   --muted: #94a3b8;
+  --muted-foreground: #94a3b8;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    /* Same as .dark for auto-detection */
     --background: #020617;
     --foreground: #f8fafc;
     --surface: #1e293b;
+    --card: #1e293b;
+    --secondary: #0f172a;
     --border: #334155;
     --primary: #22c55e;
     --primary-foreground: #020617;
     --accent: #f97316;
     --muted: #94a3b8;
+    --muted-foreground: #94a3b8;
   }
-} */
+}
 
 body {
   background: var(--background);
