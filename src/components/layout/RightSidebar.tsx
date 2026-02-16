@@ -106,7 +106,7 @@ export default function RightSidebar() {
             <div className="mt-auto pt-6 text-[10px] text-muted-foreground font-medium text-center border-t border-border/10">
                 <div className="flex items-center justify-center gap-1.5 text-primary/40 font-black uppercase tracking-widest mb-2">
                     <Smartphone className="h-3 w-3" />
-                    <span>v0.1.1</span>
+                    <span>v0.1.2</span>
                 </div>
                 © 2026 Авоська+ <br />
                 <div className="mt-1">

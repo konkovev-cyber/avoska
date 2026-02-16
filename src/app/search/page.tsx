@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Search, Filter, MapPin, PackageOpen, SlidersHorizontal, X, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { Search, Filter, MapPin, PackageOpen, SlidersHorizontal, X, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
@@ -32,6 +32,13 @@ function SearchContent() {
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
     const [specFilters, setSpecFilters] = useState<Record<string, string>>({});
+
+    // Modal states
+    const [isSortModalOpen, setIsSortModalOpen] = useState(false);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [isTransmissionModalOpen, setIsTransmissionModalOpen] = useState(false);
+    const [isRoomsModalOpen, setIsRoomsModalOpen] = useState(false);
+    const [isGenderModalOpen, setIsGenderModalOpen] = useState(false);
 
     useEffect(() => {
         fetchCategories();
@@ -144,6 +151,197 @@ function SearchContent() {
 
     return (
         <div className="container mx-auto px-4 py-6 max-w-[1200px]">
+            {/* Sort Modal */}
+            {isSortModalOpen && (
+                <div className="fixed inset-0 z-[2000] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSortModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Сортировка</h2>
+                            <button onClick={() => setIsSortModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                            {[
+                                { label: 'Сначала новые', value: 'newest' },
+                                { label: 'Дешевле', value: 'cheapest' },
+                                { label: 'Дороже', value: 'expensive' }
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => {
+                                        setSortBy(opt.value as SortOption);
+                                        setIsSortModalOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        sortBy === opt.value ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span>{opt.label}</span>
+                                    {sortBy === opt.value && <Check className="h-5 w-5" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Category Modal */}
+            {isCategoryModalOpen && (
+                <div className="fixed inset-0 z-[2000] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategoryModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300 max-h-[85vh] flex flex-col">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Категория</h2>
+                            <button onClick={() => setIsCategoryModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 overflow-y-auto pb-8 pr-2 custom-scrollbar">
+                            <button
+                                onClick={() => {
+                                    setSelectedCategoryId('');
+                                    setSelectedCategory('');
+                                    setIsCategoryModalOpen(false);
+                                    setSpecFilters({});
+                                }}
+                                className={cn(
+                                    "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                    !selectedCategoryId ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                )}
+                            >
+                                <span>Все категории</span>
+                                {!selectedCategoryId && <Check className="h-5 w-5" />}
+                            </button>
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => {
+                                        setSelectedCategoryId(cat.id);
+                                        setSelectedCategory(cat.slug);
+                                        setIsCategoryModalOpen(false);
+                                        setSpecFilters({});
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        selectedCategoryId === cat.id ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span>{cat.name}</span>
+                                    {selectedCategoryId === cat.id && <Check className="h-5 w-5" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Transmission Modal */}
+            {isTransmissionModalOpen && (
+                <div className="fixed inset-0 z-[2000] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsTransmissionModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">КПП</h2>
+                            <button onClick={() => setIsTransmissionModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                            {[
+                                { label: 'Любая КПП', value: '' },
+                                { label: 'Автомат', value: 'auto' },
+                                { label: 'Механика', value: 'manual' }
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => {
+                                        setSpecFilters({ ...specFilters, transmission: opt.value });
+                                        setIsTransmissionModalOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        (specFilters.transmission || '') === opt.value ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span>{opt.label}</span>
+                                    {(specFilters.transmission || '') === opt.value && <Check className="h-5 w-5" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Rooms Modal */}
+            {isRoomsModalOpen && (
+                <div className="fixed inset-0 z-[2000] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsRoomsModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Кол-во комнат</h2>
+                            <button onClick={() => setIsRoomsModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 pb-4">
+                            {[
+                                { label: 'Все', value: '' },
+                                { label: 'Студия', value: 'studio' },
+                                { label: '1 комната', value: '1' },
+                                { label: '2 комнаты', value: '2' },
+                                { label: '3 комнаты', value: '3' },
+                                { label: '4+ комнаты', value: '4+' }
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => {
+                                        setSpecFilters({ ...specFilters, rooms: opt.value });
+                                        setIsRoomsModalOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-4 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        (specFilters.rooms || '') === opt.value ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span className="text-sm">{opt.label}</span>
+                                    {(specFilters.rooms || '') === opt.value && <Check className="h-4 w-4" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Gender Modal */}
+            {isGenderModalOpen && (
+                <div className="fixed inset-0 z-[2000] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsGenderModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Пол</h2>
+                            <button onClick={() => setIsGenderModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2">
+                            {[
+                                { label: 'Любой', value: '' },
+                                { label: 'Мужской', value: 'male' },
+                                { label: 'Женский', value: 'female' },
+                                { label: 'Унисекс', value: 'unisex' }
+                            ].map((opt) => (
+                                <button
+                                    key={opt.value}
+                                    onClick={() => {
+                                        setSpecFilters({ ...specFilters, gender: opt.value });
+                                        setIsGenderModalOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        (specFilters.gender || '') === opt.value ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span>{opt.label}</span>
+                                    {(specFilters.gender || '') === opt.value && <Check className="h-5 w-5" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Search Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
@@ -160,18 +358,13 @@ function SearchContent() {
 
                 <div className="flex items-center gap-2">
                     {/* Sort Selector */}
-                    <div className="relative group">
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as SortOption)}
-                            className="appearance-none h-11 pl-4 pr-10 rounded-2xl bg-surface border border-border text-sm font-black focus:border-primary outline-none cursor-pointer transition-all"
-                        >
-                            <option value="newest">Сначала новые</option>
-                            <option value="cheapest">Дешевле</option>
-                            <option value="expensive">Дороже</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted pointer-events-none group-hover:text-primary transition-colors" />
-                    </div>
+                    <button
+                        onClick={() => setIsSortModalOpen(true)}
+                        className="h-11 px-4 rounded-2xl bg-surface border border-border flex items-center gap-2 text-sm font-black hover:border-primary transition-all active:scale-95"
+                    >
+                        <span>{sortBy === 'newest' ? 'Сначала новые' : sortBy === 'cheapest' ? 'Дешевле' : 'Дороже'}</span>
+                        <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                    </button>
 
                     {/* Filter Toggle */}
                     <button
@@ -309,22 +502,13 @@ function SearchContent() {
                             {/* Category Filter */}
                             <div>
                                 <label className="block text-xs font-black uppercase text-muted-foreground mb-4 tracking-widest">Категория</label>
-                                <select
-                                    value={selectedCategoryId}
-                                    onChange={(e) => {
-                                        const id = e.target.value;
-                                        setSelectedCategoryId(id);
-                                        const cat = categories.find(c => c.id === id);
-                                        setSelectedCategory(cat?.slug || '');
-                                        setSpecFilters({}); // Reset specs on category change
-                                    }}
-                                    className="w-full h-12 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-sm"
+                                <button
+                                    onClick={() => setIsCategoryModalOpen(true)}
+                                    className="w-full h-14 px-5 rounded-2xl bg-surface border border-border font-bold text-sm flex items-center justify-between hover:border-primary transition-all text-left"
                                 >
-                                    <option value="">Все категории</option>
-                                    {categories.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                </select>
+                                    <span>{categories.find(c => c.id === selectedCategoryId)?.name || "Все категории"}</span>
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                </button>
                             </div>
 
                             {/* Dynamic Specs based on Category Slug */}
@@ -339,15 +523,16 @@ function SearchContent() {
                                             onChange={(e) => setSpecFilters({ ...specFilters, brand: e.target.value })}
                                             className="w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
                                         />
-                                        <select
-                                            value={specFilters.transmission || ''}
-                                            onChange={(e) => setSpecFilters({ ...specFilters, transmission: e.target.value })}
-                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        <button
+                                            onClick={() => setIsTransmissionModalOpen(true)}
+                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border font-bold text-xs flex items-center justify-between hover:border-primary transition-all text-left"
                                         >
-                                            <option value="">Любая КПП</option>
-                                            <option value="auto">Автомат</option>
-                                            <option value="manual">Механика</option>
-                                        </select>
+                                            <span>
+                                                {specFilters.transmission === 'auto' ? 'Автомат' :
+                                                    specFilters.transmission === 'manual' ? 'Механика' : 'Любая КПП'}
+                                            </span>
+                                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -356,18 +541,16 @@ function SearchContent() {
                                 <div className="space-y-4 pt-2">
                                     <label className="block text-[10px] font-black uppercase text-primary tracking-widest">Параметры недвижимости</label>
                                     <div className="space-y-3">
-                                        <select
-                                            value={specFilters.rooms || ''}
-                                            onChange={(e) => setSpecFilters({ ...specFilters, rooms: e.target.value })}
-                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        <button
+                                            onClick={() => setIsRoomsModalOpen(true)}
+                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border font-bold text-xs flex items-center justify-between hover:border-primary transition-all text-left"
                                         >
-                                            <option value="">Кол-во комнат</option>
-                                            <option value="studio">Студия</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4+">4+</option>
-                                        </select>
+                                            <span>
+                                                {specFilters.rooms ? `${specFilters.rooms} ${specFilters.rooms === 'studio' ? '' : 'комн.'}` : 'Кол-во комнат'}
+                                                {specFilters.rooms === 'studio' && 'Студия'}
+                                            </span>
+                                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -396,16 +579,17 @@ function SearchContent() {
                                             onChange={(e) => setSpecFilters({ ...specFilters, size: e.target.value })}
                                             className="h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
                                         />
-                                        <select
-                                            value={specFilters.gender || ''}
-                                            onChange={(e) => setSpecFilters({ ...specFilters, gender: e.target.value })}
-                                            className="h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary font-bold text-xs"
+                                        <button
+                                            onClick={() => setIsGenderModalOpen(true)}
+                                            className="w-full h-11 px-4 rounded-xl bg-surface border border-border font-bold text-xs flex items-center justify-between hover:border-primary transition-all text-left"
                                         >
-                                            <option value="">Пол</option>
-                                            <option value="male">М</option>
-                                            <option value="female">Ж</option>
-                                            <option value="unisex">Унисекс</option>
-                                        </select>
+                                            <span>
+                                                {specFilters.gender === 'male' ? 'М' :
+                                                    specFilters.gender === 'female' ? 'Ж' :
+                                                        specFilters.gender === 'unisex' ? 'Унисекс' : 'Пол'}
+                                            </span>
+                                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                        </button>
                                     </div>
                                 </div>
                             )}

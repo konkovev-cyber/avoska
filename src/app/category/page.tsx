@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { getStoredCity } from '@/lib/geo';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
-import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, ChevronLeft, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles, MapPin } from 'lucide-react';
+import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, ChevronLeft, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles, MapPin, Check, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
@@ -36,6 +36,9 @@ function CategoryContent() {
     const [priceTo, setPriceTo] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [specFilters, setSpecFilters] = useState<Record<string, string>>({});
+
+    // Custom selection states
+    const [isCityModalOpen, setIsCityModalOpen] = useState(false);
     const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const category = CATEGORIES.find(c => c.slug === slug);
@@ -126,7 +129,50 @@ function CategoryContent() {
     if (!category) return <div className="p-20 text-center">Категория не найдена</div>;
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-2 md:px-4 py-6 max-w-[1200px]">
+            {/* City selection modal */}
+            {isCityModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCityModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300 max-h-[85vh] flex flex-col">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Выберите город</h2>
+                            <button onClick={() => setIsCityModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 overflow-y-auto pb-8 pr-2 custom-scrollbar">
+                            <button
+                                onClick={() => {
+                                    setSelectedCity('');
+                                    setIsCityModalOpen(false);
+                                }}
+                                className={cn(
+                                    "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                    !selectedCity ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                )}
+                            >
+                                <span>Любой город</span>
+                                {!selectedCity && <Check className="h-5 w-5" />}
+                            </button>
+                            {cities.map((c) => (
+                                <button
+                                    key={c.name}
+                                    onClick={() => {
+                                        setSelectedCity(c.name);
+                                        setIsCityModalOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        selectedCity === c.name ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span>{c.name}</span>
+                                    {selectedCity === c.name && <Check className="h-5 w-5" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
             <Link href="/categories" className="inline-flex items-center gap-2 text-primary font-black mb-6 hover:translate-x-[-4px] transition-transform text-xs uppercase tracking-widest">
                 <ChevronLeft className="h-4 w-4" /> Ко всем категориям
             </Link>
@@ -188,14 +234,13 @@ function CategoryContent() {
                         {/* City Filter */}
                         <div className="mb-8">
                             <label className="block text-[11px] font-black uppercase text-muted mb-3 tracking-widest">Город</label>
-                            <select
-                                value={selectedCity}
-                                onChange={(e) => setSelectedCity(e.target.value)}
-                                className="w-full p-3 text-sm rounded-xl bg-background border border-border outline-none focus:border-primary appearance-none cursor-pointer"
+                            <button
+                                onClick={() => setIsCityModalOpen(true)}
+                                className="w-full h-11 px-4 rounded-xl bg-background border border-border font-bold text-sm flex items-center justify-between hover:border-primary transition-all text-left"
                             >
-                                <option value="">Любой</option>
-                                {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                            </select>
+                                <span>{selectedCity || "Любой"}</span>
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                            </button>
                         </div>
 
                         {/* Dynamic Specs Filters */}
@@ -320,10 +365,13 @@ function CategoryContent() {
                             </div>
                             <div>
                                 <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Город</label>
-                                <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} className="w-full p-4 rounded-2xl bg-surface border border-border outline-none appearance-none">
-                                    <option value="">Любой город</option>
-                                    {cities.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
-                                </select>
+                                <button
+                                    onClick={() => setIsCityModalOpen(true)}
+                                    className="w-full h-14 px-5 rounded-2xl bg-surface border border-border font-bold text-sm flex items-center justify-between hover:border-primary transition-all text-left"
+                                >
+                                    <span>{selectedCity || "Любой город"}</span>
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                </button>
                             </div>
                             <button onClick={() => setShowMobileFilters(false)} className="w-full py-5 bg-primary text-white font-black rounded-2xl shadow-xl">Показать результаты</button>
                             <button onClick={() => { resetFilters(); setShowMobileFilters(false); }} className="w-full py-4 text-muted font-bold">Сбросить всё</button>

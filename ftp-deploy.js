@@ -7,7 +7,7 @@ const CONFIG = {
     ftp: {
         host: "konkevlk.beget.tech",
         user: "konkevlk_boss",
-        password: "Kk1478963!!!",
+        password: process.env.FTP_PASSWORD || "Kk1478963!!!",
         secure: false
     },
     localBuildDir: "out",
