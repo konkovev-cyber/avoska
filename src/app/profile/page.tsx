@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck, Smartphone } from 'lucide-react';
 import PromotionModal from '@/components/PromotionModal';
 import Link from 'next/link';
@@ -11,6 +11,14 @@ import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 
 export default function ProfilePage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
+            <ProfilePageContent />
+        </Suspense>
+    );
+}
+
+function ProfilePageContent() {
     const [profile, setProfile] = useState<any>(null);
     const [myAds, setMyAds] = useState<any[]>([]);
     const [favorites, setFavorites] = useState<any[]>([]);
@@ -25,13 +33,16 @@ export default function ProfilePage() {
     const [replyText, setReplyText] = useState('');
     const [isSubmittingReply, setIsSubmittingReply] = useState(false);
     const [promotingAd, setPromotingAd] = useState<{ id: string, title: string } | null>(null);
-
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [isOwnProfile, setIsOwnProfile] = useState(true);
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const viewingUserId = searchParams.get('id');
 
     useEffect(() => {
         fetchProfileData();
-    }, []);
+    }, [viewingUserId]);
 
     const fetchProfileData = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -40,11 +51,26 @@ export default function ProfilePage() {
             return;
         }
 
+        // Check if admin
+        const { data: currentUserProfile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+
+        const isAdminUser = currentUserProfile?.role === 'admin';
+        setIsAdmin(isAdminUser);
+
+        // Determine which user to fetch
+        const targetUserId = viewingUserId || session.user.id;
+        const isOwn = targetUserId === session.user.id;
+        setIsOwnProfile(isOwn);
+
         // Fetch Profile
         const { data: profileData } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', session.user.id)
+            .eq('id', targetUserId)
             .single();
 
         setProfile(profileData);
@@ -55,32 +81,33 @@ export default function ProfilePage() {
         const { data: adsData } = await supabase
             .from('ads')
             .select('*, categories:category_id(name), is_vip, is_turbo, pinned_until')
-            .eq('user_id', session.user.id)
+            .eq('user_id', targetUserId)
             .order('created_at', { ascending: false });
 
         setMyAds(adsData || []);
 
-        // Fetch Favorites with verbose join
-        const { data: favsData, error: favsError } = await supabase
-            .from('favorites')
-            .select(`
-                *,
-                ads:ad_id (
+        // Fetch Favorites (only for own profile)
+        if (isOwn) {
+            const { data: favsData, error: favsError } = await supabase
+                .from('favorites')
+                .select(`
                     *,
-                    categories:category_id (name)
-                )
-            `)
-            .eq('user_id', session.user.id);
+                    ads:ad_id (
+                        *,
+                        categories:category_id (name)
+                    )
+                `)
+                .eq('user_id', targetUserId);
 
-        if (favsError) console.error('Favorites fetch error:', favsError);
-        console.log('Processed favorites data:', favsData);
-        setFavorites(favsData || []);
+            if (favsError) console.error('Favorites fetch error:', favsError);
+            setFavorites(favsData || []);
+        }
 
         // Fetch Reviews
         const { data: reviewsData } = await supabase
             .from('reviews')
             .select('*, reviewer:profiles!reviewer_id(full_name, avatar_url)')
-            .eq('target_user_id', session.user.id)
+            .eq('target_user_id', targetUserId)
             .order('created_at', { ascending: false });
 
         setReviews(reviewsData || []);
@@ -247,12 +274,14 @@ export default function ProfilePage() {
                                 profile?.full_name?.charAt(0) || '?'
                             )}
                         </div>
-                        <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer rounded-full">
-                            <Camera className="h-6 w-6" />
-                            <input type="file" className="hidden" onChange={handleAvatarUpload} accept="image/*" />
-                        </label>
+                        {isOwnProfile && (
+                            <label className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover/avatar:opacity-100 transition-opacity cursor-pointer rounded-full">
+                                <Camera className="h-6 w-6" />
+                                <input type="file" className="hidden" onChange={handleAvatarUpload} accept="image/*" />
+                            </label>
+                        )}
                     </div>
-                    {isEditing ? (
+                    {isEditing && isOwnProfile ? (
                         <div className="flex-1 w-full space-y-4 animate-in slide-in-from-top-2 duration-300">
                             <div>
                                 <label className="block text-[10px] font-black uppercase text-muted-foreground mb-1 tracking-widest ml-1">Как вас зовут?</label>
@@ -291,7 +320,17 @@ export default function ProfilePage() {
                         </div>
                     ) : (
                         <div className="flex-1 min-w-0 w-full">
-                            <h1 className="text-2xl md:text-3xl font-black mb-1 truncate">{profile?.full_name || 'Пользователь'}</h1>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h1 className="text-2xl md:text-3xl font-black truncate">{profile?.full_name || 'Пользователь'}</h1>
+                                {profile?.is_verified && (
+                                    <div title="Верифицирован">
+                                        <ShieldCheck className="h-6 w-6 text-blue-500" />
+                                    </div>
+                                )}
+                                {!isOwnProfile && isAdmin && (
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">Просмотр админа</span>
+                                )}
+                            </div>
                             {profile?.phone && (
                                 <div className="text-sm font-bold text-foreground/60 mb-3">{profile.phone}</div>
                             )}
@@ -318,7 +357,7 @@ export default function ProfilePage() {
                     )}
                     {!isEditing && (
                         <div className="flex gap-2">
-                            {profile?.role === 'admin' && (
+                            {profile?.role === 'admin' && isOwnProfile && (
                                 <Link
                                     href="/admin"
                                     className="p-4 bg-primary/10 border border-primary/20 text-primary rounded-2xl hover:bg-primary/20 transition-all shrink-0 active:scale-90 flex items-center gap-2"
@@ -327,12 +366,14 @@ export default function ProfilePage() {
                                     <span className="hidden md:inline font-black uppercase text-[10px] tracking-widest">Админка</span>
                                 </Link>
                             )}
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
-                            >
-                                <Settings className="h-6 w-6" />
-                            </button>
+                            {isOwnProfile && (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
+                                >
+                                    <Settings className="h-6 w-6" />
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
@@ -593,6 +634,15 @@ export default function ProfilePage() {
                     Avoska+ v0.1.2
                 </div>
             </div>
+            {/* Promotion Modal */}
+            {promotingAd && (
+                <PromotionModal
+                    adId={promotingAd.id}
+                    adTitle={promotingAd.title}
+                    onClose={() => setPromotingAd(null)}
+                    onUpdate={fetchProfileData}
+                />
+            )}
         </div>
     );
 }

@@ -4,23 +4,10 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import {
-    BarChart3,
-    Package,
-    Users,
-    MapPin,
-    Settings,
-    Trash2,
-    CheckCircle,
-    XCircle,
-    ExternalLink,
-    Plus,
-    ShieldCheck,
-    Ban,
-    AlertCircle,
-    Pencil,
-    Upload,
-    X,
-    Image as ImageIcon
+    Package, Users, MapPin, Settings, Trash2, CheckCircle, CheckCircle2,
+    ShieldCheck, Ban, Pencil, Upload, X, Image as ImageIcon, Star,
+    LayoutGrid, MessageSquare, Flag, Search, Bell, LogOut, Clock,
+    User, ChevronRight, MoreHorizontal, Filter, Grid3x3, List
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -29,32 +16,35 @@ import { compressImage } from '@/lib/image-utils';
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
-    const [activeTab, setActiveTab] = useState<'ads' | 'users' | 'cities' | 'banners' | 'reports' | 'categories'>('ads');
+    const [activeTab, setActiveTab] = useState<'ads' | 'users' | 'cities' | 'banners' | 'reports' | 'categories' | 'reviews'>('ads');
     const [stats, setStats] = useState({ ads: 0, users: 0, pending: 0, cities: 0, categories: 0 });
+
+    // Data states
     const [ads, setAds] = useState<any[]>([]);
     const [users, setUsers] = useState<any[]>([]);
     const [cities, setCities] = useState<any[]>([]);
     const [reports, setReports] = useState<any[]>([]);
     const [banners, setBanners] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
+    const [reviews, setReviews] = useState<any[]>([]);
+
+    // Configuration states
     const [bannersEnabled, setBannersEnabled] = useState(true);
     const [bannersAdPageEnabled, setBannersAdPageEnabled] = useState(true);
 
-    // City form state
+    // Forms states
     const [newCity, setNewCity] = useState('');
     const [editingCity, setEditingCity] = useState<any>(null);
 
-    // Category form state
     const [catName, setCatName] = useState('');
     const [catSlug, setCatSlug] = useState('');
     const [catIcon, setCatIcon] = useState('');
-    const [catColor, setCatColor] = useState('');
+    const [catColor, setCatColor] = useState('#667eea');
     const [catImage, setCatImage] = useState('');
     const [catImageFile, setCatImageFile] = useState<File | null>(null);
     const [catImagePreview, setCatImagePreview] = useState('');
     const [editingCategory, setEditingCategory] = useState<any>(null);
 
-    // Banner form state
     const [bannerTitle, setBannerTitle] = useState('');
     const [bannerContent, setBannerContent] = useState('');
     const [bannerImage, setBannerImage] = useState('');
@@ -64,6 +54,8 @@ export default function AdminDashboard() {
     const [editingBanner, setEditingBanner] = useState<any>(null);
 
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
     const router = useRouter();
 
     useEffect(() => {
@@ -71,11 +63,11 @@ export default function AdminDashboard() {
     }, []);
 
     const checkAdmin = async () => {
+        setLoading(true);
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) return router.push('/login');
 
         const { data: profile } = await supabase.from('profiles').select('role, email').eq('id', session.user.id).single();
-
         const ADMIN_EMAILS = ['ht-elk@yandex.ru', 'dron-vbg@yandex.ru', 'konkev@bk.ru', 'konkovev@gmail.com'];
         const userEmail = session.user.email || profile?.email;
 
@@ -85,562 +77,758 @@ export default function AdminDashboard() {
         }
 
         setIsAdmin(true);
-        fetchData();
+        await fetchData();
+        setLoading(false);
     };
 
     const fetchData = async () => {
-        setLoading(true);
-        try {
-            const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes, settingsRes] = await Promise.all([
-                supabase.from('ads').select('*, profiles!user_id(full_name, email)').order('created_at', { ascending: false }),
-                supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-                supabase.from('cities').select('*').order('name'),
-                supabase.from('reports').select('*, reporter:profiles(full_name), ad:ads(title)').order('created_at', { ascending: false }),
-                supabase.from('banners').select('*').order('created_at', { ascending: false }),
-                supabase.from('categories').select('*').order('name'),
-                supabase.from('app_settings').select('*').in('key', ['banners_enabled', 'banners_ad_page_enabled'])
-            ]);
+        const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes, reviewsRes] = await Promise.all([
+            supabase.from('ads').select('*').order('created_at', { ascending: false }),
+            supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+            supabase.from('cities').select('*').order('name'),
+            supabase.from('reports').select('*, ad:ads(title), reporter:profiles!reporter_id(full_name)').order('created_at', { ascending: false }),
+            supabase.from('banners').select('*').order('created_at', { ascending: false }),
+            supabase.from('categories').select('*').order('name'),
+            supabase.from('reviews').select('*, reviewer:profiles!reviewer_id(full_name)').order('created_at', { ascending: false })
+        ]);
 
-            if (adsRes.error) {
-                console.error('Ads fetch error:', adsRes.error);
-                toast.error('Ошибка объявлений: ' + adsRes.error.message);
-                const { data: simpleAds } = await supabase.from('ads').select('*').order('created_at', { ascending: false });
-                if (simpleAds) setAds(simpleAds);
-            } else {
-                setAds(adsRes.data || []);
-            }
+        setAds(adsRes.data || []);
+        setUsers(usersRes.data || []);
+        setCities(citiesRes.data || []);
+        setReports(reportsRes.data || []);
+        setBanners(bannersRes.data || []);
+        setCategories(categoriesRes.data || []);
+        setReviews(reviewsRes.data || []);
 
-            setUsers(usersRes.data || []);
-            setCities(citiesRes.data || []);
-            setReports(reportsRes.data || []);
-            setBanners(bannersRes.data || []);
-            setCategories(categoriesRes.data || []);
-
-            const bEnabled = (settingsRes.data || []).find((s: any) => s.key === 'banners_enabled')?.value ?? 'true';
-            const bAdEnabled = (settingsRes.data || []).find((s: any) => s.key === 'banners_ad_page_enabled')?.value ?? 'true';
-
-            setBannersEnabled(bEnabled === 'true');
-            setBannersAdPageEnabled(bAdEnabled === 'true');
-
-            const allAdsCount = adsRes.data?.length || 0;
-            const pendingAdsCount = (adsRes.data || []).filter((a: any) => a.status === 'pending').length;
-
-            setStats({
-                ads: allAdsCount,
-                users: usersRes.data?.length || 0,
-                pending: pendingAdsCount,
-                cities: citiesRes.data?.length || 0,
-                categories: categoriesRes.data?.length || 0
-            });
-        } catch (err: any) {
-            console.error('Global fetch error:', err);
-            toast.error('Ошибка загрузки данных');
-        } finally {
-            setLoading(false);
-        }
+        setStats({
+            ads: adsRes.data?.length || 0,
+            users: usersRes.data?.length || 0,
+            pending: adsRes.data?.filter(a => a.status === 'pending').length || 0,
+            cities: citiesRes.data?.length || 0,
+            categories: categoriesRes.data?.length || 0
+        });
     };
 
+    // Category functions
     const addCategory = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
-        const toastId = toast.loading(editingCategory ? 'Обновление...' : 'Создание...');
+        if (!catName.trim()) return toast.error('Введите название');
 
-        try {
-            let finalImageUrl = catImage;
+        const slug = catSlug || catName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        let imageUrl = catImage;
 
-            if (catImageFile) {
-                const compressedFile = await compressImage(catImageFile);
-                const fileName = `cat-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+        if (catImageFile) {
+            const compressed = await compressImage(catImageFile, 400, 0.8);
+            const fileName = `category-${Date.now()}.jpg`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(fileName, compressed);
 
-                const { error: uploadError } = await supabase.storage
-                    .from('categories')
-                    .upload(fileName, compressedFile);
+            if (uploadError) return toast.error('Ошибка загрузки изображения');
+            const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+            imageUrl = publicUrl;
+        }
 
-                if (uploadError) {
-                    // Fallback to ad-images if categories bucket doesn't exist
-                    const { error: fallbackError } = await supabase.storage
-                        .from('ad-images')
-                        .upload(`cats/${fileName}`, compressedFile);
-
-                    if (fallbackError) throw new Error('Ошибка загрузки фото: ' + fallbackError.message);
-
-                    const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(`cats/${fileName}`);
-                    finalImageUrl = publicUrl;
-                } else {
-                    const { data: { publicUrl } } = supabase.storage.from('categories').getPublicUrl(fileName);
-                    finalImageUrl = publicUrl;
-                }
-            }
-
-            const payload = {
+        if (editingCategory) {
+            const { error } = await supabase.from('categories').update({
                 name: catName,
-                slug: catSlug || catName.toLowerCase().replace(/ /g, '-'),
+                slug,
                 icon: catIcon,
                 color: catColor,
-                image: finalImageUrl
-            };
+                image: imageUrl
+            }).eq('id', editingCategory.id);
 
-            if (editingCategory) {
-                const { error } = await supabase.from('categories').update(payload).eq('id', editingCategory.id);
-                if (error) throw error;
-                toast.success('Категория обновлена', { id: toastId });
-            } else {
-                const { error } = await supabase.from('categories').insert(payload);
-                if (error) throw error;
-                toast.success('Категория добавлена', { id: toastId });
-            }
+            if (error) return toast.error('Ошибка обновления');
+            toast.success('Категория обновлена');
+        } else {
+            const { error } = await supabase.from('categories').insert({
+                name: catName,
+                slug,
+                icon: catIcon,
+                color: catColor,
+                image: imageUrl
+            });
 
-            setEditingCategory(null);
-            setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage('');
-            setCatImageFile(null); setCatImagePreview('');
-            fetchData();
-        } catch (err: any) {
-            toast.error(err.message, { id: toastId });
-        } finally {
-            setLoading(false);
+            if (error) return toast.error('Ошибка создания');
+            toast.success('Категория создана');
         }
+
+        setCatName('');
+        setCatSlug('');
+        setCatIcon('');
+        setCatColor('#667eea');
+        setCatImage('');
+        setCatImageFile(null);
+        setCatImagePreview('');
+        setEditingCategory(null);
+        fetchData();
+    };
+
+    const startEditingCategory = (cat: any) => {
+        setEditingCategory(cat);
+        setCatName(cat.name);
+        setCatSlug(cat.slug);
+        setCatIcon(cat.icon || '');
+        setCatColor(cat.color || '#667eea');
+        setCatImage(cat.image || '');
+        setCatImagePreview(cat.image || '');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const deleteCategory = async (id: string) => {
         if (!confirm('Удалить категорию?')) return;
         const { error } = await supabase.from('categories').delete().eq('id', id);
-        if (!error) fetchData();
-    };
-
-    const startEditingCategory = (c: any) => {
-        setEditingCategory(c);
-        setCatName(c.name);
-        setCatSlug(c.slug);
-        setCatIcon(c.icon || '');
-        setCatColor(c.color || '');
-        setCatImage(c.image || '');
-        setCatImagePreview(c.image || '');
-        setCatImageFile(null);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const statusLabels: Record<string, { label: string, color: string }> = {
-        'active': { label: 'Активно', color: 'text-green-600' },
-        'pending': { label: 'На модерации', color: 'text-orange-500' },
-        'rejected': { label: 'Отклонено', color: 'text-red-500' },
-        'closed': { label: 'Закрыто', color: 'text-muted' },
-        'archived': { label: 'В архиве', color: 'text-muted' }
-    };
-
-    const handleApprove = async (id: string) => {
-        const { error } = await supabase.from('ads').update({ status: 'active' }).eq('id', id);
-        if (!error) { toast.success('Одобрено'); fetchData(); }
-    };
-
-    const handleReject = async (id: string) => {
-        const { error } = await supabase.from('ads').update({ status: 'rejected' }).eq('id', id);
-        if (!error) { toast.success('Отклонено'); fetchData(); }
+        if (error) return toast.error('Ошибка удаления');
+        toast.success('Удалено');
+        fetchData();
     };
 
     const deleteAd = async (id: string) => {
-        if (!confirm('Удалить объявление навсегда?')) return;
+        if (!confirm('Удалить объявление?')) return;
         const { error } = await supabase.from('ads').delete().eq('id', id);
-        if (!error) {
-            toast.success('Удалено');
-            fetchData();
-        }
+        if (error) return toast.error('Ошибка');
+        toast.success('Удалено');
+        fetchData();
     };
 
-    const handleVerifyUser = async (user: any) => {
-        const { error } = await supabase.from('profiles').update({ is_verified: !user.is_verified }).eq('id', user.id);
-        if (!error) { toast.success('Статус верификации изменен'); fetchData(); }
+    const toggleUserBan = async (userId: string, currentStatus: boolean) => {
+        const { error } = await supabase.from('profiles').update({ is_banned: !currentStatus }).eq('id', userId);
+        if (error) return toast.error('Ошибка');
+        toast.success(currentStatus ? 'Разбанен' : 'Забанен');
+        fetchData();
     };
 
-    const handleBanUser = async (user: any) => {
-        const { error } = await supabase.from('profiles').update({ is_banned: !user.is_banned }).eq('id', user.id);
-        if (!error) { toast.success(user.is_banned ? 'Разбанен' : 'Забанен'); fetchData(); }
+    const toggleUserVerification = async (userId: string, currentStatus: boolean) => {
+        const { error } = await supabase.from('profiles').update({ is_verified: !currentStatus }).eq('id', userId);
+        if (error) return toast.error('Ошибка');
+        toast.success(currentStatus ? 'Верификация снята' : 'Верифицирован');
+        fetchData();
     };
 
-    const handleMakeAdmin = async (user: any) => {
-        const newRole = user.role === 'admin' ? 'user' : 'admin';
-        const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', user.id);
-        if (!error) {
-            toast.success(`Роль ${newRole === 'admin' ? 'администратора выдана' : 'пользователя возвращена'}`);
-            fetchData();
-        } else {
-            toast.error('Ошибка смены роли: ' + error.message);
-        }
-    };
-
-    const handleDeleteUser = async (user: any) => {
-        if (!confirm(`Вы уверены, что хотите удалить пользователя ${user.full_name || user.email} и ВСЕ его объявления? Это действие необратимо.`)) return;
-
-        setLoading(true);
-        const toastId = toast.loading('Удаление пользователя и данных...');
-
-        try {
-            // 1. Delete user ads (if cascade not enabled in DB)
-            const { error: adsError } = await supabase.from('ads').delete().eq('user_id', user.id);
-            if (adsError) throw new Error('Ошибка при удалении объявлений: ' + adsError.message);
-
-            // 2. Delete profile
-            const { error: profileError } = await supabase.from('profiles').delete().eq('id', user.id);
-            if (profileError) throw new Error('Ошибка при удалении профиля: ' + profileError.message);
-
-            toast.success('Пользователь и его объявления удалены', { id: toastId });
-            fetchData();
-        } catch (err: any) {
-            toast.error(err.message, { id: toastId });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const addCity = async () => {
-        if (!newCity.trim()) return;
-
-        if (editingCity) {
-            const { error } = await supabase.from('cities').update({ name: newCity.trim() }).eq('id', editingCity.id);
-            if (!error) {
-                toast.success('Город обновлен');
-                setEditingCity(null);
-                setNewCity('');
-                fetchData();
-            } else {
-                toast.error('Ошибка обновления');
-            }
-        } else {
-            const { error } = await supabase.from('cities').insert({ name: newCity.trim() });
-            if (!error) {
-                toast.success('Город добавлен');
-                setNewCity('');
-                fetchData();
-            } else {
-                toast.error('Ошибка или такой город уже есть');
-            }
-        }
-    };
-
-    const deleteCity = async (id: string) => {
-        if (!confirm('Удалить город?')) return;
-        const { error } = await supabase.from('cities').delete().eq('id', id);
-        if (!error) fetchData();
-    };
-
-    const startEditingCity = (c: any) => {
-        setEditingCity(c);
-        setNewCity(c.name);
-    };
-
-    const addBanner = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        const toastId = toast.loading(editingBanner ? 'Обновление...' : 'Создание...');
-
-        try {
-            let finalImageUrl = bannerImage;
-
-            if (bannerImageFile) {
-                const fileName = `banner-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-                const { error: uploadError } = await supabase.storage
-                    .from('categories') // Reuse categories bucket or use a banner bucket if exists
-                    .upload(fileName, bannerImageFile);
-
-                if (uploadError) {
-                    // Fallback to ad-images if bucket doesn't exist
-                    const { error: fallbackError } = await supabase.storage
-                        .from('ad-images')
-                        .upload(`banners/${fileName}`, bannerImageFile);
-
-                    if (fallbackError) throw new Error('Ошибка загрузки фото: ' + fallbackError.message);
-
-                    const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(`banners/${fileName}`);
-                    finalImageUrl = publicUrl;
-                } else {
-                    const { data: { publicUrl } } = supabase.storage.from('categories').getPublicUrl(fileName);
-                    finalImageUrl = publicUrl;
-                }
-            }
-
-            const payload = {
-                title: bannerTitle,
-                content: bannerContent,
-                image_url: finalImageUrl,
-                link_url: bannerLink,
-                is_active: true
-            };
-
-            if (editingBanner) {
-                const { error } = await supabase.from('banners').update(payload).eq('id', editingBanner.id);
-                if (error) throw error;
-                toast.success('Баннер обновлен', { id: toastId });
-            } else {
-                const { error } = await supabase.from('banners').insert(payload);
-                if (error) throw error;
-                toast.success('Баннер добавлен', { id: toastId });
-            }
-
-            setEditingBanner(null);
-            setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
-            setBannerImageFile(null); setBannerImagePreview('');
-            fetchData();
-        } catch (err: any) {
-            toast.error(err.message, { id: toastId });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const deleteBanner = async (id: string) => {
-        const { error } = await supabase.from('banners').delete().eq('id', id);
-        if (!error) fetchData();
-    };
-
-    const startEditingBanner = (b: any) => {
-        setEditingBanner(b);
-        setBannerTitle(b.title);
-        setBannerContent(b.content || '');
-        setBannerImage(b.image_url || '');
-        setBannerImagePreview(b.image_url || '');
-        setBannerImageFile(null);
-        setBannerLink(b.link_url || '');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    const toggleBannersEnabled = async () => {
-        const newValue = !bannersEnabled;
-        const { error } = await supabase
-            .from('app_settings')
-            .upsert({ key: 'banners_enabled', value: newValue.toString(), updated_at: new Date().toISOString() }, { onConflict: 'key' });
-
-        if (!error) {
-            setBannersEnabled(newValue);
-            toast.success(newValue ? 'Баннеры на главной включены' : 'Баннеры на главной выключены');
-        } else {
-            toast.error('Ошибка обновления настроек');
-        }
-    };
-
-    const toggleBannersAdPageEnabled = async () => {
-        const newValue = !bannersAdPageEnabled;
-        const { error } = await supabase
-            .from('app_settings')
-            .upsert({ key: 'banners_ad_page_enabled', value: newValue.toString(), updated_at: new Date().toISOString() }, { onConflict: 'key' });
-
-        if (!error) {
-            setBannersAdPageEnabled(newValue);
-            toast.success(newValue ? 'Баннеры в объявлениях включены' : 'Баннеры в объявлениях выключены');
-        } else {
-            toast.error('Ошибка обновления настроек');
-        }
-    };
-
-    if (!isAdmin || loading) return <div className="p-20 text-center flex flex-col items-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <p>Загрузка панели управления...</p>
-    </div>;
+    if (loading) return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+    );
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                <h1 className="text-4xl font-black flex items-center gap-3">
-                    <Settings className="h-10 w-10 text-primary" /> Админка
-                </h1>
-                <div className="flex flex-wrap gap-2 p-1">
-                    {(['ads', 'users', 'cities', 'categories', 'banners', 'reports'] as const).map(tab => (
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            {/* macOS-style Sidebar */}
+            <div className="fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-sm z-50">
+                <div className="p-6">
+                    <h1 className="text-xl font-semibold text-gray-900 mb-1">Admin Console</h1>
+                    <p className="text-xs text-gray-500">Авоська Админ</p>
+                </div>
+
+                <nav className="px-3 space-y-1">
+                    {[
+                        { id: 'ads', icon: Package, label: 'Объявления', count: stats.ads },
+                        { id: 'users', icon: Users, label: 'Пользователи', count: stats.users },
+                        { id: 'cities', icon: MapPin, label: 'Города', count: stats.cities },
+                        { id: 'categories', icon: LayoutGrid, label: 'Категории', count: stats.categories },
+                        { id: 'banners', icon: ImageIcon, label: 'Баннеры', count: banners.length },
+                        { id: 'reports', icon: Flag, label: 'Жалобы', count: reports.length },
+                        { id: 'reviews', icon: MessageSquare, label: 'Отзывы', count: reviews.length },
+                    ].map(tab => (
                         <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
                             className={cn(
-                                "px-6 py-3 rounded-xl text-sm font-black capitalize transition-all whitespace-nowrap border-2",
-                                activeTab === tab
-                                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
-                                    : "bg-white border-border text-muted-foreground hover:bg-muted/50 hover:border-muted-foreground/20"
+                                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                                activeTab === tab.id
+                                    ? "bg-blue-50 text-blue-600"
+                                    : "text-gray-700 hover:bg-gray-50"
                             )}
                         >
-                            {tab === 'ads' ? `Объявления (${stats.pending})` :
-                                tab === 'users' ? 'Люди' :
-                                    tab === 'cities' ? 'Города' :
-                                        tab === 'categories' ? 'Категории' :
-                                            tab === 'banners' ? 'Баннеры' : 'Жалобы'}
+                            <tab.icon className="h-4 w-4" />
+                            <span className="flex-1 text-left">{tab.label}</span>
+                            <span className={cn(
+                                "text-xs px-2 py-0.5 rounded-full",
+                                activeTab === tab.id ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"
+                            )}>
+                                {tab.count}
+                            </span>
                         </button>
                     ))}
+                </nav>
+            </div>
+
+            {/* Main Content */}
+            <main className="ml-12 min-h-screen p-4">
+                {/* Header */}
+                <div className="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 className="text-lg font-semibold text-gray-900">
+                            {activeTab === 'categories' && 'Категории'}
+                            {activeTab === 'ads' && 'Объявления'}
+                            {activeTab === 'users' && 'Пользователи'}
+                            {activeTab === 'cities' && 'Города'}
+                            {activeTab === 'banners' && 'Баннеры'}
+                            {activeTab === 'reports' && 'Жалобы'}
+                            {activeTab === 'reviews' && 'Отзывы'}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                            {activeTab === 'categories' && 'Управление категориями объявлений'}
+                            {activeTab === 'users' && 'Управление пользователями'}
+                            {activeTab === 'cities' && 'Управление городами'}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="relative w-48">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                placeholder="Поиск..."
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                className="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            />
+                        </div>
+                        <div className="flex bg-white border border-gray-200 rounded-lg p-0.5">
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                className={cn(
+                                    "p-1.5 rounded transition-all",
+                                    viewMode === 'grid' ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:text-gray-600"
+                                )}
+                            >
+                                <Grid3x3 className="h-4 w-4" />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('table')}
+                                className={cn(
+                                    "p-1.5 rounded transition-all",
+                                    viewMode === 'table' ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:text-gray-600"
+                                )}
+                            >
+                                <List className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Stats Summary - Clickable */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-                <button
-                    onClick={() => setActiveTab('ads')}
-                    className={cn(
-                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
-                        activeTab === 'ads' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
-                    )}
-                >
-                    <div className="text-xs font-bold text-muted uppercase mb-1">Всего объявлений</div>
-                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.ads}</div>
-                </button>
-                <button
-                    onClick={() => setActiveTab('ads')}
-                    className={cn(
-                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
-                        activeTab === 'ads' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
-                    )}
-                >
-                    <div className="text-xs font-bold text-muted uppercase mb-1">На модерации</div>
-                    <div className="text-2xl font-black text-orange-500 group-hover:scale-105 transition-transform origin-left">{stats.pending}</div>
-                </button>
-                <button
-                    onClick={() => setActiveTab('users')}
-                    className={cn(
-                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
-                        activeTab === 'users' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
-                    )}
-                >
-                    <div className="text-xs font-bold text-muted uppercase mb-1">Пользователей</div>
-                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.users}</div>
-                </button>
-                <button
-                    onClick={() => setActiveTab('cities')}
-                    className={cn(
-                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
-                        activeTab === 'cities' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
-                    )}
-                >
-                    <div className="text-xs font-bold text-muted uppercase mb-1">Городов</div>
-                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.cities}</div>
-                </button>
-                <button
-                    onClick={() => setActiveTab('categories')}
-                    className={cn(
-                        "bg-surface p-4 rounded-3xl border transition-all text-left group",
-                        activeTab === 'categories' ? "border-primary shadow-md ring-1 ring-primary/20" : "border-border hover:border-primary/50 hover:shadow-sm"
-                    )}
-                >
-                    <div className="text-xs font-bold text-muted uppercase mb-1">Категорий</div>
-                    <div className="text-2xl font-black group-hover:text-primary transition-colors">{stats.categories}</div>
-                </button>
-            </div>
-
-            {/* Content Area */}
-            <div className="bg-surface rounded-3xl border border-border shadow-sm min-h-[500px]">
-                {activeTab === 'ads' && (
-                    <div className="divide-y divide-border">
-                        {ads.map(ad => (
-                            <div key={ad.id} className="group hover:bg-muted/30 transition-colors relative">
-                                <div className="p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                    <Link href={`/ad?id=${ad.id}`} className="flex items-center gap-4 flex-1">
-                                        <div className="w-16 h-16 bg-muted rounded-2xl overflow-hidden shrink-0 shadow-sm">
-                                            {ad.images?.[0] && <img src={ad.images[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />}
-                                        </div>
-                                        <div>
-                                            <div className="font-black text-lg line-clamp-1 group-hover:text-primary transition-colors">{ad.title}</div>
-                                            <div className="text-sm text-muted">
-                                                {ad.profiles?.full_name || 'Загрузка...'} • <span className={cn(
-                                                    "font-bold",
-                                                    statusLabels[ad.status]?.color || 'text-muted'
-                                                )}>{statusLabels[ad.status]?.label || ad.status}</span>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                    <div className="flex flex-wrap items-center gap-1 w-full md:w-auto relative z-10">
-                                        <Link
-                                            href={`/ads/edit?id=${ad.id}`}
-                                            className="p-2 hover:bg-blue-50 text-blue-500 rounded-lg transition-all"
-                                            title="Редактировать"
-                                        >
-                                            <Pencil className="h-5 w-5" />
-                                        </Link>
-
-                                        {ad.status === 'active' ? (
-                                            <button
-                                                onClick={() => handleReject(ad.id)}
-                                                className="p-2 hover:bg-orange-50 text-orange-500 rounded-lg transition-all"
-                                                title="Забанить"
-                                            >
-                                                <Ban className="h-5 w-5" />
-                                            </button>
-                                        ) : (
-                                            ad.status !== 'pending' && (
-                                                <button
-                                                    onClick={() => handleApprove(ad.id)}
-                                                    className="p-2 hover:bg-green-50 text-green-500 rounded-lg transition-all"
-                                                    title="Активировать"
+                {/* Categories View */}
+                {activeTab === 'categories' && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Название</th>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Slug</th>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {categories.map(cat => (
+                                    <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-4 py-2">
+                                            <div className="flex items-center gap-2">
+                                                <div
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden"
+                                                    style={{
+                                                        background: `linear-gradient(135deg, ${cat.color || '#667eea'} 0%, ${cat.color || '#764ba2'} 100%)`
+                                                    }}
                                                 >
-                                                    <CheckCircle className="h-5 w-5" />
-                                                </button>
-                                            )
-                                        )}
-
-                                        {ad.status === 'pending' && (
-                                            <div className="flex gap-1 mr-2">
-                                                <button onClick={() => handleApprove(ad.id)} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-xs font-black transition-all shadow-sm"><CheckCircle className="h-4 w-4" /> ОК</button>
-                                                <button onClick={() => handleReject(ad.id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 text-xs font-black transition-all shadow-sm"><XCircle className="h-4 w-4" /> НЕТ</button>
+                                                    {cat.image ? (
+                                                        <img src={cat.image} className="w-5 h-5 object-contain" alt={cat.name} />
+                                                    ) : (
+                                                        <LayoutGrid className="h-4 w-4 text-white" />
+                                                    )}
+                                                </div>
+                                                <span className="font-medium text-gray-900">{cat.name}</span>
                                             </div>
-                                        )}
-
-                                        <button onClick={() => deleteAd(ad.id)} className="p-2 text-destructive hover:bg-red-50 rounded-lg transition-all" title="Удалить"><Trash2 className="h-5 w-5" /></button>
-                                        <Link href={`/ad?id=${ad.id}`} target="_blank" className="p-2 hover:bg-muted rounded-lg text-primary transition-all"><ExternalLink className="h-5 w-5" /></Link>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                        {ads.length === 0 && <div className="p-20 text-center text-muted">Нет объявлений</div>}
+                                        </td>
+                                        <td className="px-4 py-2 text-gray-500 font-mono text-xs">{cat.slug}</td>
+                                        <td className="px-4 py-2">
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={() => startEditingCategory(cat)}
+                                                    className="p-1.5 hover:bg-gray-100 rounded text-gray-500 hover:text-blue-600 transition-colors"
+                                                    title="Редактировать"
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => deleteCategory(cat.id)}
+                                                    className="p-1.5 hover:bg-red-50 rounded text-gray-400 hover:text-red-600 transition-colors"
+                                                    title="Удалить"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 )}
 
+                {/* Users View */}
                 {activeTab === 'users' && (
-                    <div className="p-6 grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {users.map(u => (
-                            <div key={u.id} className="bg-background p-6 rounded-3xl border border-border flex flex-col justify-between">
-                                <div>
-                                    <div className="font-black text-lg flex items-center gap-2">
-                                        {u.full_name}
-                                        {u.is_verified && <CheckCircle className="h-4 w-4 text-primary" />}
-                                        {u.is_banned && <Ban className="h-4 w-4 text-destructive" />}
+                    viewMode === 'grid' ? (
+                        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                            {users.filter(u => u.full_name?.toLowerCase().includes(searchQuery.toLowerCase())).map(user => (
+                                <div
+                                    key={user.id}
+                                    onClick={() => router.push(`/profile?id=${user.id}`)}
+                                    className="bg-white rounded-lg shadow-sm border border-gray-200/50 p-1.5 hover:shadow-md transition-all cursor-pointer group"
+                                >
+                                    <div className="flex items-start gap-1 mb-1">
+                                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                                            {user.avatar_url ? (
+                                                <img src={user.avatar_url} className="w-full h-full rounded-full object-cover" alt={user.full_name} />
+                                            ) : (
+                                                user.full_name?.charAt(0) || '?'
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-0.5 mb-0">
+                                                <h3 className="font-semibold text-[10px] text-gray-900 truncate">{user.full_name || 'Без имени'}</h3>
+                                                {user.is_verified && (
+                                                    <ShieldCheck className="h-2 w-2 text-blue-500 flex-shrink-0" />
+                                                )}
+                                            </div>
+                                            <p className="text-[9px] text-gray-500 truncate">{user.email}</p>
+                                        </div>
                                     </div>
-                                    <div className="text-sm text-muted mb-6">{u.email}</div>
+                                    <div className="flex gap-0.5">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); toggleUserVerification(user.id, user.is_verified); }}
+                                            className={cn(
+                                                "flex-1 py-0.5 rounded text-[9px] font-medium transition-all",
+                                                user.is_verified
+                                                    ? "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                            )}
+                                        >
+                                            {user.is_verified ? '✓' : 'Вер.'}
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); toggleUserBan(user.id, user.is_banned); }}
+                                            className={cn(
+                                                "px-1.5 py-0.5 rounded text-[9px] font-medium transition-all",
+                                                user.is_banned
+                                                    ? "bg-red-50 text-red-600 hover:bg-red-100"
+                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                            )}
+                                        >
+                                            {user.is_banned ? 'Раз' : 'Бан'}
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => handleVerifyUser(u)} className={cn("flex-1 py-2 rounded-xl text-xs font-bold", u.is_verified ? "bg-primary/10 text-primary" : "bg-muted")}>
-                                        {u.is_verified ? "Удалить галку" : "Верифицировать"}
-                                    </button>
-                                    <button onClick={() => handleBanUser(u)} className={cn("flex-1 py-2 rounded-xl text-xs font-bold", u.is_banned ? "bg-green-100 text-green-700" : "bg-red-50 text-red-600")}>
-                                        {u.is_banned ? "Разбанить" : "Бан"}
-                                    </button>
-                                </div>
-                                <div className="mt-2 flex gap-2">
-                                    <button onClick={() => handleMakeAdmin(u)} className={cn("flex-1 py-2 rounded-xl text-xs font-bold transition-colors", u.role === 'admin' ? "bg-purple-100 text-purple-700 hover:bg-purple-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}>
-                                        {u.role === 'admin' ? "Снять админа" : "Сделать админом"}
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteUser(u)}
-                                        className="p-2 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors"
-                                        title="Удалить пользователя"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Пользователь</th>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Email</th>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Статус</th>
+                                        <th className="px-4 py-3 font-medium text-gray-500 text-right">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {users.filter(u => u.full_name?.toLowerCase().includes(searchQuery.toLowerCase())).map(user => (
+                                        <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-4 py-2">
+                                                <div className="flex items-center gap-2" onClick={() => router.push(`/profile?id=${user.id}`)}>
+                                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 overflow-hidden">
+                                                        {user.avatar_url ? (
+                                                            <img src={user.avatar_url} className="w-full h-full object-cover" alt={user.full_name} />
+                                                        ) : (
+                                                            user.full_name?.charAt(0) || '?'
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-1 cursor-pointer">
+                                                        <span className="font-medium text-gray-900">{user.full_name || 'Без имени'}</span>
+                                                        {user.is_verified && <ShieldCheck className="h-3 w-3 text-blue-500" />}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2 text-gray-600">{user.email}</td>
+                                            <td className="px-4 py-2">
+                                                <div className="flex gap-2">
+                                                    {user.is_verified && <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">Верифицирован</span>}
+                                                    {user.is_banned && <span className="px-2 py-0.5 bg-red-50 text-red-600 rounded text-xs">Забанен</span>}
+                                                    {!user.is_verified && !user.is_banned && <span className="text-gray-400 text-xs">-</span>}
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-2 text-right">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => toggleUserVerification(user.id, user.is_verified)}
+                                                        className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-blue-600 transition-colors"
+                                                        title={user.is_verified ? "Снять верификацию" : "Верифицировать"}
+                                                    >
+                                                        <ShieldCheck className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => toggleUserBan(user.id, user.is_banned)}
+                                                        className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-red-600 transition-colors"
+                                                        title={user.is_banned ? "Разбанить" : "Забанить"}
+                                                    >
+                                                        <Ban className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )
                 )}
 
+                {/* Cities View */}
                 {activeTab === 'cities' && (
-                    <div className="p-6">
-                        <div className="flex gap-4 mb-8">
-                            <input value={newCity} onChange={e => setNewCity(e.target.value)} placeholder="Название города" className="flex-1 p-3 rounded-2xl bg-background border border-border outline-none" />
-                            <div className="flex gap-2">
-                                <button onClick={addCity} className="bg-primary text-white px-6 py-3 rounded-2xl font-black">
-                                    {editingCity ? 'Обновить' : 'Добавить'}
+                    <div>
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200/50 p-4 mb-4">
+                            <h3 className="font-semibold text-sm text-gray-900 mb-3">Добавить город</h3>
+                            <form
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!newCity.trim()) return;
+                                    if (editingCity) {
+                                        await supabase.from('cities').update({ name: newCity }).eq('id', editingCity.id);
+                                        toast.success('Обновлено');
+                                    } else {
+                                        await supabase.from('cities').insert({ name: newCity });
+                                        toast.success('Добавлено');
+                                    }
+                                    setNewCity('');
+                                    setEditingCity(null);
+                                    fetchData();
+                                }}
+                                className="flex gap-2"
+                            >
+                                <input
+                                    value={newCity}
+                                    onChange={e => setNewCity(e.target.value)}
+                                    placeholder="Название города"
+                                    className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                                />
+                                <button
+                                    type="submit"
+                                    className="px-4 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-all active:scale-95"
+                                >
+                                    {editingCity ? 'Сохранить' : 'Добавить'}
                                 </button>
                                 {editingCity && (
-                                    <button onClick={() => { setEditingCity(null); setNewCity(''); }} className="bg-muted px-6 py-3 rounded-2xl font-black">Отмена</button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setEditingCity(null); setNewCity(''); }}
+                                        className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium transition-all"
+                                    >
+                                        Отмена
+                                    </button>
                                 )}
-                            </div>
+                            </form>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {cities.map(c => (
-                                <div key={c.id} className="bg-background p-4 rounded-2xl border border-border flex items-center justify-between group">
-                                    <span className="font-bold">{c.name}</span>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => startEditingCity(c)} className="text-primary"><Settings className="h-4 w-4" /></button>
-                                        <button onClick={() => deleteCity(c.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                            <table className="w-full text-left text-base">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Город</th>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {cities.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).map(city => (
+                                        <tr key={city.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-4 py-3">
+                                                <span className="text-sm font-medium text-gray-900">{city.name}</span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => { setEditingCity(city); setNewCity(city.name); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                                        className="p-2 hover:bg-gray-100 rounded text-gray-500 hover:text-blue-600 transition-colors"
+                                                        title="Редактировать"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm('Удалить?')) {
+                                                                await supabase.from('cities').delete().eq('id', city.id);
+                                                                toast.success('Удалено');
+                                                                fetchData();
+                                                            }
+                                                        }}
+                                                        className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-600 transition-colors"
+                                                        title="Удалить"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {/* Ads View */}
+                {activeTab === 'ads' && (
+                    viewMode === 'grid' ? (
+                        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                            {ads.map(ad => (
+                                <Link
+                                    key={ad.id}
+                                    href={`/ad?id=${ad.id}`}
+                                    className="bg-white rounded-lg shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all group"
+                                >
+                                    <div className="aspect-video bg-gray-100 relative overflow-hidden">
+                                        {ad.images?.[0] ? (
+                                            <img src={ad.images[0]} className="w-full h-full object-cover" alt={ad.title} />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <ImageIcon className="h-4 w-4 text-gray-300" />
+                                            </div>
+                                        )}
+                                        {ad.status === 'pending' && (
+                                            <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-yellow-500 text-white text-[9px] font-medium rounded">
+                                                Мод.
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="p-1.5">
+                                        <h3 className="font-semibold text-[10px] text-gray-900 mb-0 line-clamp-1">{ad.title}</h3>
+                                        <p className="text-[9px] text-gray-500 mb-1 line-clamp-1">{ad.description}</p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs font-bold text-blue-600">{Number(ad.price).toLocaleString('ru-RU')} ₽</span>
+                                            <button
+                                                onClick={(e) => { e.preventDefault(); deleteAd(ad.id); }}
+                                                className="p-0.5 hover:bg-red-50 rounded transition-all"
+                                            >
+                                                <Trash2 className="h-2.5 w-2.5 text-red-600" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Объявление</th>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Цена</th>
+                                        <th className="px-4 py-3 font-medium text-gray-500">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {ads.map(ad => (
+                                        <tr key={ad.id} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-4 py-2">
+                                                <Link href={`/ad?id=${ad.id}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1 block">
+                                                    {ad.title}
+                                                </Link>
+                                                <p className="text-xs text-gray-500 line-clamp-1">{ad.description}</p>
+                                            </td>
+                                            <td className="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">
+                                                {Number(ad.price).toLocaleString('ru-RU')} ₽
+                                            </td>
+                                            <td className="px-4 py-2">
+                                                <div className="flex items-center gap-2">
+                                                    {ad.status === 'pending' ? (
+                                                        <span className="px-2 py-0.5 bg-yellow-50 text-yellow-600 rounded text-xs whitespace-nowrap">На модерации</span>
+                                                    ) : (
+                                                        <span className="px-2 py-0.5 bg-green-50 text-green-600 rounded text-xs whitespace-nowrap">Активно</span>
+                                                    )}
+                                                    <button
+                                                        onClick={() => deleteAd(ad.id)}
+                                                        className="p-1.5 hover:bg-red-50 rounded text-gray-400 hover:text-red-600 transition-colors"
+                                                        title="Удалить"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )
+                )}
+
+                {/* Banners View */}
+                {activeTab === 'banners' && (
+                    <div>
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200/50 p-4 mb-4">
+                            <h3 className="font-semibold text-sm text-gray-900 mb-3">Добавить баннер</h3>
+                            <form
+                                onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!bannerTitle.trim()) return toast.error('Введите заголовок');
+
+                                    let imageUrl = bannerImage;
+                                    if (bannerImageFile) {
+                                        const compressed = await compressImage(bannerImageFile, 1200, 0.9);
+                                        const fileName = `banner-${Date.now()}.jpg`;
+                                        const { data: uploadData, error: uploadError } = await supabase.storage
+                                            .from('images')
+                                            .upload(fileName, compressed);
+                                        if (uploadError) return toast.error('Ошибка загрузки');
+                                        const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+                                        imageUrl = publicUrl;
+                                    }
+
+                                    if (editingBanner) {
+                                        await supabase.from('banners').update({
+                                            title: bannerTitle,
+                                            content: bannerContent,
+                                            image: imageUrl,
+                                            link: bannerLink
+                                        }).eq('id', editingBanner.id);
+                                        toast.success('Обновлено');
+                                    } else {
+                                        await supabase.from('banners').insert({
+                                            title: bannerTitle,
+                                            content: bannerContent,
+                                            image: imageUrl,
+                                            link: bannerLink
+                                        });
+                                        toast.success('Добавлено');
+                                    }
+                                    setBannerTitle('');
+                                    setBannerContent('');
+                                    setBannerImage('');
+                                    setBannerImageFile(null);
+                                    setBannerImagePreview('');
+                                    setBannerLink('');
+                                    setEditingBanner(null);
+                                    fetchData();
+                                }}
+                                className="space-y-3"
+                            >
+                                <div className="grid grid-cols-2 gap-3">
+                                    <input
+                                        value={bannerTitle}
+                                        onChange={e => setBannerTitle(e.target.value)}
+                                        placeholder="Заголовок"
+                                        className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                                    />
+                                    <input
+                                        value={bannerLink}
+                                        onChange={e => setBannerLink(e.target.value)}
+                                        placeholder="Ссылка"
+                                        className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
+                                    />
+                                </div>
+                                <textarea
+                                    value={bannerContent}
+                                    onChange={e => setBannerContent(e.target.value)}
+                                    placeholder="Описание"
+                                    rows={2}
+                                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all resize-none"
+                                />
+                                <label className="block w-full h-24 border-2 border-dashed border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50/50 transition-all relative overflow-hidden group">
+                                    {bannerImagePreview ? (
+                                        <>
+                                            <img src={bannerImagePreview} className="w-full h-full object-cover" alt="Preview" />
+                                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <span className="text-white text-xs font-medium">Изменить</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                            <ImageIcon className="h-6 w-6 mb-1" />
+                                            <span className="text-xs font-medium">Загрузить изображение</span>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={e => {
+                                            if (e.target.files?.[0]) {
+                                                setBannerImageFile(e.target.files[0]);
+                                                setBannerImagePreview(URL.createObjectURL(e.target.files[0]));
+                                            }
+                                        }}
+                                    />
+                                </label>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="submit"
+                                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition-all active:scale-95"
+                                    >
+                                        {editingBanner ? 'Сохранить' : 'Добавить'}
+                                    </button>
+                                    {editingBanner && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingBanner(null);
+                                                setBannerTitle('');
+                                                setBannerContent('');
+                                                setBannerImage('');
+                                                setBannerImageFile(null);
+                                                setBannerImagePreview('');
+                                                setBannerLink('');
+                                            }}
+                                            className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-all"
+                                        >
+                                            Отмена
+                                        </button>
+                                    )}
+                                </div>
+                            </form>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                            {banners.map(banner => (
+                                <div key={banner.id} className="bg-white rounded-lg shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all group">
+                                    {banner.image && (
+                                        <div className="aspect-video bg-gray-100 relative overflow-hidden">
+                                            <img src={banner.image} className="w-full h-full object-cover" alt={banner.title} />
+                                        </div>
+                                    )}
+                                    <div className="p-2">
+                                        <h3 className="font-semibold text-xs text-gray-900 mb-0.5 truncate">{banner.title}</h3>
+                                        <p className="text-[10px] text-gray-500 mb-1 line-clamp-2">{banner.content}</p>
+                                        <div className="flex items-center justify-between">
+                                            {banner.link && (
+                                                <a href={banner.link} target="_blank" className="text-[10px] text-blue-600 hover:underline truncate">
+                                                    {banner.link}
+                                                </a>
+                                            )}
+                                            <div className="flex gap-1 ml-auto">
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingBanner(banner);
+                                                        setBannerTitle(banner.title);
+                                                        setBannerContent(banner.content || '');
+                                                        setBannerImage(banner.image || '');
+                                                        setBannerImagePreview(banner.image || '');
+                                                        setBannerLink(banner.link || '');
+                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                    }}
+                                                    className="p-1 hover:bg-gray-100 rounded transition-all"
+                                                >
+                                                    <Pencil className="h-2.5 w-2.5 text-gray-600" />
+                                                </button>
+                                                <button
+                                                    onClick={async () => {
+                                                        if (confirm('Удалить?')) {
+                                                            await supabase.from('banners').delete().eq('id', banner.id);
+                                                            toast.success('Удалено');
+                                                            fetchData();
+                                                        }
+                                                    }}
+                                                    className="p-1 hover:bg-red-50 rounded transition-all"
+                                                >
+                                                    <Trash2 className="h-2.5 w-2.5 text-red-600" />
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -648,247 +836,122 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
-                {activeTab === 'categories' && (
-                    <div className="p-6 space-y-8">
-                        <form onSubmit={addCategory} className="grid md:grid-cols-2 gap-4 bg-background p-6 rounded-3xl border border-border">
-                            <div className="md:col-span-2 flex justify-between items-center mb-2">
-                                <h3 className="font-black text-xl">{editingCategory ? 'Редактировать категорию' : 'Добавить новую категорию'}</h3>
-                                {editingCategory && (
-                                    <button type="button" onClick={() => { setEditingCategory(null); setCatName(''); setCatSlug(''); setCatIcon(''); setCatColor(''); setCatImage(''); }} className="text-sm text-primary font-bold">Отменить редактирование</button>
-                                )}
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Название категории</label>
-                                <input value={catName} onChange={e => setCatName(e.target.value)} placeholder="Напр: Электроника" className="w-full p-3 rounded-xl border border-border bg-surface outline-none font-bold" required />
-                                <p className="text-[9px] text-muted-foreground ml-1 font-medium">Отображается в меню сайта</p>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Имя для ссылки (латиницей)</label>
-                                <input value={catSlug} onChange={e => setCatSlug(e.target.value)} placeholder="Напр: electronics" className="w-full p-3 rounded-xl border border-border bg-surface outline-none" />
-                                <p className="text-[9px] text-muted-foreground ml-1">Будет в адресе: avoska.com/category/<b>ваше-слово</b></p>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Загрузить картинку</label>
-                                <div className="flex items-center gap-4">
-                                    <label className="flex-1 flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:bg-muted/30 transition-all group bg-surface overflow-hidden relative">
-                                        {catImagePreview ? (
-                                            <>
-                                                <img src={catImagePreview} className="w-full h-full object-cover" />
-                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <span className="text-white text-xs font-bold">Изменить</span>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                                <Upload className="h-8 w-8" />
-                                                <span className="text-[10px] font-black uppercase">Выбрать файл</span>
-                                            </div>
-                                        )}
-                                        <input
-                                            type="file"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) {
-                                                    setCatImageFile(file);
-                                                    setCatImagePreview(URL.createObjectURL(file));
-                                                }
-                                            }}
-                                        />
-                                    </label>
-                                    {catImagePreview && (
-                                        <button
-                                            type="button"
-                                            onClick={() => { setCatImageFile(null); setCatImagePreview(''); setCatImage(''); }}
-                                            className="p-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors"
-                                        >
-                                            <X className="h-5 w-5" />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Цветовой код градиента</label>
-                                <input value={catColor} onChange={e => setCatColor(e.target.value)} placeholder="from-blue-500 to-cyan-500" className="w-full p-3 rounded-xl border border-border bg-surface outline-none" />
-                                <p className="text-[9px] text-muted-foreground ml-1 font-medium">Стиль заливки кнопок (напр: from-green-500 to-teal-500)</p>
-                            </div>
-                            <div className="space-y-1 md:col-span-2">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Тип иконки (на английском)</label>
-                                <input value={catIcon} onChange={e => setCatIcon(e.target.value)} placeholder="Напр: Car, Home, Smartphone" className="w-full p-3 rounded-xl border border-border bg-surface outline-none font-mono text-sm" />
-                                <p className="text-[9px] text-muted-foreground ml-1">Название символа из библиотеки (Home, Car, Smartphone, Shirt и др.)</p>
-                            </div>
-                            <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-xl font-black transition-all hover:opacity-90">
-                                {editingCategory ? 'Обновить категорию' : 'Добавить категорию'}
-                            </button>
-                        </form>
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {categories.map(c => (
-                                <div key={c.id} className="bg-background p-4 rounded-3xl border border-border flex items-center gap-3 group">
-                                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-muted shrink-0">
-                                        {c.image ? <img src={c.image} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs text-muted">Нет фото</div>}
+                {/* Reports View */}
+                {activeTab === 'reports' && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                        {reports.map(report => (
+                            <div key={report.id} className="bg-white rounded-lg shadow-sm border border-gray-200/50 p-2 hover:shadow-md transition-all">
+                                <div className="flex items-start gap-1.5 mb-1.5">
+                                    <div className="w-6 h-6 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                                        <Flag className="h-3 w-3 text-red-600" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="font-bold truncate">{c.name}</div>
-                                        <div className="text-xs text-muted truncate">{c.slug}</div>
+                                        <div className="flex items-center gap-1 mb-0.5">
+                                            <span className="text-[10px] font-semibold text-red-600 bg-red-50 px-1 py-0.5 rounded">Жалоба</span>
+                                            <span className="text-[10px] text-gray-400">#{report.id.substring(0, 6)}</span>
+                                        </div>
+                                        <h3 className="font-medium text-xs text-gray-900 mb-0.5 truncate">На: {report.ad?.title || 'Удалено'}</h3>
+                                        <p className="text-[10px] text-gray-600 italic line-clamp-2">"{report.reason}"</p>
                                     </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => startEditingCategory(c)} className="text-primary hover:scale-110 transition-transform"><Settings className="h-4 w-4" /></button>
-                                        <button onClick={() => deleteCategory(c.id)} className="text-destructive hover:scale-110 transition-transform"><Trash2 className="h-4 w-4" /></button>
-                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === 'banners' && (
-                    <div className="p-6 space-y-8">
-                        {/* Global Banner Toggle */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary/5 to-primary/10 rounded-2xl border border-primary/20">
-                                <div>
-                                    <h3 className="font-black text-lg">Баннеры на главной</h3>
-                                    <p className="text-xs text-muted">Глобальный показ на главной странице</p>
-                                </div>
-                                <button
-                                    onClick={toggleBannersEnabled}
-                                    className={cn(
-                                        "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
-                                        bannersEnabled ? "bg-primary" : "bg-muted"
-                                    )}
-                                >
-                                    <span
-                                        className={cn(
-                                            "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-lg",
-                                            bannersEnabled ? "translate-x-7" : "translate-x-1"
-                                        )}
-                                    />
-                                </button>
-                            </div>
-
-                            <div className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/5 to-accent/10 rounded-2xl border border-accent/20">
-                                <div>
-                                    <h3 className="font-black text-lg">Баннеры в объявлении</h3>
-                                    <p className="text-xs text-muted">Показ в боковой панели объявления</p>
-                                </div>
-                                <button
-                                    onClick={toggleBannersAdPageEnabled}
-                                    className={cn(
-                                        "relative inline-flex h-8 w-14 items-center rounded-full transition-colors",
-                                        bannersAdPageEnabled ? "bg-accent" : "bg-muted"
-                                    )}
-                                >
-                                    <span
-                                        className={cn(
-                                            "inline-block h-6 w-6 transform rounded-full bg-white transition-transform shadow-lg",
-                                            bannersAdPageEnabled ? "translate-x-7" : "translate-x-1"
-                                        )}
-                                    />
-                                </button>
-                            </div>
-                        </div>
-
-                        <form onSubmit={addBanner} className="grid md:grid-cols-2 gap-4 bg-surface p-6 rounded-3xl border border-border">
-                            <div className="md:col-span-2 flex justify-between items-center mb-1">
-                                <h3 className="font-black text-xl">{editingBanner ? 'Редактировать баннер' : 'Создать новый баннер'}</h3>
-                                {editingBanner && (
-                                    <button type="button" onClick={() => { setEditingBanner(null); setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink(''); setBannerImageFile(null); setBannerImagePreview(''); }} className="text-sm text-primary font-bold">Отменить</button>
-                                )}
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Заголовок</label>
-                                <input value={bannerTitle} onChange={e => setBannerTitle(e.target.value)} placeholder="Заголовок" className="w-full p-3 rounded-xl border border-border bg-background outline-none" required />
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Ссылка (необязательно)</label>
-                                <input value={bannerLink} onChange={e => setBannerLink(e.target.value)} placeholder="https://..." className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
-                            </div>
-                            <div className="space-y-1 md:col-span-2">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Загрузить картинку</label>
-                                <div className="flex items-center gap-4">
-                                    <label className="flex-1 flex flex-col items-center justify-center h-40 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:bg-muted/30 transition-all group bg-background overflow-hidden relative">
-                                        {bannerImagePreview ? (
-                                            <>
-                                                <img src={bannerImagePreview} className="w-full h-full object-cover" />
-                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <span className="text-white text-xs font-bold font-black uppercase tracking-widest">Изменить</span>
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                                <ImageIcon className="h-10 w-10 opacity-30" />
-                                                <span className="text-[10px] font-black uppercase tracking-widest">Выбрать баннер</span>
-                                            </div>
-                                        )}
-                                        <input
-                                            type="file"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) {
-                                                    setBannerImageFile(file);
-                                                    setBannerImagePreview(URL.createObjectURL(file));
-                                                }
-                                            }}
-                                        />
-                                    </label>
-                                    {bannerImagePreview && (
+                                <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
+                                    <span className="text-[10px] text-gray-500 truncate">От: {report.reporter?.full_name || 'Аноним'}</span>
+                                    <div className="flex gap-1 flex-shrink-0 ml-1.5">
                                         <button
-                                            type="button"
-                                            onClick={() => { setBannerImageFile(null); setBannerImagePreview(''); setBannerImage(''); }}
-                                            className="p-4 bg-red-100 text-red-600 rounded-2xl hover:bg-red-200 transition-colors"
+                                            onClick={() => deleteAd(report.ad_id)}
+                                            className="px-1.5 py-0.5 bg-red-600 hover:bg-red-700 text-white rounded text-[10px] font-medium transition-all"
                                         >
-                                            <Trash2 className="h-6 w-6" />
+                                            Удалить
                                         </button>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="space-y-1 md:col-span-2">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Текст баннера (необязательно)</label>
-                                <textarea value={bannerContent} onChange={e => setBannerContent(e.target.value)} placeholder="Короткое описание..." className="w-full p-3 rounded-xl border border-border bg-background outline-none min-h-[80px]" />
-                            </div>
-                            <button type="submit" className="md:col-span-2 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all">
-                                {editingBanner ? 'Обновить баннер' : 'Создать баннер'}
-                            </button>
-                        </form>
-                        <div className="space-y-4">
-                            {banners.map(b => (
-                                <div key={b.id} className="bg-background p-6 rounded-3xl border border-border flex items-center justify-between group">
-                                    <div className="flex items-center gap-4">
-                                        {b.image_url && <img src={b.image_url} className="w-12 h-12 rounded-lg object-cover" />}
-                                        <div><div className="font-bold">{b.title}</div><div className="text-sm text-muted">{b.content}</div></div>
+                                        <button
+                                            onClick={async () => {
+                                                await supabase.from('reports').delete().eq('id', report.id);
+                                                toast.success('Отклонена');
+                                                fetchData();
+                                            }}
+                                            className="px-1.5 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-[10px] font-medium transition-all"
+                                        >
+                                            Отклонить
+                                        </button>
                                     </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => startEditingBanner(b)} className="text-primary"><Settings className="h-4 w-4" /></button>
-                                        <button onClick={() => deleteBanner(b.id)} className="text-destructive"><Trash2 className="h-4 w-4" /></button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {activeTab === 'reports' && (
-                    <div className="divide-y divide-border">
-                        {reports.map(r => (
-                            <div key={r.id} className="p-6 flex items-center justify-between">
-                                <div>
-                                    <div className="font-black text-red-600 mb-1">Жалоба от {r.reporter?.full_name}</div>
-                                    <div className="text-sm font-bold">На объявление: {r.ad?.title}</div>
-                                    <div className="text-sm text-muted italic">«{r.reason}»</div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => deleteAd(r.ad_id)} className="bg-destructive text-white px-4 py-2 rounded-xl font-bold">Удалить объявление</button>
-                                    <button onClick={() => { supabase.from('reports').delete().eq('id', r.id).then(() => fetchData()) }} className="bg-muted px-4 py-2 rounded-xl font-bold">Игнорировать</button>
                                 </div>
                             </div>
                         ))}
-                        {reports.length === 0 && <div className="p-20 text-center text-muted">Жалоб нет</div>}
+                        {reports.length === 0 && (
+                            <div className="col-span-full text-center py-12 text-gray-400 text-sm">
+                                Нет жалоб
+                            </div>
+                        )}
                     </div>
                 )}
-            </div>
+
+                {/* Reviews View */}
+                {activeTab === 'reviews' && (
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <table className="w-full text-left text-base">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Пользователь</th>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Рейтинг</th>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Отзыв</th>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Дата</th>
+                                    <th className="px-4 py-3 font-medium text-gray-500">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {reviews.map(review => (
+                                    <tr key={review.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-sm flex-shrink-0">
+                                                    {review.reviewer?.full_name?.charAt(0) || '?'}
+                                                </div>
+                                                <span className="text-sm font-medium text-gray-900">{review.reviewer?.full_name || 'Аноним'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex gap-0.5">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <Star
+                                                        key={i}
+                                                        className={cn(
+                                                            "h-4 w-4",
+                                                            i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"
+                                                        )}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="text-sm text-gray-600 italic">{review.comment}</span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="text-sm text-gray-400">
+                                                {new Date(review.created_at).toLocaleDateString()}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <button
+                                                onClick={async () => {
+                                                    if (confirm('Удалить?')) {
+                                                        await supabase.from('reviews').delete().eq('id', review.id);
+                                                        toast.success('Удалено');
+                                                        fetchData();
+                                                    }
+                                                }}
+                                                className="p-2 hover:bg-red-50 rounded text-gray-400 hover:text-red-600 transition-colors"
+                                                title="Удалить"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </main>
         </div>
     );
 }
