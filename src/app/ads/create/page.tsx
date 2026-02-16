@@ -139,7 +139,7 @@ export default function CreateAdPage() {
                 address,
                 delivery_possible: delivery,
                 images: uploadedImageUrls,
-                status: 'active',
+                status: 'pending',
                 condition: (category === 'jobs' || category === 'services') ? 'new' : condition,
                 specifications,
                 latitude: null,
@@ -148,7 +148,7 @@ export default function CreateAdPage() {
 
             if (insertError) throw insertError;
 
-            toast.success('Опубликовано!', { id: toastId });
+            toast.success('Отправлено на модерацию!', { id: toastId });
             router.push('/');
             router.refresh();
         } catch (error: any) {

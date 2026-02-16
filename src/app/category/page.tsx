@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { getStoredCity } from '@/lib/geo';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
-import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles, MapPin } from 'lucide-react';
+import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, ChevronLeft, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES = [
@@ -127,6 +127,9 @@ function CategoryContent() {
 
     return (
         <div className="container mx-auto px-4 py-8">
+            <Link href="/categories" className="inline-flex items-center gap-2 text-primary font-black mb-6 hover:translate-x-[-4px] transition-transform text-xs uppercase tracking-widest">
+                <ChevronLeft className="h-4 w-4" /> Ко всем категориям
+            </Link>
             <div className="flex flex-col md:flex-row items-end justify-between mb-8 gap-4">
                 <div className="flex items-center gap-6">
                     <div className="relative w-20 h-20 rounded-[2rem] overflow-hidden shadow-xl border-2 border-primary/20 shrink-0">

@@ -25,6 +25,7 @@ import {
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { compressImage } from '@/lib/image-utils';
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -57,6 +58,8 @@ export default function AdminDashboard() {
     const [bannerTitle, setBannerTitle] = useState('');
     const [bannerContent, setBannerContent] = useState('');
     const [bannerImage, setBannerImage] = useState('');
+    const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
+    const [bannerImagePreview, setBannerImagePreview] = useState('');
     const [bannerLink, setBannerLink] = useState('');
     const [editingBanner, setEditingBanner] = useState<any>(null);
 
@@ -146,16 +149,18 @@ export default function AdminDashboard() {
             let finalImageUrl = catImage;
 
             if (catImageFile) {
+                const compressedFile = await compressImage(catImageFile);
                 const fileName = `cat-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+
                 const { error: uploadError } = await supabase.storage
                     .from('categories')
-                    .upload(fileName, catImageFile);
+                    .upload(fileName, compressedFile);
 
                 if (uploadError) {
                     // Fallback to ad-images if categories bucket doesn't exist
                     const { error: fallbackError } = await supabase.storage
                         .from('ad-images')
-                        .upload(`cats/${fileName}`, catImageFile);
+                        .upload(`cats/${fileName}`, compressedFile);
 
                     if (fallbackError) throw new Error('Ошибка загрузки фото: ' + fallbackError.message);
 
@@ -262,6 +267,30 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleDeleteUser = async (user: any) => {
+        if (!confirm(`Вы уверены, что хотите удалить пользователя ${user.full_name || user.email} и ВСЕ его объявления? Это действие необратимо.`)) return;
+
+        setLoading(true);
+        const toastId = toast.loading('Удаление пользователя и данных...');
+
+        try {
+            // 1. Delete user ads (if cascade not enabled in DB)
+            const { error: adsError } = await supabase.from('ads').delete().eq('user_id', user.id);
+            if (adsError) throw new Error('Ошибка при удалении объявлений: ' + adsError.message);
+
+            // 2. Delete profile
+            const { error: profileError } = await supabase.from('profiles').delete().eq('id', user.id);
+            if (profileError) throw new Error('Ошибка при удалении профиля: ' + profileError.message);
+
+            toast.success('Пользователь и его объявления удалены', { id: toastId });
+            fetchData();
+        } catch (err: any) {
+            toast.error(err.message, { id: toastId });
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const addCity = async () => {
         if (!newCity.trim()) return;
 
@@ -300,35 +329,60 @@ export default function AdminDashboard() {
 
     const addBanner = async (e: React.FormEvent) => {
         e.preventDefault();
-        const payload = {
-            title: bannerTitle,
-            content: bannerContent,
-            image_url: bannerImage,
-            link_url: bannerLink,
-            is_active: true
-        };
+        setLoading(true);
+        const toastId = toast.loading(editingBanner ? 'Обновление...' : 'Создание...');
 
-        if (editingBanner) {
-            const { error } = await supabase.from('banners').update(payload).eq('id', editingBanner.id);
-            if (!error) {
-                toast.success('Баннер обновлен');
-                setEditingBanner(null);
-                setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
-                fetchData();
-            } else {
-                console.error('Banner update error:', error);
-                toast.error('Ошибка обновления: ' + error.message);
+        try {
+            let finalImageUrl = bannerImage;
+
+            if (bannerImageFile) {
+                const fileName = `banner-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+                const { error: uploadError } = await supabase.storage
+                    .from('categories') // Reuse categories bucket or use a banner bucket if exists
+                    .upload(fileName, bannerImageFile);
+
+                if (uploadError) {
+                    // Fallback to ad-images if bucket doesn't exist
+                    const { error: fallbackError } = await supabase.storage
+                        .from('ad-images')
+                        .upload(`banners/${fileName}`, bannerImageFile);
+
+                    if (fallbackError) throw new Error('Ошибка загрузки фото: ' + fallbackError.message);
+
+                    const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(`banners/${fileName}`);
+                    finalImageUrl = publicUrl;
+                } else {
+                    const { data: { publicUrl } } = supabase.storage.from('categories').getPublicUrl(fileName);
+                    finalImageUrl = publicUrl;
+                }
             }
-        } else {
-            const { error } = await supabase.from('banners').insert(payload);
-            if (!error) {
-                toast.success('Баннер добавлен');
-                setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
-                fetchData();
+
+            const payload = {
+                title: bannerTitle,
+                content: bannerContent,
+                image_url: finalImageUrl,
+                link_url: bannerLink,
+                is_active: true
+            };
+
+            if (editingBanner) {
+                const { error } = await supabase.from('banners').update(payload).eq('id', editingBanner.id);
+                if (error) throw error;
+                toast.success('Баннер обновлен', { id: toastId });
             } else {
-                console.error('Banner error:', error);
-                toast.error('Ошибка создания: ' + error.message);
+                const { error } = await supabase.from('banners').insert(payload);
+                if (error) throw error;
+                toast.success('Баннер добавлен', { id: toastId });
             }
+
+            setEditingBanner(null);
+            setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink('');
+            setBannerImageFile(null); setBannerImagePreview('');
+            fetchData();
+        } catch (err: any) {
+            toast.error(err.message, { id: toastId });
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -342,6 +396,8 @@ export default function AdminDashboard() {
         setBannerTitle(b.title);
         setBannerContent(b.content || '');
         setBannerImage(b.image_url || '');
+        setBannerImagePreview(b.image_url || '');
+        setBannerImageFile(null);
         setBannerLink(b.link_url || '');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -548,9 +604,16 @@ export default function AdminDashboard() {
                                         {u.is_banned ? "Разбанить" : "Бан"}
                                     </button>
                                 </div>
-                                <div className="mt-2 text-center">
-                                    <button onClick={() => handleMakeAdmin(u)} className={cn("w-full py-2 rounded-xl text-xs font-bold transition-colors", u.role === 'admin' ? "bg-purple-100 text-purple-700 hover:bg-purple-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}>
+                                <div className="mt-2 flex gap-2">
+                                    <button onClick={() => handleMakeAdmin(u)} className={cn("flex-1 py-2 rounded-xl text-xs font-bold transition-colors", u.role === 'admin' ? "bg-purple-100 text-purple-700 hover:bg-purple-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200")}>
                                         {u.role === 'admin' ? "Снять админа" : "Сделать админом"}
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteUser(u)}
+                                        className="p-2 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors"
+                                        title="Удалить пользователя"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>
                             </div>
@@ -730,14 +793,63 @@ export default function AdminDashboard() {
                             <div className="md:col-span-2 flex justify-between items-center mb-1">
                                 <h3 className="font-black text-xl">{editingBanner ? 'Редактировать баннер' : 'Создать новый баннер'}</h3>
                                 {editingBanner && (
-                                    <button type="button" onClick={() => { setEditingBanner(null); setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink(''); }} className="text-sm text-primary font-bold">Отменить</button>
+                                    <button type="button" onClick={() => { setEditingBanner(null); setBannerTitle(''); setBannerContent(''); setBannerImage(''); setBannerLink(''); setBannerImageFile(null); setBannerImagePreview(''); }} className="text-sm text-primary font-bold">Отменить</button>
                                 )}
                             </div>
-                            <input value={bannerTitle} onChange={e => setBannerTitle(e.target.value)} placeholder="Заголовок" className="p-3 rounded-xl border border-border bg-background outline-none" required />
-                            <input value={bannerImage} onChange={e => setBannerImage(e.target.value)} placeholder="URL картинки" className="p-3 rounded-xl border border-border bg-background outline-none" />
-                            <input value={bannerLink} onChange={e => setBannerLink(e.target.value)} placeholder="URL ссылки" className="p-3 rounded-xl border border-border bg-background outline-none" />
-                            <textarea value={bannerContent} onChange={e => setBannerContent(e.target.value)} placeholder="Текст баннера" className="p-3 rounded-xl border border-border bg-background outline-none md:col-span-2" />
-                            <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-xl font-black">
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Заголовок</label>
+                                <input value={bannerTitle} onChange={e => setBannerTitle(e.target.value)} placeholder="Заголовок" className="w-full p-3 rounded-xl border border-border bg-background outline-none" required />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Ссылка (необязательно)</label>
+                                <input value={bannerLink} onChange={e => setBannerLink(e.target.value)} placeholder="https://..." className="w-full p-3 rounded-xl border border-border bg-background outline-none" />
+                            </div>
+                            <div className="space-y-1 md:col-span-2">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Загрузить картинку</label>
+                                <div className="flex items-center gap-4">
+                                    <label className="flex-1 flex flex-col items-center justify-center h-40 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:bg-muted/30 transition-all group bg-background overflow-hidden relative">
+                                        {bannerImagePreview ? (
+                                            <>
+                                                <img src={bannerImagePreview} className="w-full h-full object-cover" />
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <span className="text-white text-xs font-bold font-black uppercase tracking-widest">Изменить</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                                                <ImageIcon className="h-10 w-10 opacity-30" />
+                                                <span className="text-[10px] font-black uppercase tracking-widest">Выбрать баннер</span>
+                                            </div>
+                                        )}
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    setBannerImageFile(file);
+                                                    setBannerImagePreview(URL.createObjectURL(file));
+                                                }
+                                            }}
+                                        />
+                                    </label>
+                                    {bannerImagePreview && (
+                                        <button
+                                            type="button"
+                                            onClick={() => { setBannerImageFile(null); setBannerImagePreview(''); setBannerImage(''); }}
+                                            className="p-4 bg-red-100 text-red-600 rounded-2xl hover:bg-red-200 transition-colors"
+                                        >
+                                            <Trash2 className="h-6 w-6" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="space-y-1 md:col-span-2">
+                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Текст баннера (необязательно)</label>
+                                <textarea value={bannerContent} onChange={e => setBannerContent(e.target.value)} placeholder="Короткое описание..." className="w-full p-3 rounded-xl border border-border bg-background outline-none min-h-[80px]" />
+                            </div>
+                            <button type="submit" className="md:col-span-2 bg-primary text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-primary/20 active:scale-95 transition-all">
                                 {editingBanner ? 'Обновить баннер' : 'Создать баннер'}
                             </button>
                         </form>

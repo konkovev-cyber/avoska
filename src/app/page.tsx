@@ -317,8 +317,8 @@ export default function HomePage() {
           </div>
 
           {/* Mobile Categories - Responsive Grid */}
-          <div className="md:hidden grid grid-cols-5 gap-2 px-1">
-            {CATEGORIES.slice(0, 10).map((cat) => (
+          <div className="md:hidden grid grid-cols-4 gap-2 px-1">
+            {CATEGORIES.slice(0, 12).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}
@@ -327,7 +327,7 @@ export default function HomePage() {
                 <div className="aspect-square w-full bg-surface border border-border rounded-xl overflow-hidden shadow-sm active:scale-95 transition-transform flex items-center justify-center">
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
                 </div>
-                <span className="text-[9px] font-bold text-center leading-tight line-clamp-1">{cat.name}</span>
+                <span className="text-[10px] font-bold text-center leading-tight line-clamp-1">{cat.name}</span>
               </Link>
             ))}
           </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Download, RefreshCw, X } from 'lucide-react';
 
-const CURRENT_VERSION = '0.1.0'; // Should match package.json
+const CURRENT_VERSION = '0.1.1'; // Should match package.json
 const GITHUB_REPO = 'konkovev-cyber/avoska';
 
 export default function AppUpdateCheck() {

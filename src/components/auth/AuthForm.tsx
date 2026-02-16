@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { X, ArrowLeft, Mail, ShieldCheck } from 'lucide-react';
 
@@ -12,6 +12,8 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
     const [fullName, setFullName] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const errorParam = searchParams.get('error');
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,6 +87,19 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                     mode === 'register' ? 'Станьте своим' :
                         mode === 'forgot-password' ? 'Сброс пароля' : 'Новый пароль'}
             </h2>
+
+            {errorParam === 'unauthorized' && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex flex-col gap-1 animate-in slide-in-from-top-2 duration-500">
+                    <div className="flex items-center gap-2 text-red-600">
+                        <ShieldCheck className="h-5 w-5" />
+                        <span className="text-xs font-black uppercase tracking-widest">Доступ ограничен</span>
+                    </div>
+                    <p className="text-[10px] text-red-500 font-bold leading-tight">
+                        Пожалуйста, войдите в аккаунт или зарегистрируйтесь, чтобы продолжить.
+                    </p>
+                </div>
+            )}
+
             <form onSubmit={handleAuth} className="space-y-5">
                 {mode === 'register' && (
                     <div>

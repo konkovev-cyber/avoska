@@ -1,8 +1,7 @@
-# Скрипт для сборки APK с автоматическим поиском Java
+# APK Build Script
 
-Write-Host "Поиск установленной Java..." -ForegroundColor Cyan
+Write-Host "Searching for Java..." -ForegroundColor Cyan
 
-# Возможные пути установки JDK
 $possiblePaths = @(
     "C:\Program Files\Java\jdk-*",
     "C:\Program Files\Eclipse Adoptium\jdk-*",
@@ -22,52 +21,39 @@ foreach ($pattern in $possiblePaths) {
 }
 
 if ($javaHome) {
-    Write-Host "✓ Java найдена: $javaHome" -ForegroundColor Green
+    Write-Host "Java found: $javaHome" -ForegroundColor Green
     $env:JAVA_HOME = $javaHome
-    $env:PATH = "$javaHome\bin;$env:PATH"
+    $env:PATH = "$javaHome\bin;" + $env:PATH
     
-    Write-Host "`nПроверка версии Java:" -ForegroundColor Cyan
-    & java -version
+    Write-Host "Checking Java version:" -ForegroundColor Cyan
+    java -version
     
-    Write-Host "`n=== Начинаем сборку APK ===" -ForegroundColor Yellow
-    Write-Host "Это может занять несколько минут при первом запуске...`n" -ForegroundColor Gray
+    Write-Host "=== Starting APK build ===" -ForegroundColor Yellow
     
     Set-Location android
     
-    # Даем права на выполнение gradlew (если нужно)
     if (Test-Path ".\gradlew.bat") {
-        Write-Host "Запуск Gradle..." -ForegroundColor Cyan
-        & .\gradlew.bat assembleDebug
+        Write-Host "Running Gradle..." -ForegroundColor Cyan
+        ./gradlew.bat assembleDebug
         
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "`n✓ APK успешно собран!" -ForegroundColor Green
-            Write-Host "`nФайл находится здесь:" -ForegroundColor Cyan
+            Write-Host "APK build successful!" -ForegroundColor Green
             $apkPath = "app\build\outputs\apk\debug\app-debug.apk"
             if (Test-Path $apkPath) {
                 $fullPath = (Resolve-Path $apkPath).Path
-                Write-Host $fullPath -ForegroundColor White
-                Write-Host "`nРазмер файла: $((Get-Item $apkPath).Length / 1MB) MB" -ForegroundColor Gray
+                Write-Host "File location: $fullPath" -ForegroundColor White
             }
         }
         else {
-            Write-Host "`n✗ Ошибка при сборке APK" -ForegroundColor Red
-            Write-Host "Попробуйте открыть проект в Android Studio" -ForegroundColor Yellow
+            Write-Host "Error during APK build" -ForegroundColor Red
         }
     }
     else {
-        Write-Host "✗ Файл gradlew.bat не найден" -ForegroundColor Red
+        Write-Host "gradlew.bat not found" -ForegroundColor Red
     }
     
     Set-Location ..
 }
 else {
-    Write-Host "✗ Java (JDK) не найдена!" -ForegroundColor Red
-    Write-Host "`nУстановите JDK 17 или новее:" -ForegroundColor Yellow
-    Write-Host "1. Скачайте: https://adoptium.net/" -ForegroundColor Cyan
-    Write-Host "2. Установите с опцией 'Add to PATH'" -ForegroundColor Cyan
-    Write-Host "3. Перезапустите PowerShell" -ForegroundColor Cyan
-    Write-Host "4. Запустите этот скрипт снова`n" -ForegroundColor Cyan
-    
-    Write-Host "Альтернатива - используйте Android Studio:" -ForegroundColor Yellow
-    Write-Host "npx cap open android" -ForegroundColor Cyan
+    Write-Host "Java (JDK) not found!" -ForegroundColor Red
 }

@@ -1,13 +1,16 @@
 {
   "name": "baraholka",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "deploy": "npm run build && node ftp-deploy.js"
+    "deploy": "node ftp-deploy.js && node remote-unzip.js",
+    "deploy:full": "npm run build && node ftp-deploy.js && node remote-unzip.js",
+    "deploy:clean": "npm run build && node ftp-clean.js && node ftp-deploy.js && node remote-unzip.js",
+    "unzip": "node remote-unzip.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",

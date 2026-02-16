@@ -1,66 +1,47 @@
-const ftp = require("basic-ftp")
-const path = require("path")
+const ftp = require("basic-ftp");
+const path = require("path");
+const fs = require("fs");
+const { execSync } = require("child_process");
+
+const CONFIG = {
+    ftp: {
+        host: "konkevlk.beget.tech",
+        user: "konkevlk_boss",
+        password: "Kk1478963!!!",
+        secure: false
+    },
+    localBuildDir: "out",
+    zipFileName: "avoska.zip",
+    remotePath: "/avoska.353290.ru/public_html/"
+};
 
 async function deploy() {
-    const client = new ftp.Client()
-    client.ftp.verbose = true
+    const client = new ftp.Client();
+    client.ftp.verbose = true;
+
+    const localPath = path.join(__dirname, CONFIG.localBuildDir);
+    const zipPath = path.join(__dirname, CONFIG.zipFileName);
+
     try {
-        await client.access({
-            host: "konkevlk.beget.tech",
-            user: "konkevlk_boss",
-            password: "Kk1478963!!!",
-            secure: false
-        })
-        console.log("FTP connected")
+        await client.access(CONFIG.ftp);
+        console.log("✅ FTP connected");
 
-        // Paths
-        const localPath = path.join(__dirname, "out")
-        const zipFile = "avoska.zip"
-        const zipPath = path.join(__dirname, zipFile) // ZIP in root
+        // 1. Create ZIP
+        if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+        console.log("📦 Creating ZIP...");
+        execSync(`tar -a -c -f "${CONFIG.zipFileName}" -C "${localPath}" .`, { stdio: 'inherit' });
 
-        console.log("Preparing deployment...")
+        // 2. Upload
+        const remoteFull = CONFIG.remotePath + CONFIG.zipFileName;
+        console.log(`📤 Uploading zip to ${remoteFull}...`);
+        await client.uploadFrom(zipPath, remoteFull);
+        console.log("✅ Upload complete");
 
-        // Remove old zip if exists
-        const fs = require('fs');
-        if (fs.existsSync(zipPath)) {
-            fs.unlinkSync(zipPath);
-            console.log("Removed old ZIP archive.")
-        }
-
-        console.log("Creating ZIP archive...")
-        try {
-            const { execSync } = require('child_process');
-
-            // Use tar available on Windows 10+ (bsdtar) which handles / paths correctly
-            // -a: auto compress based on .zip extension
-            // -c: create
-            // -f: file
-            // -C: change directory (so we zip relative to 'out')
-            // Using '.' to zip current dir content
-            execSync(`tar -a -c -f "${zipFile}" -C "${localPath}" .`, { stdio: 'inherit' });
-
-            console.log(`ZIP archive created at ${zipPath}`)
-        } catch (zipErr) {
-            console.error("ZIP creation failed:", zipErr.message)
-            return
-        }
-
-        // Remote path
-        const remotePath = "/avoska.353290.ru/public_html/" + zipFile
-
-        console.log(`Uploading ${zipPath} to ${remotePath}...`)
-
-        // Upload ONLY the zip file
-        await client.uploadFrom(zipPath, remotePath)
-
-        console.log("Archive deployment successful!")
-
-        console.log("Deployment successful!")
+    } catch (err) {
+        console.error("❌ FTP Error:", err);
+    } finally {
+        client.close();
     }
-    catch (err) {
-        console.error("FTP Error:", err)
-    }
-    client.close()
 }
 
-deploy()
+deploy();

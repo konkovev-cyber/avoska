@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X } from 'lucide-react';
+import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck } from 'lucide-react';
 import PromotionModal from '@/components/PromotionModal';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -317,12 +317,23 @@ export default function ProfilePage() {
                         </div>
                     )}
                     {!isEditing && (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
-                        >
-                            <Settings className="h-6 w-6" />
-                        </button>
+                        <div className="flex gap-2">
+                            {profile?.role === 'admin' && (
+                                <Link
+                                    href="/admin"
+                                    className="p-4 bg-primary/10 border border-primary/20 text-primary rounded-2xl hover:bg-primary/20 transition-all shrink-0 active:scale-90 flex items-center gap-2"
+                                >
+                                    <ShieldCheck className="h-6 w-6" />
+                                    <span className="hidden md:inline font-black uppercase text-[10px] tracking-widest">Админка</span>
+                                </Link>
+                            )}
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
+                            >
+                                <Settings className="h-6 w-6" />
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
