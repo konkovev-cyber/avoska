@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck } from 'lucide-react';
+import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck, Smartphone } from 'lucide-react';
 import PromotionModal from '@/components/PromotionModal';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -587,8 +587,9 @@ export default function ProfilePage() {
                 )}
             </div>
             {/* Version Display */}
-            <div className="mt-12 text-center pb-8">
-                <div className="inline-block px-3 py-1 bg-surface border border-border rounded-full text-[9px] font-black text-muted uppercase tracking-[0.2em]">
+            <div className="mt-12 text-center pb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface border-2 border-primary/10 rounded-2xl text-[11px] font-black text-primary/60 uppercase tracking-[0.2em] shadow-sm">
+                    <Smartphone className="h-3 w-3" />
                     Avoska+ v0.1.1
                 </div>
             </div>

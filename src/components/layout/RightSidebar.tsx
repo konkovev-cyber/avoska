@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Smartphone } from 'lucide-react';
 
 export default function RightSidebar() {
     const pathname = usePathname();
@@ -103,9 +103,15 @@ export default function RightSidebar() {
             )}
 
             {/* Footer Links */}
-            <div className="mt-auto pt-4 text-[10px] text-muted-foreground font-medium text-center">
+            <div className="mt-auto pt-6 text-[10px] text-muted-foreground font-medium text-center border-t border-border/10">
+                <div className="flex items-center justify-center gap-1.5 text-primary/40 font-black uppercase tracking-widest mb-2">
+                    <Smartphone className="h-3 w-3" />
+                    <span>v0.1.1</span>
+                </div>
                 © 2026 Авоська+ <br />
-                <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
+                <div className="mt-1">
+                    <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
+                </div>
             </div>
         </aside>
     );
