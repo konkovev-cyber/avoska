@@ -75,7 +75,7 @@ export default function HomePage() {
           .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
           .eq('status', 'active')
           .order('created_at', { ascending: false })
-          .limit(5),
+          .limit(6),
         supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
       ]);
 
@@ -350,66 +350,70 @@ export default function HomePage() {
         </section>
 
         {/* Fresh Ads Section */}
-        <section className="mb-10">
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h2 className="text-xl md:text-3xl font-black tracking-tight">Новое</h2>
+        <section className="mb-4">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h2 className="text-xl md:text-2xl font-black tracking-tight">Новое</h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 px-1">
-            {newAds.slice(0, 5).map((ad) => (
-              <div key={ad.id} className="group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl border border-border/80 transition-all duration-300 active:scale-[0.98]">
-                <div className="aspect-[4/3] relative overflow-hidden bg-secondary/10">
-                  <HoverImageGallery
-                    images={ad.images}
-                    alt={ad.title}
-                    href={`/ad?id=${ad.id}`}
-                  />
-                  {ad.condition === 'new' && (
-                    <div className="absolute bottom-1 left-1 px-1 py-0.5 bg-green-500 text-white text-[7px] font-black uppercase rounded shadow-sm z-20 pointer-events-none">
-                      Новое
-                    </div>
-                  )}
-                </div>
-
-                <Link href={`/ad?id=${ad.id}`} className="flex flex-col flex-1">
-                  <div className="p-3 flex flex-col flex-1 gap-1">
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="text-[14px] md:text-base font-medium leading-tight line-clamp-2 text-foreground flex-1 hover:text-primary transition-colors">
-                        {ad.title}
-                      </h3>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          toggleFavorite(e, ad.id);
-                        }}
-                        className="p-1 rounded-full text-foreground/50 hover:text-red-500 transition-colors active:scale-90 z-20"
-                      >
-                        <Heart className={cn("h-5 w-5", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
-                      </button>
-                    </div>
-
-                    <div className="text-[15px] md:text-lg font-bold tracking-tight text-foreground">
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
+              ))}
+            </div>
+          ) : newAds.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
+              {newAds.slice(0, 6).map((ad) => (
+                <Link
+                  key={ad.id}
+                  href={`/ad?id=${ad.id}`}
+                  className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
+                >
+                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                    <HoverImageGallery
+                      images={ad.images}
+                      alt={ad.title}
+                      href={`/ad?id=${ad.id}`}
+                      layout="horizontal"
+                    />
+                    {ad.condition === 'new' && (
+                      <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-[9px] font-bold uppercase rounded shadow-sm z-20 pointer-events-none">
+                        Новое
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2.5 flex flex-col flex-1 gap-1">
+                    <div className="text-[15px] font-black text-foreground tracking-tight leading-none">
                       {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                     </div>
-
-                    <div className="text-[12px] md:text-[13px] text-muted-foreground flex items-center gap-1 mt-1 font-medium">
-                      <MapPin className="h-3 w-3 opacity-60" />
-                      <span className="line-clamp-1">{ad.city || 'Город'}</span>
+                    <h3 className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em] group-hover:text-primary transition-colors">
+                      {ad.title}
+                    </h3>
+                    <div className="mt-auto pt-1.5 flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
+                      <MapPin className="h-2.5 w-2.5 shrink-0" />
+                      <span className="truncate">{ad.city || 'Город'}</span>
                     </div>
                   </div>
                 </Link>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex justify-start md:justify-center px-1">
-            <Link
-              href="/search?sort=newest"
-              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
-            >
-              <span>Смотреть все</span>
-              <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-surface p-10 rounded-2xl border-2 border-dashed border-border/50 text-center">
+              <p className="text-muted-foreground">Объявлений пока нет</p>
+            </div>
+          )}
+
+          {newAds.length > 0 && (
+            <div className="mt-2 flex justify-start md:justify-center px-1">
+              <Link
+                href="/search?sort=newest"
+                className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
+              >
+                <span>Смотреть все</span>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* App Download Section - Slim Version */}
@@ -440,62 +444,59 @@ export default function HomePage() {
         )}
 
         {/* Recommendations Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h2 className="text-xl md:text-3xl font-black tracking-tight">Подборка для вас</h2>
+        <section className="mb-4">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h2 className="text-xl md:text-2xl font-black tracking-tight">Подборка для вас</h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 px-1">
-            {loading ? (
-              [1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="aspect-[3/4] bg-muted/20 rounded-xl animate-pulse" />
-              ))
-            ) : ads.slice(0, 5).map((ad) => (
-              <div key={ad.id} className="group relative flex flex-col bg-card rounded-xl overflow-hidden shadow-md hover:shadow-xl border border-border/80 transition-all duration-300 active:scale-[0.98]">
-                <div className="aspect-[4/3] relative overflow-hidden bg-secondary/10">
-                  <HoverImageGallery
-                    images={ad.images}
-                    alt={ad.title}
-                    href={`/ad?id=${ad.id}`}
-                  />
-                  {ad.condition === 'new' && (
-                    <div className="absolute bottom-1 left-1 px-1 py-0.5 bg-green-500 text-white text-[7px] font-black uppercase rounded shadow-sm z-20 pointer-events-none">
-                      Новое
-                    </div>
-                  )}
-                </div>
-
-                <Link href={`/ad?id=${ad.id}`} className="flex flex-col flex-1">
-                  <div className="p-3 flex flex-col flex-1 gap-1">
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="text-[14px] md:text-base font-medium leading-tight line-clamp-2 text-foreground flex-1 hover:text-primary transition-colors">
-                        {ad.title}
-                      </h3>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          toggleFavorite(e, ad.id);
-                        }}
-                        className="p-1 rounded-full text-foreground/50 hover:text-red-500 transition-colors active:scale-90 z-20"
-                      >
-                        <Heart className={cn("h-5 w-5", favorites.has(ad.id) ? "fill-red-500 text-red-500" : "")} />
-                      </button>
-                    </div>
-
-                    <div className="text-[15px] md:text-lg font-bold tracking-tight text-foreground">
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
+              ))}
+            </div>
+          ) : ads.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
+              {ads.slice(0, 6).map((ad) => (
+                <Link
+                  key={ad.id}
+                  href={`/ad?id=${ad.id}`}
+                  className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
+                >
+                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                    <HoverImageGallery
+                      images={ad.images}
+                      alt={ad.title}
+                      href={`/ad?id=${ad.id}`}
+                      layout="horizontal"
+                    />
+                    {ad.condition === 'new' && (
+                      <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-[9px] font-bold uppercase rounded shadow-sm z-20 pointer-events-none">
+                        Новое
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2.5 flex flex-col flex-1 gap-1">
+                    <div className="text-[15px] font-black text-foreground tracking-tight leading-none">
                       {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                     </div>
-
-                    <div className="text-[12px] md:text-[13px] text-muted-foreground flex items-center gap-1 mt-1 font-medium">
-                      <MapPin className="h-3 w-3 opacity-60" />
-                      <span className="line-clamp-1">{ad.city || 'Город'}</span>
+                    <h3 className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em] group-hover:text-primary transition-colors">
+                      {ad.title}
+                    </h3>
+                    <div className="mt-auto pt-1.5 flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
+                      <MapPin className="h-2.5 w-2.5 shrink-0" />
+                      <span className="truncate">{ad.city || 'Город'}</span>
                     </div>
                   </div>
                 </Link>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex justify-start md:justify-center px-1">
+              ))}
+            </div>
+          ) : (
+            <div className="bg-surface p-10 rounded-2xl border-2 border-dashed border-border/50 text-center">
+              <p className="text-muted-foreground">Объявлений пока нет</p>
+            </div>
+          )}
+          <div className="mt-2 flex justify-start md:justify-center px-1">
             <Link
               href="/search"
               className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
@@ -506,7 +507,7 @@ export default function HomePage() {
           </div>
         </section>
         {!loading && ads.length === 0 && (
-          <div className="bg-surface p-10 md:p-20 rounded-2xl md:rounded-[4rem] border-2 md:border-4 border-dashed border-border/50 text-center shadow-inner mt-8">
+          <div className="bg-surface p-10 md:p-20 rounded-2xl md:rounded-[4rem] border-2 md:border-4 border-dashed border-border/50 text-center shadow-inner">
             <div className="w-16 h-16 md:w-24 md:h-24 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <MapPin className="h-6 w-6 md:h-10 md:w-10 text-muted/40" />
             </div>
@@ -518,7 +519,7 @@ export default function HomePage() {
           </div>
         )}
 
-        <div ref={loadMoreRef} className="h-32 flex items-center justify-center mt-8">
+        <div ref={loadMoreRef} className="h-32 flex items-center justify-center">
           {loadingMore && (
             <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 w-full opacity-50">
               {[1, 2, 3, 4, 5].map(i => (

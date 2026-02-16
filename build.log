@@ -1,0 +1,50 @@
+
+> baraholka@0.1.2 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.0s
+  Running TypeScript ...
+  Collecting page data using 23 workers ...
+  Generating static pages using 23 workers (0/28) ...
+  Generating static pages using 23 workers (7/28) 
+  Generating static pages using 23 workers (14/28) 
+  Generating static pages using 23 workers (21/28) 
+✓ Generating static pages using 23 workers (28/28) in 566.9ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /ad
+├ ○ /admin
+├ ○ /ads
+├ ○ /ads/create
+├ ○ /ads/edit
+├ ƒ /api/notify-ad
+├ ○ /auth/callback
+├ ○ /categories
+├ ○ /category
+├ ○ /chat
+├ ○ /favorites
+├ ○ /forgot-password
+├ ○ /help
+├ ○ /login
+├ ○ /notifications
+├ ○ /privacy
+├ ○ /profile
+├ ○ /profile/settings
+├ ○ /register
+├ ○ /search
+├ ○ /terms
+├ ○ /update-password
+├ ○ /user
+└ ○ /verify-email
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

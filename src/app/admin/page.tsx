@@ -56,6 +56,7 @@ export default function AdminDashboard() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+    const [dataFetched, setDataFetched] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -77,7 +78,10 @@ export default function AdminDashboard() {
         }
 
         setIsAdmin(true);
-        await fetchData();
+        if (!dataFetched) {
+            await fetchData();
+            setDataFetched(true);
+        }
         setLoading(false);
     };
 
@@ -92,13 +96,16 @@ export default function AdminDashboard() {
             supabase.from('reviews').select('*, reviewer:profiles!reviewer_id(full_name)').order('created_at', { ascending: false })
         ]);
 
-        setAds(adsRes.data || []);
-        setUsers(usersRes.data || []);
-        setCities(citiesRes.data || []);
-        setReports(reportsRes.data || []);
-        setBanners(bannersRes.data || []);
-        setCategories(categoriesRes.data || []);
-        setReviews(reviewsRes.data || []);
+        // Deduplicate by id
+        const dedupe = (arr: any[]) => Array.from(new Map(arr.map(item => [item.id, item])).values());
+
+        setAds(dedupe(adsRes.data || []));
+        setUsers(dedupe(usersRes.data || []));
+        setCities(dedupe(citiesRes.data || []));
+        setReports(dedupe(reportsRes.data || []));
+        setBanners(dedupe(bannersRes.data || []));
+        setCategories(dedupe(categoriesRes.data || []));
+        setReviews(dedupe(reviewsRes.data || []));
 
         setStats({
             ads: adsRes.data?.length || 0,
@@ -254,7 +261,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Main Content */}
-            <main className="ml-12 min-h-screen p-4">
+            <main className="ml-20 min-h-screen p-4">
                 {/* Header */}
                 <div className="mb-4 flex items-center justify-between">
                     <div>
@@ -309,58 +316,227 @@ export default function AdminDashboard() {
 
                 {/* Categories View */}
                 {activeTab === 'categories' && (
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-gray-50 border-b border-gray-200">
-                                <tr>
-                                    <th className="px-4 py-3 font-medium text-gray-500">Название</th>
-                                    <th className="px-4 py-3 font-medium text-gray-500">Slug</th>
-                                    <th className="px-4 py-3 font-medium text-gray-500">Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
+                    <div className="space-y-4">
+                        {/* Заголовок с переключателем */}
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="font-semibold text-base text-gray-900">
+                                    {editingCategory ? 'Редактировать категорию' : 'Добавить категорию'}
+                                </h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Заполните данные для создания категории</p>
+                            </div>
+                            <div className="flex bg-white border border-gray-200 rounded-lg p-0.5">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={cn(
+                                        "p-1.5 rounded transition-all",
+                                        viewMode === 'grid' ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:text-gray-600"
+                                    )}
+                                    title="Карточки"
+                                >
+                                    <Grid3x3 className="h-4 w-4" />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('table')}
+                                    className={cn(
+                                        "p-1.5 rounded transition-all",
+                                        viewMode === 'table' ? "bg-blue-50 text-blue-600" : "text-gray-400 hover:text-gray-600"
+                                    )}
+                                    title="Таблица"
+                                >
+                                    <List className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Форма добавления/редактирования */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                            <form onSubmit={addCategory} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <input
+                                    value={catName}
+                                    onChange={e => setCatName(e.target.value)}
+                                    placeholder="Название категории"
+                                    className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    required
+                                />
+                                <input
+                                    value={catSlug}
+                                    onChange={e => setCatSlug(e.target.value)}
+                                    placeholder="Slug (например, transport)"
+                                    className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                />
+                                <input
+                                    type="color"
+                                    value={catColor}
+                                    onChange={e => setCatColor(e.target.value)}
+                                    className="w-full h-[42px] bg-gray-50 border border-gray-200 rounded-lg cursor-pointer"
+                                    title="Цвет категории"
+                                />
+                                <div className="md:col-span-2">
+                                    <input
+                                        value={catIcon}
+                                        onChange={e => setCatIcon(e.target.value)}
+                                        placeholder="Иконка (Emoji, например: 🚗)"
+                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    <label className="flex-1 cursor-pointer">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={async e => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                    setCatImageFile(file);
+                                                    const reader = new FileReader();
+                                                    reader.onload = e => setCatImagePreview(e.target?.result as string);
+                                                    reader.readAsDataURL(file);
+                                                }
+                                            }}
+                                            className="hidden"
+                                        />
+                                        <div className="h-[42px] px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm flex items-center justify-center hover:bg-gray-100 transition-all">
+                                            {catImagePreview ? '✓ Файл выбран' : '📁 Загрузить фото'}
+                                        </div>
+                                    </label>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-all"
+                                    >
+                                        {editingCategory ? 'Сохранить' : 'Добавить'}
+                                    </button>
+                                    {editingCategory && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingCategory(null);
+                                                setCatName('');
+                                                setCatSlug('');
+                                                setCatIcon('');
+                                                setCatColor('#667eea');
+                                                setCatImage('');
+                                                setCatImageFile(null);
+                                                setCatImagePreview('');
+                                            }}
+                                            className="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-all"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            </form>
+                        </div>
+
+                        {/* Список категорий - Grid вид */}
+                        {viewMode === 'grid' ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                                 {categories.map(cat => (
-                                    <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-4 py-2">
-                                            <div className="flex items-center gap-2">
-                                                <div
-                                                    className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden"
-                                                    style={{
-                                                        background: `linear-gradient(135deg, ${cat.color || '#667eea'} 0%, ${cat.color || '#764ba2'} 100%)`
-                                                    }}
-                                                >
-                                                    {cat.image ? (
-                                                        <img src={cat.image} className="w-5 h-5 object-contain" alt={cat.name} />
-                                                    ) : (
-                                                        <LayoutGrid className="h-4 w-4 text-white" />
-                                                    )}
-                                                </div>
-                                                <span className="font-medium text-gray-900">{cat.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-2 text-gray-500 font-mono text-xs">{cat.slug}</td>
-                                        <td className="px-4 py-2">
-                                            <div className="flex items-center gap-2">
+                                    <div
+                                        key={cat.id}
+                                        className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all group"
+                                    >
+                                        <div
+                                            className="h-24 flex items-center justify-center relative"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${cat.color || '#667eea'} 0%, ${cat.color || '#764ba2'} 100%)`
+                                            }}
+                                        >
+                                            {cat.image ? (
+                                                <img src={cat.image} className="w-16 h-16 object-contain" alt={cat.name} />
+                                            ) : (
+                                                <span className="text-4xl">{cat.icon || '📁'}</span>
+                                            )}
+                                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => startEditingCategory(cat)}
-                                                    className="p-1.5 hover:bg-gray-100 rounded text-gray-500 hover:text-blue-600 transition-colors"
+                                                    className="p-1.5 bg-white/90 hover:bg-white rounded-lg shadow-sm transition-all"
                                                     title="Редактировать"
                                                 >
-                                                    <Pencil className="h-4 w-4" />
+                                                    <Pencil className="h-4 w-4 text-blue-600" />
                                                 </button>
                                                 <button
                                                     onClick={() => deleteCategory(cat.id)}
-                                                    className="p-1.5 hover:bg-red-50 rounded text-gray-400 hover:text-red-600 transition-colors"
+                                                    className="p-1.5 bg-white/90 hover:bg-white rounded-lg shadow-sm transition-all"
                                                     title="Удалить"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
+                                                    <Trash2 className="h-4 w-4 text-red-600" />
                                                 </button>
                                             </div>
-                                        </td>
-                                    </tr>
+                                        </div>
+                                        <div className="p-3">
+                                            <h3 className="font-bold text-base text-gray-900 mb-1 truncate">{cat.name}</h3>
+                                            <p className="text-xs text-gray-500 font-mono truncate">{cat.slug}</p>
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+                        ) : (
+                            /* Список категорий - Table вид */
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th className="px-4 py-3 font-medium text-gray-500">Категория</th>
+                                            <th className="px-4 py-3 font-medium text-gray-500">Slug</th>
+                                            <th className="px-4 py-3 font-medium text-gray-500">Цвет</th>
+                                            <th className="px-4 py-3 font-medium text-gray-500 text-right">Действия</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {categories.map(cat => (
+                                            <tr key={cat.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div
+                                                            className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden"
+                                                            style={{
+                                                                background: `linear-gradient(135deg, ${cat.color || '#667eea'} 0%, ${cat.color || '#764ba2'} 100%)`
+                                                            }}
+                                                        >
+                                                            {cat.image ? (
+                                                                <img src={cat.image} className="w-6 h-6 object-contain" alt={cat.name} />
+                                                            ) : (
+                                                                <span className="text-xl">{cat.icon || '📁'}</span>
+                                                            )}
+                                                        </div>
+                                                        <span className="font-medium text-gray-900">{cat.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-gray-500 font-mono text-xs">{cat.slug}</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <div
+                                                            className="w-6 h-6 rounded border border-gray-200"
+                                                            style={{ backgroundColor: cat.color || '#667eea' }}
+                                                        />
+                                                        <span className="text-xs text-gray-500 font-mono">{cat.color || '#667eea'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => startEditingCategory(cat)}
+                                                            className="p-2 hover:bg-blue-50 rounded-lg text-gray-500 hover:text-blue-600 transition-all"
+                                                            title="Редактировать"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => deleteCategory(cat.id)}
+                                                            className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-all"
+                                                            title="Удалить"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -783,51 +959,51 @@ export default function AdminDashboard() {
                                 </div>
                             </form>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {banners.map(banner => (
-                                <div key={banner.id} className="bg-white rounded-lg shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all group">
+                                <div key={banner.id} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-all group">
                                     {banner.image && (
-                                        <div className="aspect-video bg-gray-100 relative overflow-hidden">
+                                        <div className="aspect-[3/2] bg-gray-100 relative overflow-hidden">
                                             <img src={banner.image} className="w-full h-full object-cover" alt={banner.title} />
                                         </div>
                                     )}
-                                    <div className="p-2">
-                                        <h3 className="font-semibold text-xs text-gray-900 mb-0.5 truncate">{banner.title}</h3>
-                                        <p className="text-[10px] text-gray-500 mb-1 line-clamp-2">{banner.content}</p>
-                                        <div className="flex items-center justify-between">
-                                            {banner.link && (
-                                                <a href={banner.link} target="_blank" className="text-[10px] text-blue-600 hover:underline truncate">
-                                                    {banner.link}
-                                                </a>
-                                            )}
-                                            <div className="flex gap-1 ml-auto">
-                                                <button
-                                                    onClick={() => {
-                                                        setEditingBanner(banner);
-                                                        setBannerTitle(banner.title);
-                                                        setBannerContent(banner.content || '');
-                                                        setBannerImage(banner.image || '');
-                                                        setBannerImagePreview(banner.image || '');
-                                                        setBannerLink(banner.link || '');
-                                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                                    }}
-                                                    className="p-1 hover:bg-gray-100 rounded transition-all"
-                                                >
-                                                    <Pencil className="h-2.5 w-2.5 text-gray-600" />
-                                                </button>
-                                                <button
-                                                    onClick={async () => {
-                                                        if (confirm('Удалить?')) {
-                                                            await supabase.from('banners').delete().eq('id', banner.id);
-                                                            toast.success('Удалено');
-                                                            fetchData();
-                                                        }
-                                                    }}
-                                                    className="p-1 hover:bg-red-50 rounded transition-all"
-                                                >
-                                                    <Trash2 className="h-2.5 w-2.5 text-red-600" />
-                                                </button>
-                                            </div>
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-base text-gray-900 mb-2 truncate">{banner.title}</h3>
+                                        <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">{banner.content}</p>
+                                        {banner.link && (
+                                            <a href={banner.link} target="_blank" className="text-sm text-blue-600 hover:underline font-medium block mb-3 truncate">
+                                                {banner.link}
+                                            </a>
+                                        )}
+                                        <div className="flex items-center justify-between gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setEditingBanner(banner);
+                                                    setBannerTitle(banner.title);
+                                                    setBannerContent(banner.content || '');
+                                                    setBannerImage(banner.image || '');
+                                                    setBannerImagePreview(banner.image || '');
+                                                    setBannerLink(banner.link || '');
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }}
+                                                className="flex-1 py-2 px-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Pencil className="h-4 w-4 text-blue-600" />
+                                                <span className="text-sm font-medium text-blue-700">Ред.</span>
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    if (confirm('Удалить?')) {
+                                                        await supabase.from('banners').delete().eq('id', banner.id);
+                                                        toast.success('Удалено');
+                                                        fetchData();
+                                                    }
+                                                }}
+                                                className="flex-1 py-2 px-3 bg-red-50 hover:bg-red-100 rounded-lg transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Trash2 className="h-4 w-4 text-red-600" />
+                                                <span className="text-sm font-medium text-red-700">Удал.</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

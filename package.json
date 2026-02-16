@@ -10,7 +10,9 @@
     "deploy": "node ftp-deploy.js && node remote-unzip.js",
     "deploy:full": "npm run build && node ftp-deploy.js && node remote-unzip.js",
     "deploy:clean": "npm run build && node ftp-clean.js && node ftp-deploy.js && node remote-unzip.js",
-    "unzip": "node remote-unzip.js"
+    "unzip": "node remote-unzip.js",
+    "skills": "node scripts/list-skills.js",
+    "skills:connect": "node scripts/connect-skill.js"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",

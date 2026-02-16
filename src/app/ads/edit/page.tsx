@@ -4,9 +4,10 @@ import { useState, useEffect, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { X, AlertCircle, PlusSquare, Rocket, CheckCircle2, ChevronDown, Check, ChevronLeft } from 'lucide-react';
+import { X, AlertCircle, PlusSquare, Rocket, CheckCircle2, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
+import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
 
 const CATEGORIES = [
     { name: 'Транспорт', slug: 'transport' },
@@ -247,20 +248,13 @@ function EditAdContent() {
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Категория</label>
-                            <div className="relative">
-                                <select
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full h-11 px-4 pr-10 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold appearance-none transition-all cursor-pointer"
-                                >
-                                    <option value="">Выберите категорию</option>
-                                    {CATEGORIES.map((cat) => (
-                                        <option key={cat.slug} value={cat.slug}>{cat.name}</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                            </div>
+                            <ResponsiveSelect
+                                label="Категория"
+                                value={category}
+                                onChange={setCategory}
+                                options={CATEGORIES.map(c => ({ value: c.slug, label: c.name }))}
+                                placeholder="Выберите категорию"
+                            />
                         </div>
                     </div>
 
@@ -481,19 +475,13 @@ function EditAdContent() {
                     <div className="bg-white rounded-2xl p-4 border border-border shadow-sm">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Город</label>
-                                <div className="relative">
-                                    <select
-                                        value={city}
-                                        onChange={(e) => setCity(e.target.value)}
-                                        className="w-full h-10 px-3 pr-8 rounded-lg bg-surface border border-border outline-none focus:border-primary font-bold text-sm appearance-none transition-all cursor-pointer"
-                                    >
-                                        {cities.map((c) => (
-                                            <option key={c.name} value={c.name}>{c.name}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                </div>
+                                <ResponsiveSelect
+                                    label="Город"
+                                    value={city}
+                                    onChange={setCity}
+                                    options={cities.map(c => ({ value: c.name, label: c.name }))}
+                                    placeholder="Выберите город"
+                                />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Адрес (необязательно)</label>

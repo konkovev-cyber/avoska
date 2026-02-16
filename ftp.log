@@ -1,0 +1,56 @@
+Connected to 5.101.153.227:21 (No encryption)
+< 220 Welcome to LTD BeGet FTP Server 'xerox'
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+Login security: No encryption
+> USER konkevlk_boss
+< 331 Please specify the password.
+
+> PASS ###
+< 230 Login successful.
+
+> FEAT
+< 211-Features:
+
+<  EPRT
+ EPSV
+ MDTM
+ PASV
+ PBSZ
+ PROT
+ REST STREAM
+ SIZE
+ TVFS
+ UTF8
+211 End
+
+> TYPE I
+< 200 Switching to Binary mode.
+
+> STRU F
+< 200 Structure set to F.
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+✅ FTP connected
+📦 Creating ZIP...
+tar: could not chdir to 'c:\www\avoska\out'
+
+❌ FTP Error: Error: Command failed: tar -a -c -f "avoska.zip" -C "c:\www\avoska\out" .
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:925:11)
+    at execSync (node:child_process:997:15)
+    at deploy (c:\www\avoska\ftp-deploy.js:32:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 27548,
+  stdout: null,
+  stderr: null
+}
+> QUIT
