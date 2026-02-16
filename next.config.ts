@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Для локальной разработки
+  output: 'export',
   images: {
     unoptimized: true,
   },

@@ -1,0 +1,2696 @@
+
+> baraholka@0.1.2 deploy:clean
+> npm run build && node ftp-clean.js && node ftp-deploy.js && node remote-unzip.js
+
+
+> baraholka@0.1.2 build
+> next build
+
+▲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.9s
+  Running TypeScript ...
+  Collecting page data using 23 workers ...
+  Generating static pages using 23 workers (0/28) ...
+  Generating static pages using 23 workers (7/28) 
+  Generating static pages using 23 workers (14/28) 
+  Generating static pages using 23 workers (21/28) 
+✓ Generating static pages using 23 workers (28/28) in 570.7ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /ad
+├ ○ /admin
+├ ○ /ads
+├ ○ /ads/create
+├ ○ /ads/edit
+├ ƒ /api/notify-ad
+├ ○ /auth/callback
+├ ○ /categories
+├ ○ /category
+├ ○ /chat
+├ ○ /favorites
+├ ○ /forgot-password
+├ ○ /help
+├ ○ /login
+├ ○ /notifications
+├ ○ /privacy
+├ ○ /profile
+├ ○ /profile/settings
+├ ○ /register
+├ ○ /search
+├ ○ /terms
+├ ○ /update-password
+├ ○ /user
+└ ○ /verify-email
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+Connected to 5.101.153.227:21 (No encryption)
+< 220 Welcome to LTD BeGet FTP Server 'xerox'
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+Login security: No encryption
+> USER konkevlk_boss
+< 331 Please specify the password.
+
+> PASS ###
+< 230 Login successful.
+
+> FEAT
+< 211-Features:
+
+<  EPRT
+ EPSV
+ MDTM
+ PASV
+ PBSZ
+ PROT
+ REST STREAM
+ SIZE
+ TVFS
+ UTF8
+211 End
+
+> TYPE I
+< 200 Switching to Binary mode.
+
+> STRU F
+< 200 Structure set to F.
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+🧹 Cleaning remote directory...
+> CWD /
+< 250 Directory successfully changed.
+
+> MKD avoska.353290.ru
+< 550 Create directory operation failed.
+
+> CWD avoska.353290.ru
+< 250 Directory successfully changed.
+
+> MKD public_html
+< 550 Create directory operation failed.
+
+> CWD public_html
+< 250 Directory successfully changed.
+
+Trying to find optimal transfer strategy...
+> EPSV
+< 229 Entering Extended Passive Mode (|||20119|)
+
+Optimal transfer strategy found.
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20119 (No encryption)
+< 226 Directory send OK.
+
+drwx------   25 14607    601         20480 Feb 16 18:23 .
+drwx------    3 0        0            4096 Feb 12 04:21 ..
+drwx------    2 14607    601          4096 Feb 16 18:23 404
+-rw-------    1 14607    601         27090 Feb 16 18:23 404.html
+-rw-------    1 14607    601          1038 Feb 16 18:23 __next.__PAGE__.txt
+-rw-------    1 14607    601          7072 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           349 Feb 16 18:23 __next._tree.txt
+drwx------    4 14607    601          4096 Feb 16 18:23 _next
+drwx------    3 14607    601          4096 Feb 16 18:23 _not-found
+drwx------    3 14607    601          4096 Feb 16 18:23 ad
+drwx------    3 14607    601          4096 Feb 16 18:23 admin
+drwx------    5 14607    601          4096 Feb 16 18:23 ads
+drwx------    3 14607    601          4096 Feb 16 18:23 auth
+drwx------    3 14607    601          4096 Feb 16 18:23 categories
+drwx------    3 14607    601          4096 Feb 16 18:23 category
+drwx------    3 14607    601          4096 Feb 16 18:23 chat
+-rw-------    1 14607    601         25931 Feb 16 18:23 favicon.ico
+drwx------    3 14607    601          4096 Feb 16 18:23 favorites
+-rw-------    1 14607    601           391 Feb 16 18:23 file.svg
+drwx------    3 14607    601          4096 Feb 16 18:23 forgot-password
+-rw-------    1 14607    601          1035 Feb 16 18:23 globe.svg
+drwx------    3 14607    601          4096 Feb 16 18:23 help
+-rw-------    1 14607    601         44969 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7072 Feb 16 18:23 index.txt
+drwx------    3 14607    601          4096 Feb 16 18:23 login
+-rw-------    1 14607    601        542130 Feb 16 18:23 logo.png
+-rw-------    1 14607    601        542130 Feb 16 18:23 logo_main.png
+-rw-------    1 14607    601           415 Feb 16 18:23 manifest.json
+-rw-------    1 14607    601          1375 Feb 16 18:23 next.svg
+drwx------    3 14607    601          4096 Feb 16 18:23 notifications
+-rwx------    1 14607    601       2588816 Feb 16 18:23 out.zip
+drwx------    3 14607    601          4096 Feb 16 18:23 privacy
+drwx------    4 14607    601          4096 Feb 16 18:23 profile
+drwx------    3 14607    601          4096 Feb 16 18:23 register
+drwx------    3 14607    601          4096 Feb 16 18:23 search
+drwx------    3 14607    601          4096 Feb 16 18:23 terms
+drwx------    3 14607    601          4096 Feb 16 18:23 update-password
+drwx------    3 14607    601          4096 Feb 16 18:23 user
+-rw-------    1 14607    601           128 Feb 16 18:23 vercel.svg
+drwx------    3 14607    601          4096 Feb 16 18:23 verify-email
+-rw-------    1 14607    601           385 Feb 16 18:23 window.svg
+
+> CWD 404
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20013|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20013 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------   25 14607    601         20480 Feb 16 18:23 ..
+-rw-------    1 14607    601         27090 Feb 16 18:23 index.html
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD 404
+< 250 Remove directory operation successful.
+
+> DELE 404.html
+< 250 Delete operation successful.
+
+> DELE __next.__PAGE__.txt
+< 250 Delete operation successful.
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD _next
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20020|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20020 (No encryption)
+< 226 Directory send OK.
+
+drwx------    4 14607    601          4096 Feb 16 18:23 .
+drwx------   24 14607    601         20480 Feb 16 23:02 ..
+drwx------    2 14607    601          4096 Feb 16 18:23 UTC3TWH9klFbptWgB1e7S
+drwx------    5 14607    601          4096 Feb 16 18:23 static
+
+> CWD UTC3TWH9klFbptWgB1e7S
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20005|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20005 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    4 14607    601          4096 Feb 16 18:23 ..
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD UTC3TWH9klFbptWgB1e7S
+< 250 Remove directory operation successful.
+
+> CWD static
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20085|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20085 (No encryption)
+< 226 Directory send OK.
+
+drwx------    5 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+drwx------    2 14607    601          4096 Feb 16 18:23 UTC3TWH9klFbptWgB1e7S
+drwx------    2 14607    601          4096 Feb 16 18:23 chunks
+drwx------    2 14607    601          4096 Feb 16 18:23 media
+
+> CWD UTC3TWH9klFbptWgB1e7S
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20549|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20549 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    5 14607    601          4096 Feb 16 18:23 ..
+-rw-------    1 14607    601           219 Feb 16 18:23 _buildManifest.js
+-rw-------    1 14607    601             2 Feb 16 18:23 _clientMiddlewareManifest.json
+-rw-------    1 14607    601            80 Feb 16 18:23 _ssgManifest.js
+
+> DELE _buildManifest.js
+< 250 Delete operation successful.
+
+> DELE _clientMiddlewareManifest.json
+< 250 Delete operation successful.
+
+> DELE _ssgManifest.js
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD UTC3TWH9klFbptWgB1e7S
+< 250 Remove directory operation successful.
+
+> CWD chunks
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20666|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20666 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    4 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601         30678 Feb 16 18:23 02c600b57f8673ae.js
+-rw-------    1 14607    601          2746 Feb 16 18:23 079cdb78e0d8410f.js
+-rw-------    1 14607    601         25323 Feb 16 18:23 0c812328e911301a.js
+-rw-------    1 14607    601        141439 Feb 16 18:23 18047d61d2550e1e.js
+-rw-------    1 14607    601         20513 Feb 16 18:23 184563cd933b4488.js
+-rw-------    1 14607    601          3473 Feb 16 18:23 1a592f5dfb809469.js
+-rw-------    1 14607    601           282 Feb 16 18:23 1d440ee81dcd4a3f.js
+-rw-------    1 14607    601         91204 Feb 16 18:23 21338bfe65ee4228.css
+-rw-------    1 14607    601          1455 Feb 16 18:23 2460930895210c36.js
+-rw-------    1 14607    601         29412 Feb 16 18:23 2a4c99224ed2ac0d.js
+-rw-------    1 14607    601          4726 Feb 16 18:23 361e832d685e2cd5.js
+-rw-------    1 14607    601          3868 Feb 16 18:23 3d3c531b4513cc5b.js
+-rw-------    1 14607    601        224635 Feb 16 18:23 462965539efa9e8f.js
+-rw-------    1 14607    601         29410 Feb 16 18:23 464da2f0026e64f6.js
+-rw-------    1 14607    601          3254 Feb 16 18:23 465d1296a7a1a911.js
+-rw-------    1 14607    601         25641 Feb 16 18:23 4846e2b523a238de.js
+-rw-------    1 14607    601         17704 Feb 16 18:23 4bfb7697355a0237.js
+-rw-------    1 14607    601         20943 Feb 16 18:23 5903e85abb447695.js
+-rw-------    1 14607    601        110258 Feb 16 18:23 612a006c544fd39e.js
+-rw-------    1 14607    601          3983 Feb 16 18:23 615b35f299680a39.js
+-rw-------    1 14607    601         35878 Feb 16 18:23 68938e355ae5f6d6.js
+-rw-------    1 14607    601        190752 Feb 16 18:23 6a7eda33373bfc52.js
+-rw-------    1 14607    601          7787 Feb 16 18:23 79a7170ca20f5cdc.js
+-rw-------    1 14607    601         33300 Feb 16 18:23 7d445d893a9d11f8.js
+-rw-------    1 14607    601          5270 Feb 16 18:23 7f6bcb24755206b8.js
+-rw-------    1 14607    601        112594 Feb 16 18:23 a6dad97d9634a72d.js
+-rw-------    1 14607    601        115731 Feb 16 18:23 a6dad97d9634a72d.js.map
+-rw-------    1 14607    601         23462 Feb 16 18:23 a8170e8fd7cbdf6b.js
+-rw-------    1 14607    601         27884 Feb 16 18:23 ace8693f2d4a84d7.js
+-rw-------    1 14607    601          2808 Feb 16 18:23 b1ef04eda31a22a8.js
+-rw-------    1 14607    601           796 Feb 16 18:23 bbf56c02ed5eae98.js
+-rw-------    1 14607    601         33210 Feb 16 18:23 bd2561fe34004ed0.js
+-rw-------    1 14607    601          1347 Feb 16 18:23 bf4228c59d85c3fc.js
+-rw-------    1 14607    601          8597 Feb 16 18:23 d377e8ea3b492985.js
+-rw-------    1 14607    601         17313 Feb 16 18:23 eb0c3b9e2e443649.js
+-rw-------    1 14607    601         12382 Feb 16 18:23 ebed217b07b16fcc.js
+-rw-------    1 14607    601         33567 Feb 16 18:23 fac59ac5f0779dd6.js
+-rw-------    1 14607    601          4648 Feb 16 18:23 fd98d4e9dda98654.js
+-rw-------    1 14607    601         10268 Feb 16 18:23 turbopack-ea706bc526a82b91.js
+
+> DELE 02c600b57f8673ae.js
+< 250 Delete operation successful.
+
+> DELE 079cdb78e0d8410f.js
+< 250 Delete operation successful.
+
+> DELE 0c812328e911301a.js
+< 250 Delete operation successful.
+
+> DELE 18047d61d2550e1e.js
+< 250 Delete operation successful.
+
+> DELE 184563cd933b4488.js
+< 250 Delete operation successful.
+
+> DELE 1a592f5dfb809469.js
+< 250 Delete operation successful.
+
+> DELE 1d440ee81dcd4a3f.js
+< 250 Delete operation successful.
+
+> DELE 21338bfe65ee4228.css
+< 250 Delete operation successful.
+
+> DELE 2460930895210c36.js
+< 250 Delete operation successful.
+
+> DELE 2a4c99224ed2ac0d.js
+< 250 Delete operation successful.
+
+> DELE 361e832d685e2cd5.js
+< 250 Delete operation successful.
+
+> DELE 3d3c531b4513cc5b.js
+< 250 Delete operation successful.
+
+> DELE 462965539efa9e8f.js
+< 250 Delete operation successful.
+
+> DELE 464da2f0026e64f6.js
+< 250 Delete operation successful.
+
+> DELE 465d1296a7a1a911.js
+< 250 Delete operation successful.
+
+> DELE 4846e2b523a238de.js
+< 250 Delete operation successful.
+
+> DELE 4bfb7697355a0237.js
+< 250 Delete operation successful.
+
+> DELE 5903e85abb447695.js
+< 250 Delete operation successful.
+
+> DELE 612a006c544fd39e.js
+< 250 Delete operation successful.
+
+> DELE 615b35f299680a39.js
+< 250 Delete operation successful.
+
+> DELE 68938e355ae5f6d6.js
+< 250 Delete operation successful.
+
+> DELE 6a7eda33373bfc52.js
+< 250 Delete operation successful.
+
+> DELE 79a7170ca20f5cdc.js
+< 250 Delete operation successful.
+
+> DELE 7d445d893a9d11f8.js
+< 250 Delete operation successful.
+
+> DELE 7f6bcb24755206b8.js
+< 250 Delete operation successful.
+
+> DELE a6dad97d9634a72d.js
+< 250 Delete operation successful.
+
+> DELE a6dad97d9634a72d.js.map
+< 250 Delete operation successful.
+
+> DELE a8170e8fd7cbdf6b.js
+< 250 Delete operation successful.
+
+> DELE ace8693f2d4a84d7.js
+< 250 Delete operation successful.
+
+> DELE b1ef04eda31a22a8.js
+< 250 Delete operation successful.
+
+> DELE bbf56c02ed5eae98.js
+< 250 Delete operation successful.
+
+> DELE bd2561fe34004ed0.js
+< 250 Delete operation successful.
+
+> DELE bf4228c59d85c3fc.js
+< 250 Delete operation successful.
+
+> DELE d377e8ea3b492985.js
+< 250 Delete operation successful.
+
+> DELE eb0c3b9e2e443649.js
+< 250 Delete operation successful.
+
+> DELE ebed217b07b16fcc.js
+< 250 Delete operation successful.
+
+> DELE fac59ac5f0779dd6.js
+< 250 Delete operation successful.
+
+> DELE fd98d4e9dda98654.js
+< 250 Delete operation successful.
+
+> DELE turbopack-ea706bc526a82b91.js
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD chunks
+< 250 Remove directory operation successful.
+
+> CWD media
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20622|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20622 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601         25931 Feb 16 18:23 favicon.0b3bf435.ico
+
+> DELE favicon.0b3bf435.ico
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD media
+< 250 Remove directory operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD static
+< 250 Remove directory operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD _next
+< 250 Remove directory operation successful.
+
+> CWD _not-found
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20489|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20489 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   23 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          8173 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1546 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next._not-found
+-rw-------    1 14607    601           432 Feb 16 18:23 __next._not-found.txt
+-rw-------    1 14607    601           483 Feb 16 18:23 __next._tree.txt
+-rw-------    1 14607    601         27090 Feb 16 18:23 index.html
+-rw-------    1 14607    601          8173 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> CWD __next._not-found
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20204|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20204 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1449 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next._not-found
+< 250 Remove directory operation successful.
+
+> DELE __next._not-found.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD _not-found
+< 250 Remove directory operation successful.
+
+> CWD ad
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20741|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20741 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   22 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7624 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           465 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.ad
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.ad.txt
+-rw-------    1 14607    601         21555 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7624 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.ad
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20726|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20726 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1171 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.ad
+< 250 Remove directory operation successful.
+
+> DELE __next.ad.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD ad
+< 250 Remove directory operation successful.
+
+> CWD admin
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20555|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20555 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   21 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7476 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           471 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.admin
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.admin.txt
+-rw-------    1 14607    601         21351 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7476 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.admin
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20496|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20496 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.admin
+< 250 Remove directory operation successful.
+
+> DELE __next.admin.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD admin
+< 250 Remove directory operation successful.
+
+> CWD ads
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20967|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20967 (No encryption)
+< 226 Directory send OK.
+
+drwx------    5 14607    601          4096 Feb 16 18:23 .
+drwx------   20 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7472 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           467 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.ads
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.ads.txt
+drwx------    3 14607    601          4096 Feb 16 18:23 create
+drwx------    3 14607    601          4096 Feb 16 18:23 edit
+-rw-------    1 14607    601         22506 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7472 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.ads
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20496|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20496 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    5 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.ads
+< 250 Remove directory operation successful.
+
+> DELE __next.ads.txt
+< 250 Delete operation successful.
+
+> CWD create
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20470|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20470 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    4 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          7878 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           591 Feb 16 18:23 __next._tree.txt
+drwx------    3 14607    601          4096 Feb 16 18:23 __next.ads
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.ads.txt
+-rw-------    1 14607    601         29015 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7878 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.ads
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20238|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20238 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+drwx------    2 14607    601          4096 Feb 16 18:23 create
+-rw-------    1 14607    601           432 Feb 16 18:23 create.txt
+
+> CWD create
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20340|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20340 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 18:23 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD create
+< 250 Remove directory operation successful.
+
+> DELE create.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.ads
+< 250 Remove directory operation successful.
+
+> DELE __next.ads.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD create
+< 250 Remove directory operation successful.
+
+> CWD edit
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20871|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20871 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          7874 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           587 Feb 16 18:23 __next._tree.txt
+drwx------    3 14607    601          4096 Feb 16 18:23 __next.ads
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.ads.txt
+-rw-------    1 14607    601         22128 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7874 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.ads
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20035|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20035 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+drwx------    2 14607    601          4096 Feb 16 18:23 edit
+-rw-------    1 14607    601           432 Feb 16 18:23 edit.txt
+
+> CWD edit
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20937|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20937 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 18:23 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD edit
+< 250 Remove directory operation successful.
+
+> DELE edit.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.ads
+< 250 Remove directory operation successful.
+
+> DELE __next.ads.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD edit
+< 250 Remove directory operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD ads
+< 250 Remove directory operation successful.
+
+> CWD auth
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20550|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20550 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   19 14607    601         20480 Feb 16 23:02 ..
+drwx------    3 14607    601          4096 Feb 16 18:23 callback
+
+> CWD callback
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20089|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20089 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 18:23 ..
+-rw-------    1 14607    601          7884 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           597 Feb 16 18:23 __next._tree.txt
+drwx------    3 14607    601          4096 Feb 16 18:23 __next.auth
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.auth.txt
+-rw-------    1 14607    601         26330 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7884 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.auth
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20160|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20160 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+drwx------    2 14607    601          4096 Feb 16 18:23 callback
+-rw-------    1 14607    601           432 Feb 16 18:23 callback.txt
+
+> CWD callback
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20671|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20671 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 18:23 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD callback
+< 250 Remove directory operation successful.
+
+> DELE callback.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.auth
+< 250 Remove directory operation successful.
+
+> DELE __next.auth.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD callback
+< 250 Remove directory operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD auth
+< 250 Remove directory operation successful.
+
+> CWD categories
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20368|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20368 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   18 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7486 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           481 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.categories
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.categories.txt
+-rw-------    1 14607    601         48001 Feb 16 18:23 beauty.jpg
+-rw-------    1 14607    601           564 Feb 16 18:23 beauty.svg
+-rw-------    1 14607    601         18798 Feb 16 18:23 clothing.jpg
+-rw-------    1 14607    601           568 Feb 16 18:23 clothing.svg
+-rw-------    1 14607    601         23250 Feb 16 18:23 electronics.jpg
+-rw-------    1 14607    601           574 Feb 16 18:23 electronics.svg
+-rw-------    1 14607    601         15814 Feb 16 18:23 hobby.jpg
+-rw-------    1 14607    601           562 Feb 16 18:23 hobby.svg
+-rw-------    1 14607    601         53111 Feb 16 18:23 home.jpg
+-rw-------    1 14607    601           563 Feb 16 18:23 home.svg
+-rw-------    1 14607    601         25736 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7486 Feb 16 18:23 index.txt
+-rw-------    1 14607    601         26154 Feb 16 18:23 jobs.jpg
+-rw-------    1 14607    601           560 Feb 16 18:23 jobs.svg
+-rw-------    1 14607    601         21211 Feb 16 18:23 kids.jpg
+-rw-------    1 14607    601           560 Feb 16 18:23 kids.svg
+-rw-------    1 14607    601         26392 Feb 16 18:23 parts.jpg
+-rw-------    1 14607    601           564 Feb 16 18:23 parts.svg
+-rw-------    1 14607    601         19069 Feb 16 18:23 pets.jpg
+-rw-------    1 14607    601           560 Feb 16 18:23 pets.svg
+-rw-------    1 14607    601         20860 Feb 16 18:23 real-estate.jpg
+-rw-------    1 14607    601           574 Feb 16 18:23 real-estate.svg
+-rw-------    1 14607    601        139939 Feb 16 18:23 rent-apartments.jpg
+-rw-------    1 14607    601        118211 Feb 16 18:23 rent-cars.jpg
+-rw-------    1 14607    601         57642 Feb 16 18:23 rent-commercial.jpg
+-rw-------    1 14607    601         35806 Feb 16 18:23 rent-tools.jpg
+-rw-------    1 14607    601         20768 Feb 16 18:23 services.jpg
+-rw-------    1 14607    601           571 Feb 16 18:23 services.svg
+-rw-------    1 14607    601         30416 Feb 16 18:23 transport.jpg
+-rw-------    1 14607    601           570 Feb 16 18:23 transport.svg
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.categories
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20212|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20212 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.categories
+< 250 Remove directory operation successful.
+
+> DELE __next.categories.txt
+< 250 Delete operation successful.
+
+> DELE beauty.jpg
+< 250 Delete operation successful.
+
+> DELE beauty.svg
+< 250 Delete operation successful.
+
+> DELE clothing.jpg
+< 250 Delete operation successful.
+
+> DELE clothing.svg
+< 250 Delete operation successful.
+
+> DELE electronics.jpg
+< 250 Delete operation successful.
+
+> DELE electronics.svg
+< 250 Delete operation successful.
+
+> DELE hobby.jpg
+< 250 Delete operation successful.
+
+> DELE hobby.svg
+< 250 Delete operation successful.
+
+> DELE home.jpg
+< 250 Delete operation successful.
+
+> DELE home.svg
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> DELE jobs.jpg
+< 250 Delete operation successful.
+
+> DELE jobs.svg
+< 250 Delete operation successful.
+
+> DELE kids.jpg
+< 250 Delete operation successful.
+
+> DELE kids.svg
+< 250 Delete operation successful.
+
+> DELE parts.jpg
+< 250 Delete operation successful.
+
+> DELE parts.svg
+< 250 Delete operation successful.
+
+> DELE pets.jpg
+< 250 Delete operation successful.
+
+> DELE pets.svg
+< 250 Delete operation successful.
+
+> DELE real-estate.jpg
+< 250 Delete operation successful.
+
+> DELE real-estate.svg
+< 250 Delete operation successful.
+
+> DELE rent-apartments.jpg
+< 250 Delete operation successful.
+
+> DELE rent-cars.jpg
+< 250 Delete operation successful.
+
+> DELE rent-commercial.jpg
+< 250 Delete operation successful.
+
+> DELE rent-tools.jpg
+< 250 Delete operation successful.
+
+> DELE services.jpg
+< 250 Delete operation successful.
+
+> DELE services.svg
+< 250 Delete operation successful.
+
+> DELE transport.jpg
+< 250 Delete operation successful.
+
+> DELE transport.svg
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD categories
+< 250 Remove directory operation successful.
+
+> CWD category
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20816|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20816 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   17 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7482 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           477 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.category
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.category.txt
+-rw-------    1 14607    601         25778 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7482 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.category
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20256|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20256 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.category
+< 250 Remove directory operation successful.
+
+> DELE __next.category.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD category
+< 250 Remove directory operation successful.
+
+> CWD chat
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20917|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20917 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   16 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7474 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           469 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.chat
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.chat.txt
+-rw-------    1 14607    601         25806 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7474 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.chat
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20601|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20601 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.chat
+< 250 Remove directory operation successful.
+
+> DELE __next.chat.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD chat
+< 250 Remove directory operation successful.
+
+> DELE favicon.ico
+< 250 Delete operation successful.
+
+> CWD favorites
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20009|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20009 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   15 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7484 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           479 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.favorites
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.favorites.txt
+-rw-------    1 14607    601         25734 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7484 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.favorites
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20115|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20115 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.favorites
+< 250 Remove directory operation successful.
+
+> DELE __next.favorites.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD favorites
+< 250 Remove directory operation successful.
+
+> DELE file.svg
+< 250 Delete operation successful.
+
+> CWD forgot-password
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20577|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20577 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   14 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7410 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           491 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.forgot-password
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.forgot-password.txt
+-rw-------    1 14607    601         25670 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7410 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.forgot-password
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20170|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20170 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601           984 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.forgot-password
+< 250 Remove directory operation successful.
+
+> DELE __next.forgot-password.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD forgot-password
+< 250 Remove directory operation successful.
+
+> DELE globe.svg
+< 250 Delete operation successful.
+
+> CWD help
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20331|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20331 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   13 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7474 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           469 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.help
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.help.txt
+-rw-------    1 14607    601         34836 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7474 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.help
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20977|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20977 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.help
+< 250 Remove directory operation successful.
+
+> DELE __next.help.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD help
+< 250 Remove directory operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CWD login
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20258|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20258 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   12 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7380 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           471 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.login
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.login.txt
+-rw-------    1 14607    601         25640 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7380 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.login
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20659|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20659 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601           974 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.login
+< 250 Remove directory operation successful.
+
+> DELE __next.login.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD login
+< 250 Remove directory operation successful.
+
+> DELE logo.png
+< 250 Delete operation successful.
+
+> DELE logo_main.png
+< 250 Delete operation successful.
+
+> DELE manifest.json
+< 250 Delete operation successful.
+
+> DELE next.svg
+< 250 Delete operation successful.
+
+> CWD notifications
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20570|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20570 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   11 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7492 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           487 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.notifications
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.notifications.txt
+-rw-------    1 14607    601         26274 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7492 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.notifications
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20593|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20593 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.notifications
+< 250 Remove directory operation successful.
+
+> DELE __next.notifications.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD notifications
+< 250 Remove directory operation successful.
+
+> DELE out.zip
+< 250 Delete operation successful.
+
+> CWD privacy
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20576|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20576 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------   10 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7480 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           475 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.privacy
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.privacy.txt
+-rw-------    1 14607    601         28987 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7480 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.privacy
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20655|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20655 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.privacy
+< 250 Remove directory operation successful.
+
+> DELE __next.privacy.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD privacy
+< 250 Remove directory operation successful.
+
+> CWD profile
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20959|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20959 (No encryption)
+< 226 Directory send OK.
+
+drwx------    4 14607    601          4096 Feb 16 18:23 .
+drwx------    9 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7480 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           475 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.profile
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.profile.txt
+-rw-------    1 14607    601         25810 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7480 Feb 16 18:23 index.txt
+drwx------    3 14607    601          4096 Feb 16 18:23 settings
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.profile
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20512|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20512 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    4 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.profile
+< 250 Remove directory operation successful.
+
+> DELE __next.profile.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CWD settings
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20599|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20599 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          7890 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           603 Feb 16 18:23 __next._tree.txt
+drwx------    3 14607    601          4096 Feb 16 18:23 __next.profile
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.profile.txt
+-rw-------    1 14607    601         26202 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7890 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.profile
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20950|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20950 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+drwx------    2 14607    601          4096 Feb 16 18:23 settings
+-rw-------    1 14607    601           432 Feb 16 18:23 settings.txt
+
+> CWD settings
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20107|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20107 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 18:23 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD settings
+< 250 Remove directory operation successful.
+
+> DELE settings.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.profile
+< 250 Remove directory operation successful.
+
+> DELE __next.profile.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD settings
+< 250 Remove directory operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD profile
+< 250 Remove directory operation successful.
+
+> CWD register
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20809|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20809 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    8 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7389 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           477 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.register
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.register.txt
+-rw-------    1 14607    601         25649 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7389 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.register
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20807|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20807 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601           977 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.register
+< 250 Remove directory operation successful.
+
+> DELE __next.register.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD register
+< 250 Remove directory operation successful.
+
+> CWD search
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20730|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20730 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    7 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7478 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           473 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.search
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.search.txt
+-rw-------    1 14607    601         25931 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7478 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.search
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20425|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20425 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.search
+< 250 Remove directory operation successful.
+
+> DELE __next.search.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD search
+< 250 Remove directory operation successful.
+
+> CWD terms
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20958|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20958 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    6 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7476 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           471 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.terms
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.terms.txt
+-rw-------    1 14607    601         29633 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7476 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.terms
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20255|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20255 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.terms
+< 250 Remove directory operation successful.
+
+> DELE __next.terms.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD terms
+< 250 Remove directory operation successful.
+
+> CWD update-password
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20471|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20471 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    5 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7410 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           491 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.update-password
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.update-password.txt
+-rw-------    1 14607    601         25670 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7410 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.update-password
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20248|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20248 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601           984 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.update-password
+< 250 Remove directory operation successful.
+
+> DELE __next.update-password.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD update-password
+< 250 Remove directory operation successful.
+
+> CWD user
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20573|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20573 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    4 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7474 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           469 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.user
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.user.txt
+-rw-------    1 14607    601         25785 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7474 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.user
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20942|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20942 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.user
+< 250 Remove directory operation successful.
+
+> DELE __next.user.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD user
+< 250 Remove directory operation successful.
+
+> DELE vercel.svg
+< 250 Delete operation successful.
+
+> CWD verify-email
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20205|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20205 (No encryption)
+< 226 Directory send OK.
+
+drwx------    3 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601         20480 Feb 16 23:02 ..
+-rw-------    1 14607    601          7490 Feb 16 18:23 __next._full.txt
+-rw-------    1 14607    601          1495 Feb 16 18:23 __next._head.txt
+-rw-------    1 14607    601          4130 Feb 16 18:23 __next._index.txt
+-rw-------    1 14607    601           485 Feb 16 18:23 __next._tree.txt
+drwx------    2 14607    601          4096 Feb 16 18:23 __next.verify-email
+-rw-------    1 14607    601           432 Feb 16 18:23 __next.verify-email.txt
+-rw-------    1 14607    601         25790 Feb 16 18:23 index.html
+-rw-------    1 14607    601          7490 Feb 16 18:23 index.txt
+
+> DELE __next._full.txt
+< 250 Delete operation successful.
+
+> DELE __next._head.txt
+< 250 Delete operation successful.
+
+> DELE __next._index.txt
+< 250 Delete operation successful.
+
+> DELE __next._tree.txt
+< 250 Delete operation successful.
+
+> CWD __next.verify-email
+< 250 Directory successfully changed.
+
+> EPSV
+< 229 Entering Extended Passive Mode (|||20223|)
+
+> LIST -a
+< 150 Here comes the directory listing.
+
+Downloading from 5.101.153.227:20223 (No encryption)
+< 226 Directory send OK.
+
+drwx------    2 14607    601          4096 Feb 16 18:23 .
+drwx------    3 14607    601          4096 Feb 16 23:02 ..
+-rw-------    1 14607    601          1038 Feb 16 18:23 __PAGE__.txt
+
+> DELE __PAGE__.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD __next.verify-email
+< 250 Remove directory operation successful.
+
+> DELE __next.verify-email.txt
+< 250 Delete operation successful.
+
+> DELE index.html
+< 250 Delete operation successful.
+
+> DELE index.txt
+< 250 Delete operation successful.
+
+> CDUP
+< 250 Directory successfully changed.
+
+> RMD verify-email
+< 250 Remove directory operation successful.
+
+> DELE window.svg
+< 250 Delete operation successful.
+
+✅ Remote directory cleaned.
+> QUIT
+Connected to 5.101.153.227:21 (No encryption)
+< 220 Welcome to LTD BeGet FTP Server 'xerox'
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+Login security: No encryption
+> USER konkevlk_boss
+< 331 Please specify the password.
+
+> PASS ###
+< 230 Login successful.
+
+> FEAT
+< 211-Features:
+
+<  EPRT
+ EPSV
+ MDTM
+ PASV
+ PBSZ
+ PROT
+ REST STREAM
+ SIZE
+ TVFS
+ UTF8
+211 End
+
+> TYPE I
+< 200 Switching to Binary mode.
+
+> STRU F
+< 200 Structure set to F.
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+✅ FTP connected
+📦 Creating ZIP...
+tar: could not chdir to 'c:\www\avoska\out'
+
+❌ FTP Error: Error: Command failed: tar -a -c -f "avoska.zip" -C "c:\www\avoska\out" .
+    at genericNodeError (node:internal/errors:985:15)
+    at wrappedFn (node:internal/errors:539:14)
+    at checkExecSyncError (node:child_process:925:11)
+    at execSync (node:child_process:997:15)
+    at deploy (c:\www\avoska\ftp-deploy.js:32:9)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  status: 1,
+  signal: null,
+  output: [ null, null, null ],
+  pid: 52388,
+  stdout: null,
+  stderr: null
+}
+> QUIT
+Connected to 5.101.153.227:21 (No encryption)
+< 220 Welcome to LTD BeGet FTP Server 'xerox'
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+Login security: No encryption
+> USER konkevlk_boss
+< 331 Please specify the password.
+
+> PASS ###
+< 230 Login successful.
+
+> FEAT
+< 211-Features:
+
+<  EPRT
+ EPSV
+ MDTM
+ PASV
+ PBSZ
+ PROT
+ REST STREAM
+ SIZE
+ TVFS
+ UTF8
+211 End
+
+> TYPE I
+< 200 Switching to Binary mode.
+
+> STRU F
+< 200 Structure set to F.
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+📤 Uploading extraction script...
+Trying to find optimal transfer strategy...
+> EPSV
+< 229 Entering Extended Passive Mode (|||20163|)
+
+Optimal transfer strategy found.
+> STOR /avoska.353290.ru/public_html/_unzip.php
+< 150 Ok to send data.
+
+Uploading to 5.101.153.227:20163 (No encryption)
+< 226 Transfer complete.
+
+🌐 Triggering extraction at http://avoska.353290.ru/_unzip.php...
+📥 Server Response: Error: avoska.zip not found
+❌ Extraction failed or returned unexpected result.
+> QUIT
