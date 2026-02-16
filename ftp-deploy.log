@@ -1,0 +1,106 @@
+Connected to 5.101.153.227:21 (No encryption)
+< 220 Welcome to LTD BeGet FTP Server 'xerox'
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+Login security: No encryption
+> USER konkevlk_boss
+< 331 Please specify the password.
+
+> PASS ###
+< 230 Login successful.
+
+> FEAT
+< 211-Features:
+ EPRT
+
+<  EPSV
+ MDTM
+ PASV
+ PBSZ
+ PROT
+ REST STREAM
+ SIZE
+ TVFS
+ UTF8
+211 End
+
+> TYPE I
+< 200 Switching to Binary mode.
+
+> STRU F
+< 200 Structure set to F.
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+✅ FTP connected
+📦 Creating ZIP...
+📤 Uploading zip to /avoska.353290.ru/public_html/avoska.zip...
+Trying to find optimal transfer strategy...
+> EPSV
+< 229 Entering Extended Passive Mode (|||20478|)
+
+Optimal transfer strategy found.
+> STOR /avoska.353290.ru/public_html/avoska.zip
+< 150 Ok to send data.
+
+Uploading to 5.101.153.227:20478 (No encryption)
+< 226 Transfer complete.
+
+✅ Upload complete
+> QUIT
+Connected to 5.101.153.227:21 (No encryption)
+< 220 Welcome to LTD BeGet FTP Server 'xerox'
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+Login security: No encryption
+> USER konkevlk_boss
+< 331 Please specify the password.
+
+> PASS ###
+< 230 Login successful.
+
+> FEAT
+< 211-Features:
+
+<  EPRT
+ EPSV
+ MDTM
+ PASV
+ PBSZ
+ PROT
+ REST STREAM
+ SIZE
+ TVFS
+ UTF8
+211 End
+
+> TYPE I
+< 200 Switching to Binary mode.
+
+> STRU F
+< 200 Structure set to F.
+
+> OPTS UTF8 ON
+< 200 Always in UTF8 mode.
+
+📤 Uploading extraction script...
+Trying to find optimal transfer strategy...
+> EPSV
+< 229 Entering Extended Passive Mode (|||20233|)
+
+Optimal transfer strategy found.
+> STOR /avoska.353290.ru/public_html/_unzip.php
+< 150 Ok to send data.
+
+Uploading to 5.101.153.227:20233 (No encryption)
+< 226 Transfer complete.
+
+🌐 Triggering extraction at http://avoska.353290.ru/_unzip.php...
+📥 Server Response: Success
+🚀 Extraction successful!
+> QUIT

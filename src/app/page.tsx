@@ -361,9 +361,9 @@ export default function HomePage() {
                 <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
               ))}
             </div>
-          ) : newAds.length > 0 ? (
+          ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
-              {newAds.slice(0, 6).map((ad) => (
+              {(newAds.length > 0 ? newAds : ads).slice(0, 6).map((ad) => (
                 <Link
                   key={ad.id}
                   href={`/ad?id=${ad.id}`}
@@ -397,23 +397,17 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-          ) : (
-            <div className="bg-surface p-10 rounded-2xl border-2 border-dashed border-border/50 text-center">
-              <p className="text-muted-foreground">Объявлений пока нет</p>
-            </div>
           )}
-
-          {newAds.length > 0 && (
-            <div className="mt-2 flex justify-start md:justify-center px-1">
-              <Link
-                href="/search?sort=newest"
-                className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
-              >
-                <span>Смотреть все</span>
-                <ChevronRight className="h-4 w-4" />
-              </Link>
-            </div>
-          )}
+          
+          <div className="mt-2 flex justify-start md:justify-center px-1">
+            <Link
+              href="/search?sort=newest"
+              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
+            >
+              <span>Смотреть все</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
         </section>
 
         {/* App Download Section - Slim Version */}
@@ -506,35 +500,6 @@ export default function HomePage() {
             </Link>
           </div>
         </section>
-        {!loading && ads.length === 0 && (
-          <div className="bg-surface p-10 md:p-20 rounded-2xl md:rounded-[4rem] border-2 md:border-4 border-dashed border-border/50 text-center shadow-inner">
-            <div className="w-16 h-16 md:w-24 md:h-24 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <MapPin className="h-6 w-6 md:h-10 md:w-10 text-muted/40" />
-            </div>
-            <h3 className="text-xl md:text-3xl font-black mb-2 tracking-tight">В этом городе пока нет объявлений</h3>
-            <p className="text-sm md:text-lg text-muted-foreground mb-6 md:mb-10 max-w-md mx-auto italic font-medium">Но мы уже ищем лучшие предложения для вас!</p>
-            <Link href="/ads/create" className="inline-flex bg-primary text-white px-6 py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-lg shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
-              Стать первым продавцом
-            </Link>
-          </div>
-        )}
-
-        <div ref={loadMoreRef} className="h-32 flex items-center justify-center">
-          {loadingMore && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-6 w-full opacity-50">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={`more-${i}`} className="flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm border border-border/40 h-full">
-                  <Skeleton className="aspect-[4/3] w-full" />
-                  <div className="p-3 space-y-2">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
