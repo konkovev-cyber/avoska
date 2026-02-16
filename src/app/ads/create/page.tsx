@@ -45,6 +45,10 @@ export default function CreateAdPage() {
     const [loading, setLoading] = useState(false);
     const [limitReached, setLimitReached] = useState(false);
 
+    // Custom selection states
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [isCityModalOpen, setIsCityModalOpen] = useState(false);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -170,7 +174,68 @@ export default function CreateAdPage() {
     }
 
     return (
-        <div className="container mx-auto px-2 md:px-4 py-2 max-w-3xl pb-24">
+        <div className="container mx-auto px-2 md:px-4 py-2 max-w-3xl pb-32">
+            {/* Category selection modal */}
+            {isCategoryModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCategoryModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300 max-h-[85vh] flex flex-col">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Выберите категорию</h2>
+                            <button onClick={() => setIsCategoryModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 overflow-y-auto pb-8 pr-2 custom-scrollbar">
+                            {CATEGORIES.map((cat) => (
+                                <button
+                                    key={cat.slug}
+                                    onClick={() => {
+                                        setCategory(cat.slug);
+                                        setIsCategoryModalOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        category === cat.slug ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span>{cat.name}</span>
+                                    {category === cat.slug && <Check className="h-5 w-5" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* City selection modal */}
+            {isCityModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-200">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCityModalOpen(false)} />
+                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300 max-h-[85vh] flex flex-col">
+                        <div className="flex items-center justify-between mb-6 shrink-0">
+                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Выберите город</h2>
+                            <button onClick={() => setIsCityModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 overflow-y-auto pb-8 pr-2 custom-scrollbar">
+                            {cities.map((c) => (
+                                <button
+                                    key={c.name}
+                                    onClick={() => {
+                                        setCity(c.name);
+                                        setIsCityModalOpen(false);
+                                    }}
+                                    className={cn(
+                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
+                                        city === c.name ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
+                                    )}
+                                >
+                                    <span>{c.name}</span>
+                                    {city === c.name && <Check className="h-5 w-5" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="bg-surface border border-border rounded-[2rem] p-4 md:p-6 shadow-2xl shadow-black/5">
                 <h1 className="text-xl md:text-2xl font-black mb-4 tracking-tight flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -192,19 +257,16 @@ export default function CreateAdPage() {
                         </div>
                         <div className="space-y-1">
                             <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Категория</label>
-                            <div className="relative">
-                                <select
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full h-11 px-4 pr-10 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold appearance-none transition-all cursor-pointer"
-                                >
-                                    <option value="">Выберите категорию</option>
-                                    {CATEGORIES.map((cat) => (
-                                        <option key={cat.slug} value={cat.slug}>{cat.name}</option>
-                                    ))}
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsCategoryModalOpen(true)}
+                                className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold flex items-center justify-between transition-all"
+                            >
+                                <span className={category ? "text-foreground" : "text-muted-foreground/50 font-medium"}>
+                                    {CATEGORIES.find(c => c.slug === category)?.name || "Выберите категорию"}
+                                </span>
+                                <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                            </button>
                         </div>
                     </div>
 
@@ -409,18 +471,14 @@ export default function CreateAdPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Город</label>
-                                <div className="relative">
-                                    <select
-                                        value={city}
-                                        onChange={(e) => setCity(e.target.value)}
-                                        className="w-full h-10 px-3 pr-8 rounded-lg bg-surface border border-border outline-none focus:border-primary font-bold text-sm appearance-none transition-all cursor-pointer"
-                                    >
-                                        {cities.map((c) => (
-                                            <option key={c.name} value={c.name}>{c.name}</option>
-                                        ))}
-                                    </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCityModalOpen(true)}
+                                    className="w-full h-10 px-3 rounded-lg bg-surface border border-border outline-none focus:border-primary font-bold text-sm flex items-center justify-between transition-all text-left"
+                                >
+                                    <span>{city}</span>
+                                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                </button>
                             </div>
                             <div className="space-y-1">
                                 <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Адрес (необязательно)</label>

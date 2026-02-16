@@ -586,6 +586,12 @@ export default function ProfilePage() {
                     </div>
                 )}
             </div>
+            {/* Version Display */}
+            <div className="mt-12 text-center pb-8">
+                <div className="inline-block px-3 py-1 bg-surface border border-border rounded-full text-[9px] font-black text-muted uppercase tracking-[0.2em]">
+                    Avoska+ v0.1.1
+                </div>
+            </div>
         </div>
     );
 }

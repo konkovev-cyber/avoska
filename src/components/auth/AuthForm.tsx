@@ -74,15 +74,15 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
     };
 
     return (
-        <div className="w-full max-w-sm p-6 md:p-8 bg-surface rounded-[2.5rem] shadow-2xl border border-border relative overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div className="w-full max-w-sm p-5 md:p-8 bg-surface rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-border relative overflow-hidden animate-in fade-in zoom-in duration-300">
             <button
                 onClick={() => router.push('/')}
-                className="absolute top-6 right-6 p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground active:scale-90"
+                className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground active:scale-90 z-10"
                 title="Закрыть"
             >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
             </button>
-            <h2 className="text-3xl font-black text-center mb-8 tracking-tighter">
+            <h2 className="text-2xl md:text-3xl font-black text-center mb-6 md:mb-8 tracking-tighter">
                 {mode === 'login' ? 'С возвращением!' :
                     mode === 'register' ? 'Станьте своим' :
                         mode === 'forgot-password' ? 'Сброс пароля' : 'Новый пароль'}
@@ -100,15 +100,15 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 </div>
             )}
 
-            <form onSubmit={handleAuth} className="space-y-5">
+            <form onSubmit={handleAuth} className="space-y-4 md:space-y-5">
                 {mode === 'register' && (
                     <div>
-                        <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Как вас зовут?</label>
+                        <label className="block text-[9px] font-black uppercase text-muted-foreground mb-1.5 tracking-[0.15em] ml-1">Как вас зовут?</label>
                         <input
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full h-14 px-5 rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold text-sm"
                             placeholder="Иван Иванов"
                             required
                         />
@@ -116,12 +116,12 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 )}
                 {mode !== 'update-password' && (
                     <div>
-                        <label className="block text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-[0.2em] ml-1">Ваша почта (Email)</label>
+                        <label className="block text-[9px] font-black uppercase text-muted-foreground mb-1.5 tracking-[0.15em] ml-1">Ваша почта (Email)</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full h-14 px-5 rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold text-sm"
                             placeholder="example@mail.com"
                             required
                         />
@@ -129,15 +129,15 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 )}
                 {mode !== 'forgot-password' && (
                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="block text-[10px] font-black uppercase text-muted-foreground tracking-[0.2em] ml-1">
+                        <div className="flex justify-between items-center mb-1.5">
+                            <label className="block text-[9px] font-black uppercase text-muted-foreground tracking-[0.15em] ml-1">
                                 {mode === 'update-password' ? 'Новый пароль' : 'Пароль'}
                             </label>
                             {mode === 'login' && (
                                 <button
                                     type="button"
                                     onClick={() => router.push('/forgot-password')}
-                                    className="text-[10px] font-bold uppercase tracking-wider text-primary hover:underline"
+                                    className="text-[9px] font-bold uppercase tracking-wider text-primary hover:underline"
                                 >
                                     Забыли пароль?
                                 </button>
@@ -147,7 +147,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full h-14 px-5 rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold text-sm"
                             placeholder="••••••••"
                             required
                         />
@@ -156,27 +156,27 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-14 bg-primary text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/30 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 mt-4"
+                    className="w-full h-12 md:h-14 bg-primary text-white font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/30 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 mt-2"
                 >
                     {loading ? (
                         <div className="flex items-center justify-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span>Загрузка...</span>
+                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="text-xs">Загрузка...</span>
                         </div>
                     ) : (
-                        mode === 'login' ? 'Войти' :
+                        <span className="text-sm">{mode === 'login' ? 'Войти' :
                             mode === 'register' ? 'Создать аккаунт' :
-                                mode === 'forgot-password' ? 'Сбросить пароль' : 'Обновить пароль'
+                                mode === 'forgot-password' ? 'Сбросить пароль' : 'Обновить пароль'}</span>
                     )}
                 </button>
 
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="w-full h-14 bg-muted/30 text-muted-foreground font-black uppercase tracking-widest rounded-2xl hover:bg-muted/50 transition-all flex items-center justify-center gap-2 mt-2"
+                    className="w-full h-12 md:h-14 bg-muted/30 text-muted-foreground font-black uppercase tracking-widest rounded-xl md:rounded-2xl hover:bg-muted/50 transition-all flex items-center justify-center gap-2 mt-1"
                 >
-                    <ArrowLeft className="h-4 w-4" />
-                    Назад
+                    <ArrowLeft className="h-3 w-3" />
+                    <span className="text-xs">Назад</span>
                 </button>
             </form>
 

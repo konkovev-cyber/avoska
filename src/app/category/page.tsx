@@ -140,7 +140,7 @@ function CategoryContent() {
                         />
                     </div>
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight">{category.name}</h1>
+                        <h1 className="text-2xl md:text-4xl font-black tracking-tight">{category.name}</h1>
                         <p className="text-muted text-[11px] font-black uppercase tracking-[0.2em] mt-1">{ads.length} объявлений</p>
                     </div>
                 </div>

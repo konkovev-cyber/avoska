@@ -49,6 +49,7 @@ export default function HomePage() {
   const [hasMore, setHasMore] = useState(true);
   const [city, setCity] = useState<string | null>(null);
   const [personalCategory, setPersonalCategory] = useState<any>(null);
+  const [isMobileApp, setIsMobileApp] = useState(false);
   const PAGE_SIZE = 14;
 
   const router = useRouter();
@@ -57,6 +58,9 @@ export default function HomePage() {
   useEffect(() => {
     fetchInitialData();
     fetchFavorites();
+    // Check for Capacitor / Mobile environment
+    const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;
+    setIsMobileApp(isCapacitor);
   }, []);
 
   const fetchInitialData = async () => {
@@ -327,7 +331,9 @@ export default function HomePage() {
                 <div className="aspect-square w-full bg-surface border border-border rounded-xl overflow-hidden shadow-sm active:scale-95 transition-transform flex items-center justify-center">
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
                 </div>
-                <span className="text-[10px] font-bold text-center leading-tight line-clamp-1">{cat.name}</span>
+                <div className="h-[2.5em] flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-center leading-tight line-clamp-2">{cat.name}</span>
+                </div>
               </Link>
             ))}
           </div>
@@ -407,29 +413,31 @@ export default function HomePage() {
         </section>
 
         {/* App Download Section - Slim Version */}
-        <section className="mb-12 px-1">
-          <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-4 md:p-6 text-white relative overflow-hidden shadow-xl shadow-green-900/5">
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0">
-                  <Smartphone className="h-7 w-7 text-white" />
+        {!isMobileApp && (
+          <section className="mb-12 px-1">
+            <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-4 md:p-6 text-white relative overflow-hidden shadow-xl shadow-green-900/5">
+              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0">
+                    <Smartphone className="h-7 w-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg md:text-xl font-black tracking-tight">Установите Авоську+</h3>
+                    <p className="text-green-50/70 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Приложение для Android стало быстрее и удобнее</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg md:text-xl font-black tracking-tight">Установите Авоську+</h3>
-                  <p className="text-green-50/70 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Приложение для Android стало быстрее и удобнее</p>
-                </div>
-              </div>
 
-              <a
-                href="https://github.com/konkovev-cyber/avoska/releases/download/v0.1.0/avoska.apk"
-                className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
-              >
-                <span>Скачать .apk</span>
-                <ChevronRight className="h-4 w-4" />
-              </a>
+                <a
+                  href="https://github.com/konkovev-cyber/avoska/releases/latest/download/avoska.apk"
+                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  <span>Скачать .apk</span>
+                  <ChevronRight className="h-4 w-4" />
+                </a>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Recommendations Section */}
         <section className="mb-12">
