@@ -1,0 +1,20 @@
+# Next.js Static Export Apache Configuration
+Options -Indexes
+RewriteEngine On
+RewriteBase /
+
+# Redirect /index.html to /
+RewriteRule ^index\.html$ / [R=301,L]
+
+# Force remove trailing slash from non-directories
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+# Internal rewrite to .html if file exists
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.*)$ $1.html [L]
+
+# 404 handling
+ErrorDocument 404 /404.html
