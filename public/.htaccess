@@ -1,20 +1,21 @@
-# Next.js Static Export Apache Configuration
-Options -Indexes
+# Next.js Static Export Apache Configuration (Trailing Slash Optimized)
+Options -Indexes -MultiViews
 RewriteEngine On
 RewriteBase /
 
-# Redirect /index.html to /
+# 1. Redirect /index.html to /
 RewriteRule ^index\.html$ / [R=301,L]
 
-# Force remove trailing slash from non-directories
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)/$ /$1 [L,R=301]
-
-# Internal rewrite to .html if file exists
+# 2. Match URLs without trailing slash and add it
+# This ensures that /category becomes /category/ which maps to /category/index.html
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME}\.html -f
-RewriteRule ^(.*)$ $1.html [L]
+RewriteCond %{REQUEST_URI} !(.*)/$
+RewriteCond %{REQUEST_URI} !(\.[a-zA-Z0-9]{1,5})$
+RewriteRule ^(.*)$ $1/ [L,R=301]
 
-# 404 handling
-ErrorDocument 404 /404.html
+# 3. If the request is for a path (with slash), Apache will naturally find index.html
+# No extra rewrites needed for extensionless URLs when trailingSlash is true!
+
+# 4. Handle 404
+# (Next.js with trailingSlash: true creates 404/index.html)
+ErrorDocument 404 /404/index.html
