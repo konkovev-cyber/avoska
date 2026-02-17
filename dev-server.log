@@ -4,13 +4,11 @@
 - Environments: .env.local
 
 ✓ Starting...
-✓ Ready in 1331ms
-○ Compiling / ...
- GET / 200 in 5.1s (compile: 4.7s, render: 425ms)
- GET /ad?id=2cb8fc32-c24a-421f-b94c-d14f56a0e03e 200 in 803ms (compile: 771ms, render: 31ms)
- GET /user?id=adc75021-b3fc-4b41-837a-5df122908212 200 in 632ms (compile: 608ms, render: 24ms)
- GET /profile 200 in 774ms (compile: 685ms, render: 88ms)
- GET /profile 200 in 91ms (compile: 5ms, render: 85ms)
- GET /profile 200 in 52ms (compile: 4ms, render: 48ms)
- GET /profile 200 in 26ms (compile: 4ms, render: 22ms)
- GET /admin 200 in 568ms (compile: 544ms, render: 24ms)
+✓ Ready in 1345ms
+○ Compiling /category ...
+ GET /category?slug=real-estate 200 in 5.1s (compile: 4.7s, render: 356ms)
+ GET /categories 200 in 743ms (compile: 711ms, render: 32ms)
+ GET / 200 in 597ms (compile: 574ms, render: 22ms)
+ GET / 200 in 94ms (compile: 7ms, render: 88ms)
+ GET /ad?id=f4dc76f7-0610-4fdf-be23-44b089ee8448 200 in 774ms (compile: 748ms, render: 27ms)
+ GET /ads/create 200 in 505ms (compile: 478ms, render: 27ms)

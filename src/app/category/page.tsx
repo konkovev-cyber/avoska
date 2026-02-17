@@ -130,49 +130,6 @@ function CategoryContent() {
 
     return (
         <div className="container mx-auto px-2 md:px-4 py-6 max-w-[1200px]">
-            {/* City selection modal */}
-            {isCityModalOpen && (
-                <div className="fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-200">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsCityModalOpen(false)} />
-                    <div className="relative w-full max-w-lg bg-surface rounded-t-[2.5rem] p-6 shadow-2xl animate-in slide-in-from-bottom-full duration-300 max-h-[85vh] flex flex-col">
-                        <div className="flex items-center justify-between mb-6 shrink-0">
-                            <h2 className="text-xl font-black uppercase tracking-tight ml-2">Выберите город</h2>
-                            <button onClick={() => setIsCityModalOpen(false)} className="p-2 bg-muted/10 rounded-full text-muted-foreground"><X className="h-6 w-6" /></button>
-                        </div>
-                        <div className="grid grid-cols-1 gap-2 overflow-y-auto pb-8 pr-2 custom-scrollbar">
-                            <button
-                                onClick={() => {
-                                    setSelectedCity('');
-                                    setIsCityModalOpen(false);
-                                }}
-                                className={cn(
-                                    "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
-                                    !selectedCity ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
-                                )}
-                            >
-                                <span>Любой город</span>
-                                {!selectedCity && <Check className="h-5 w-5" />}
-                            </button>
-                            {cities.map((c) => (
-                                <button
-                                    key={c.name}
-                                    onClick={() => {
-                                        setSelectedCity(c.name);
-                                        setIsCityModalOpen(false);
-                                    }}
-                                    className={cn(
-                                        "flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all font-bold text-left",
-                                        selectedCity === c.name ? "bg-primary/5 border-primary text-primary" : "bg-muted/10 border-transparent hover:bg-muted/20"
-                                    )}
-                                >
-                                    <span>{c.name}</span>
-                                    {selectedCity === c.name && <Check className="h-5 w-5" />}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
             <Link href="/categories" className="inline-flex items-center gap-2 text-primary font-black mb-6 hover:translate-x-[-4px] transition-transform text-xs uppercase tracking-widest">
                 <ChevronLeft className="h-4 w-4" /> Ко всем категориям
             </Link>
@@ -215,41 +172,77 @@ function CategoryContent() {
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
+                                    min="0"
                                     placeholder="От"
                                     value={priceFrom}
-                                    onChange={(e) => setPriceFrom(e.target.value)}
+                                    onChange={(e) => setPriceFrom(e.target.value.replace(/^-/, ''))}
                                     className="w-full p-3 text-sm rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors"
                                 />
                                 <div className="w-4 h-0.5 bg-border"></div>
                                 <input
                                     type="number"
+                                    min="0"
                                     placeholder="До"
                                     value={priceTo}
-                                    onChange={(e) => setPriceTo(e.target.value)}
+                                    onChange={(e) => setPriceTo(e.target.value.replace(/^-/, ''))}
                                     className="w-full p-3 text-sm rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors"
                                 />
                             </div>
                         </div>
 
-                        {/* City Filter */}
-                        <div className="mb-8">
+                        {/* City Filter - Compact Dropdown */}
+                        <div className="mb-8 relative">
                             <label className="block text-[11px] font-black uppercase text-muted mb-3 tracking-widest">Город</label>
                             <button
-                                onClick={() => setIsCityModalOpen(true)}
+                                onClick={() => setIsCityModalOpen(!isCityModalOpen)}
                                 className="w-full h-11 px-4 rounded-xl bg-background border border-border font-bold text-sm flex items-center justify-between hover:border-primary transition-all text-left"
                             >
-                                <span>{selectedCity || "Любой"}</span>
-                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                <span className="truncate">{selectedCity || "Любой"}</span>
+                                <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", isCityModalOpen && "rotate-180")} />
                             </button>
+                            
+                            {isCityModalOpen && (
+                                <div className="absolute top-full left-0 mt-2 w-full bg-surface border border-border rounded-xl shadow-2xl overflow-hidden z-50 max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedCity('');
+                                            setIsCityModalOpen(false);
+                                        }}
+                                        className={cn(
+                                            "w-full text-left px-4 py-2.5 text-sm font-bold transition-all border-b border-border/50",
+                                            !selectedCity ? "bg-primary text-white" : "hover:bg-muted"
+                                        )}
+                                    >
+                                        Любой город
+                                    </button>
+                                    {cities.map((c) => (
+                                        <button
+                                            key={c.name}
+                                            onClick={() => {
+                                                setSelectedCity(c.name);
+                                                setIsCityModalOpen(false);
+                                            }}
+                                            className={cn(
+                                                "w-full text-left px-4 py-2.5 text-sm font-bold transition-all hover:bg-muted",
+                                                selectedCity === c.name ? "bg-primary text-white" : ""
+                                            )}
+                                        >
+                                            {c.name}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Dynamic Specs Filters */}
-                        {(slug === 'transport' || slug === 'electronics' || slug === 'real-estate') && (
-                            <div className="space-y-6 pt-6 border-t border-border">
-                                {slug === 'transport' && (
+                        {/* Dynamic Specs Filters by Category */}
+                        <div className="space-y-6 pt-6 border-t border-border">
+                            
+                            {/* Transport Filters */}
+                            {slug === 'transport' && (
+                                <>
                                     <div>
                                         <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">КПП</label>
-                                        <div className="grid grid-cols-1 gap-2">
+                                        <div className="grid grid-cols-2 gap-2">
                                             {['auto', 'manual'].map(t => (
                                                 <button
                                                     key={t}
@@ -264,11 +257,98 @@ function CategoryContent() {
                                             ))}
                                         </div>
                                     </div>
-                                )}
-                                {slug === 'real-estate' && (
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Состояние</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {['new', 'used'].map(c => (
+                                                <button
+                                                    key={c}
+                                                    onClick={() => setSpecFilters({ ...specFilters, condition: specFilters.condition === c ? '' : c })}
+                                                    className={cn(
+                                                        "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.condition === c ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    {c === 'new' ? 'Новое' : 'Б/У'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Real Estate Filters */}
+                            {slug === 'real-estate' && (
+                                <>
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Тип объекта</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { value: 'apartment', label: 'Квартира' },
+                                                { value: 'house', label: 'Дом' },
+                                                { value: 'plot', label: 'Участок' },
+                                                { value: 'commercial', label: 'Коммерция' }
+                                            ].map(t => (
+                                                <button
+                                                    key={t.value}
+                                                    onClick={() => setSpecFilters({ ...specFilters, type: specFilters.type === t.value ? '' : t.value })}
+                                                    className={cn(
+                                                        "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.type === t.value ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                     <div>
                                         <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Комнаты</label>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {['studio', '1', '2', '3', '4+'].map(r => (
+                                                <button
+                                                    key={r}
+                                                    onClick={() => setSpecFilters({ ...specFilters, rooms: specFilters.rooms === r ? '' : r })}
+                                                    className={cn(
+                                                        "p-2 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.rooms === r ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    {r}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Rent Apartments Filters */}
+                            {slug === 'rent-apartments' && (
+                                <>
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Тип жилья</label>
                                         <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { value: 'apartment', label: 'Квартира' },
+                                                { value: 'room', label: 'Комната' },
+                                                { value: 'house', label: 'Дом' }
+                                            ].map(t => (
+                                                <button
+                                                    key={t.value}
+                                                    onClick={() => setSpecFilters({ ...specFilters, type: specFilters.type === t.value ? '' : t.value })}
+                                                    className={cn(
+                                                        "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.type === t.value ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Комнаты</label>
+                                        <div className="grid grid-cols-4 gap-2">
                                             {['studio', '1', '2', '3'].map(r => (
                                                 <button
                                                     key={r}
@@ -283,9 +363,112 @@ function CategoryContent() {
                                             ))}
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        )}
+                                </>
+                            )}
+
+                            {/* Rent Commercial Filters */}
+                            {slug === 'rent-commercial' && (
+                                <div>
+                                    <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Тип</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {[
+                                            { value: 'office', label: 'Офис' },
+                                            { value: 'retail', label: 'Магазин' },
+                                            { value: 'warehouse', label: 'Склад' },
+                                            { value: 'other', label: 'Другое' }
+                                        ].map(t => (
+                                            <button
+                                                key={t.value}
+                                                onClick={() => setSpecFilters({ ...specFilters, type: specFilters.type === t.value ? '' : t.value })}
+                                                className={cn(
+                                                    "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                    specFilters.type === t.value ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                )}
+                                            >
+                                                {t.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Electronics Filters */}
+                            {slug === 'electronics' && (
+                                <div>
+                                    <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Состояние</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {['new', 'used'].map(c => (
+                                            <button
+                                                key={c}
+                                                onClick={() => setSpecFilters({ ...specFilters, condition: specFilters.condition === c ? '' : c })}
+                                                className={cn(
+                                                    "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                    specFilters.condition === c ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                )}
+                                            >
+                                                {c === 'new' ? 'Новое' : 'Б/У'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Jobs Filters */}
+                            {slug === 'jobs' && (
+                                <>
+                                    <div>
+                                        <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Занятость</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { value: 'full', label: 'Полная' },
+                                                { value: 'part', label: 'Частичная' },
+                                                { value: 'remote', label: 'Удалённо' },
+                                                { value: 'project', label: 'Проект' }
+                                            ].map(t => (
+                                                <button
+                                                    key={t.value}
+                                                    onClick={() => setSpecFilters({ ...specFilters, employment: specFilters.employment === t.value ? '' : t.value })}
+                                                    className={cn(
+                                                        "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.employment === t.value ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                    )}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Services Filters */}
+                            {slug === 'services' && (
+                                <div>
+                                    <label className="block text-[11px] font-black uppercase text-muted mb-2 tracking-widest">Тип услуги</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {[
+                                            { value: 'repair', label: 'Ремонт' },
+                                            { value: 'construction', label: 'Стройка' },
+                                            { value: 'beauty', label: 'Красота' },
+                                            { value: 'education', label: 'Обучение' },
+                                            { value: 'transport', label: 'Перевозки' },
+                                            { value: 'other', label: 'Другое' }
+                                        ].map(t => (
+                                            <button
+                                                key={t.value}
+                                                onClick={() => setSpecFilters({ ...specFilters, serviceType: specFilters.serviceType === t.value ? '' : t.value })}
+                                                className={cn(
+                                                    "text-left p-3 rounded-xl text-sm font-bold border transition-all",
+                                                    specFilters.serviceType === t.value ? "bg-primary text-white border-primary" : "bg-background border-border hover:border-primary/50"
+                                                )}
+                                            >
+                                                {t.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </aside>
 
@@ -356,6 +539,7 @@ function CategoryContent() {
                             <button onClick={() => setShowMobileFilters(false)} className="p-2 bg-surface rounded-full"><X className="h-6 w-6" /></button>
                         </div>
                         <div className="p-8 space-y-8">
+                            {/* Price */}
                             <div>
                                 <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Цена, ₽</label>
                                 <div className="grid grid-cols-2 gap-4">
@@ -363,6 +547,8 @@ function CategoryContent() {
                                     <input type="number" placeholder="До" value={priceTo} onChange={(e) => setPriceTo(e.target.value)} className="w-full p-4 rounded-2xl bg-surface border border-border outline-none" />
                                 </div>
                             </div>
+
+                            {/* City */}
                             <div>
                                 <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Город</label>
                                 <button
@@ -373,8 +559,218 @@ function CategoryContent() {
                                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                 </button>
                             </div>
-                            <button onClick={() => setShowMobileFilters(false)} className="w-full py-5 bg-primary text-white font-black rounded-2xl shadow-xl">Показать результаты</button>
-                            <button onClick={() => { resetFilters(); setShowMobileFilters(false); }} className="w-full py-4 text-muted font-bold">Сбросить всё</button>
+
+                            {/* Transport Filters */}
+                            {slug === 'transport' && (
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">КПП</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {['auto', 'manual'].map(t => (
+                                                <button
+                                                    key={t}
+                                                    onClick={() => setSpecFilters({ ...specFilters, transmission: specFilters.transmission === t ? '' : t })}
+                                                    className={cn(
+                                                        "p-4 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.transmission === t ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                    )}
+                                                >
+                                                    {t === 'auto' ? 'Автомат' : 'Механика'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Состояние</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {['new', 'used'].map(c => (
+                                                <button
+                                                    key={c}
+                                                    onClick={() => setSpecFilters({ ...specFilters, condition: specFilters.condition === c ? '' : c })}
+                                                    className={cn(
+                                                        "p-4 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.condition === c ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                    )}
+                                                >
+                                                    {c === 'new' ? 'Новое' : 'Б/У'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Real Estate Filters */}
+                            {slug === 'real-estate' && (
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Тип объекта</label>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[
+                                                { value: 'apartment', label: 'Квартира' },
+                                                { value: 'house', label: 'Дом' },
+                                                { value: 'plot', label: 'Участок' },
+                                                { value: 'commercial', label: 'Коммерция' }
+                                            ].map(t => (
+                                                <button
+                                                    key={t.value}
+                                                    onClick={() => setSpecFilters({ ...specFilters, type: specFilters.type === t.value ? '' : t.value })}
+                                                    className={cn(
+                                                        "p-4 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.type === t.value ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                    )}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Комнаты</label>
+                                        <div className="grid grid-cols-5 gap-2">
+                                            {['studio', '1', '2', '3', '4+'].map(r => (
+                                                <button
+                                                    key={r}
+                                                    onClick={() => setSpecFilters({ ...specFilters, rooms: specFilters.rooms === r ? '' : r })}
+                                                    className={cn(
+                                                        "p-3 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.rooms === r ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                    )}
+                                                >
+                                                    {r}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Rent Apartments Filters */}
+                            {slug === 'rent-apartments' && (
+                                <>
+                                    <div>
+                                        <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Тип жилья</label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {[
+                                                { value: 'apartment', label: 'Квартира' },
+                                                { value: 'room', label: 'Комната' },
+                                                { value: 'house', label: 'Дом' }
+                                            ].map(t => (
+                                                <button
+                                                    key={t.value}
+                                                    onClick={() => setSpecFilters({ ...specFilters, type: specFilters.type === t.value ? '' : t.value })}
+                                                    className={cn(
+                                                        "p-4 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.type === t.value ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                    )}
+                                                >
+                                                    {t.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Комнаты</label>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {['studio', '1', '2', '3'].map(r => (
+                                                <button
+                                                    key={r}
+                                                    onClick={() => setSpecFilters({ ...specFilters, rooms: specFilters.rooms === r ? '' : r })}
+                                                    className={cn(
+                                                        "p-3 rounded-xl text-sm font-bold border transition-all",
+                                                        specFilters.rooms === r ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                    )}
+                                                >
+                                                    {r === 'studio' ? 'Студия' : r}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Electronics Filters */}
+                            {slug === 'electronics' && (
+                                <div>
+                                    <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Состояние</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {['new', 'used'].map(c => (
+                                            <button
+                                                key={c}
+                                                onClick={() => setSpecFilters({ ...specFilters, condition: specFilters.condition === c ? '' : c })}
+                                                className={cn(
+                                                    "p-4 rounded-xl text-sm font-bold border transition-all",
+                                                    specFilters.condition === c ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                )}
+                                            >
+                                                {c === 'new' ? 'Новое' : 'Б/У'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Jobs Filters */}
+                            {slug === 'jobs' && (
+                                <div>
+                                    <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Занятость</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {[
+                                            { value: 'full', label: 'Полная' },
+                                            { value: 'part', label: 'Частичная' },
+                                            { value: 'remote', label: 'Удалённо' },
+                                            { value: 'project', label: 'Проект' }
+                                        ].map(t => (
+                                            <button
+                                                key={t.value}
+                                                onClick={() => setSpecFilters({ ...specFilters, employment: specFilters.employment === t.value ? '' : t.value })}
+                                                className={cn(
+                                                    "p-4 rounded-xl text-sm font-bold border transition-all",
+                                                    specFilters.employment === t.value ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                )}
+                                            >
+                                                {t.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Services Filters */}
+                            {slug === 'services' && (
+                                <div>
+                                    <label className="block text-xs font-black uppercase text-muted mb-4 tracking-widest">Тип услуги</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[
+                                            { value: 'repair', label: 'Ремонт' },
+                                            { value: 'construction', label: 'Стройка' },
+                                            { value: 'beauty', label: 'Красота' },
+                                            { value: 'education', label: 'Обучение' },
+                                            { value: 'transport', label: 'Перевозки' },
+                                            { value: 'other', label: 'Другое' }
+                                        ].map(t => (
+                                            <button
+                                                key={t.value}
+                                                onClick={() => setSpecFilters({ ...specFilters, serviceType: specFilters.serviceType === t.value ? '' : t.value })}
+                                                className={cn(
+                                                    "p-4 rounded-xl text-sm font-bold border transition-all",
+                                                    specFilters.serviceType === t.value ? "bg-primary text-white border-primary" : "bg-surface border-border"
+                                                )}
+                                            >
+                                                {t.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Actions */}
+                            <div className="pt-4 border-t border-border">
+                                {(priceFrom || priceTo || selectedCity || Object.keys(specFilters).length > 0) && (
+                                    <button onClick={resetFilters} className="w-full py-4 text-muted font-bold mb-4">Сбросить всё</button>
+                                )}
+                                <button onClick={() => { setShowMobileFilters(false); fetchAds(); }} className="w-full py-5 bg-primary text-white font-black rounded-2xl shadow-xl">Показать результаты</button>
+                            </div>
                         </div>
                     </div>
                 </div>

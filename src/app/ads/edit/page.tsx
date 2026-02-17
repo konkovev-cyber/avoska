@@ -277,8 +277,9 @@ function EditAdContent() {
                                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Цена (₽)</label>
                                     <input
                                         type="number"
+                                        min="0"
                                         value={price}
-                                        onChange={(e) => setPrice(e.target.value)}
+                                        onChange={(e) => setPrice(e.target.value.replace(/^-/, ''))}
                                         className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black text-lg transition-all"
                                         placeholder="0"
                                     />
@@ -339,11 +340,28 @@ function EditAdContent() {
                                     )}
                                     <div className="space-y-1">
                                         <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">КПП</label>
-                                        <select value={specifications.transmission || ''} onChange={(e) => setSpecifications({ ...specifications, transmission: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm cursor-pointer">
-                                            <option value="">...</option>
-                                            <option value="auto">Автомат</option>
-                                            <option value="manual">Механика</option>
-                                        </select>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setSpecifications({ ...specifications, transmission: 'auto' })}
+                                                className={cn(
+                                                    "py-2 rounded-lg text-[10px] font-black uppercase transition-all border",
+                                                    specifications.transmission === 'auto' ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
+                                                )}
+                                            >
+                                                Автомат
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSpecifications({ ...specifications, transmission: 'manual' })}
+                                                className={cn(
+                                                    "py-2 rounded-lg text-[10px] font-black uppercase transition-all border",
+                                                    specifications.transmission === 'manual' ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
+                                                )}
+                                            >
+                                                Механика
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -362,27 +380,47 @@ function EditAdContent() {
                                     {category === 'real-estate' && (
                                         <div className="space-y-1">
                                             <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Тип недвижимости</label>
-                                            <select value={specifications.type || ''} onChange={(e) => setSpecifications({ ...specifications, type: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm cursor-pointer">
-                                                <option value="">Выберите...</option>
-                                                <option value="apartment">Квартира</option>
-                                                <option value="house">Дом, дача</option>
-                                                <option value="plot">Участок</option>
-                                                <option value="commercial">Коммерческая</option>
-                                            </select>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {[
+                                                    { value: 'apartment', label: 'Квартира' },
+                                                    { value: 'house', label: 'Дом' },
+                                                    { value: 'plot', label: 'Участок' },
+                                                    { value: 'commercial', label: 'Коммерция' }
+                                                ].map(t => (
+                                                    <button
+                                                        key={t.value}
+                                                        type="button"
+                                                        onClick={() => setSpecifications({ ...specifications, type: t.value })}
+                                                        className={cn(
+                                                            "py-2 rounded-lg text-[9px] font-black uppercase transition-all border",
+                                                            specifications.type === t.value ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
+                                                        )}
+                                                    >
+                                                        {t.label}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                     {(specifications.type === 'apartment' || category === 'rent-apartments') && (
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Комнат</label>
-                                                <select value={specifications.rooms || ''} onChange={(e) => setSpecifications({ ...specifications, rooms: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm cursor-pointer">
-                                                    <option value="">...</option>
-                                                    <option value="studio">Студия</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4+">4+</option>
-                                                </select>
+                                                <div className="grid grid-cols-5 gap-1">
+                                                    {['studio', '1', '2', '3', '4+'].map(r => (
+                                                        <button
+                                                            key={r}
+                                                            type="button"
+                                                            onClick={() => setSpecifications({ ...specifications, rooms: r })}
+                                                            className={cn(
+                                                                "py-1.5 rounded text-[9px] font-black uppercase transition-all border",
+                                                                specifications.rooms === r ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
+                                                            )}
+                                                        >
+                                                            {r}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Площадь (м²)</label>
