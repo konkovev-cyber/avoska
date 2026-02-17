@@ -20,6 +20,7 @@ export default function Header() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [favoritesCount, setFavoritesCount] = useState(0);
     const [theme, setInternalTheme] = useState<Theme>('system');
+    const [isCapacitor, setIsCapacitor] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -68,6 +69,9 @@ export default function Header() {
                 fetchFavoritesCount();
             })
             .subscribe();
+
+        // Detect Capacitor
+        setIsCapacitor(typeof window !== 'undefined' && (window as any).Capacitor !== undefined);
 
         return () => {
             subscription.unsubscribe();
@@ -127,6 +131,28 @@ export default function Header() {
     return (
         <header className="sticky top-0 z-[100] bg-background border-b border-border/50 pt-safe shadow-sm">
             <div className="max-w-7xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center gap-3 lg:gap-8">
+                {!isCapacitor && (
+                    <>
+                        <Link href="/" className="hidden lg:flex shrink-0 items-center group gap-2">
+                            <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+                                <span className="text-white font-black text-xl tracking-tighter">А+</span>
+                            </div>
+                            <div className="flex flex-col h-10 justify-between py-0.5">
+                                <span className="text-2xl font-black text-foreground tracking-tighter group-hover:text-primary transition-colors leading-none">Авоська+</span>
+                                <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 leading-none">Полезное совсем рядом</span>
+                            </div>
+                        </Link>
+
+                        <Link href="/" className="lg:hidden shrink-0 flex items-center group">
+                            <div className="flex items-center gap-1.5 active:scale-95 transition-transform">
+                                <div className="w-9 h-9 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20">
+                                    <span className="text-white font-black text-lg tracking-tighter">А+</span>
+                                </div>
+                            </div>
+                        </Link>
+                    </>
+                )}
+
                 {/* City Picker & Filter - Mobile */}
                 <div className="lg:hidden flex-shrink-1 min-w-0">
                     <ResponsiveSelect
@@ -203,6 +229,14 @@ export default function Header() {
                         })()}
                     </button>
 
+                    {
+                        user && !isCapacitor && (
+                            <Link href="/notifications" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Уведомления">
+                                <Bell className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
+                            </Link>
+                        )
+                    }
+
                     <div className="mx-2 w-px h-8 bg-border/50" />
 
                     <Link
@@ -236,7 +270,13 @@ export default function Header() {
 
                 {/* Mobile Actions - Simplified */}
                 <div className="lg:hidden flex items-center gap-1">
-                    {/* Actions removed by request */}
+                    {
+                        user && !isCapacitor && (
+                            <Link href="/notifications" className="p-2.5 hover:bg-surface rounded-xl block relative">
+                                <Bell className="h-6 w-6 text-muted-foreground" />
+                            </Link>
+                        )
+                    }
                 </div >
             </div >
         </header >
