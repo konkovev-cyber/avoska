@@ -284,11 +284,11 @@ function EditAdContent() {
                             <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">З/П От</label>
-                                    <input type="number" value={salaryFrom} onChange={(e) => setSalaryFrom(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black transition-all" />
+                                    <input type="number" min="0" value={salaryFrom} onChange={(e) => setSalaryFrom(Math.max(0, parseFloat(e.target.value) || 0).toString())} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black transition-all" />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">З/П До</label>
-                                    <input type="number" value={salaryTo} onChange={(e) => setSalaryTo(e.target.value)} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black transition-all" />
+                                    <input type="number" min="0" value={salaryTo} onChange={(e) => setSalaryTo(Math.max(0, parseFloat(e.target.value) || 0).toString())} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black transition-all" />
                                 </div>
                             </div>
                         ) : (
@@ -297,8 +297,9 @@ function EditAdContent() {
                                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Цена (₽)</label>
                                     <input
                                         type="number"
+                                        min="0"
                                         value={price}
-                                        onChange={(e) => setPrice(e.target.value)}
+                                        onChange={(e) => setPrice(Math.max(0, parseFloat(e.target.value) || 0).toString())}
                                         className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black text-lg transition-all"
                                         placeholder="0"
                                     />
@@ -353,8 +354,8 @@ function EditAdContent() {
                                     </div>
                                     {category === 'transport' && (
                                         <div className="space-y-1">
-                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Пробег</label>
-                                            <input type="number" placeholder="50000" value={specifications.mileage || ''} onChange={(e) => setSpecifications({ ...specifications, mileage: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Пробег (км)</label>
+                                            <input type="number" min="0" value={specifications.mileage || ''} onChange={(e) => setSpecifications({ ...specifications, mileage: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
                                         </div>
                                     )}
                                     <ResponsiveSelect
@@ -410,32 +411,32 @@ function EditAdContent() {
                                             />
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Площадь (м²)</label>
-                                                <input type="number" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                                <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
                                             </div>
                                         </div>
                                     )}
                                     {(specifications.type === 'commercial' || category === 'rent-commercial') && (
                                         <div className="space-y-1">
                                             <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Площадь (м²)</label>
-                                            <input type="number" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                            <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
                                         </div>
                                     )}
                                     {specifications.type === 'house' && (
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Дом (м²)</label>
-                                                <input type="number" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                                <input type="number" min="0" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Участок (сот)</label>
-                                                <input type="number" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                                <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
                                             </div>
                                         </div>
                                     )}
                                     {specifications.type === 'plot' && (
                                         <div className="space-y-1">
                                             <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Участок (сот)</label>
-                                            <input type="number" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                            <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
                                         </div>
                                     )}
                                 </div>

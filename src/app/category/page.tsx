@@ -144,17 +144,19 @@ function CategoryContent() {
                 <div className="flex items-center gap-2">
                     <input
                         type="number"
+                        min="0"
                         placeholder="От"
                         value={priceFrom}
-                        onChange={(e) => setPriceFrom(e.target.value)}
+                        onChange={(e) => setPriceFrom(Math.max(0, parseFloat(e.target.value) || 0).toString())}
                         className="w-full h-11 px-4 text-sm rounded-xl bg-muted/5 border border-border outline-none focus:border-primary transition-all font-bold"
                     />
                     <div className="w-4 h-px bg-border shrink-0"></div>
                     <input
                         type="number"
+                        min="0"
                         placeholder="До"
                         value={priceTo}
-                        onChange={(e) => setPriceTo(e.target.value)}
+                        onChange={(e) => setPriceTo(Math.max(0, parseFloat(e.target.value) || 0).toString())}
                         className="w-full h-11 px-4 text-sm rounded-xl bg-muted/5 border border-border outline-none focus:border-primary transition-all font-bold"
                     />
                 </div>
@@ -173,7 +175,7 @@ function CategoryContent() {
             />
 
             {/* Dynamic Specs Filters */}
-            {(slug === 'transport' || slug === 'electronics' || slug === 'real-estate' || slug === 'rent-apartments' || slug === 'rent-cars') && (
+            {(slug === 'transport' || slug === 'electronics' || slug === 'real-estate' || slug === 'rent-apartments' || slug === 'rent-cars' || slug === 'rent-commercial') && (
                 <div className="space-y-6 pt-6 border-t border-border/50">
                     {(slug === 'transport' || slug === 'rent-cars') && (
                         <>
@@ -182,16 +184,18 @@ function CategoryContent() {
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="number"
+                                        min="0"
                                         placeholder="От"
                                         value={specFilters.mileage_from || ''}
-                                        onChange={(e) => setSpecFilters({ ...specFilters, mileage_from: e.target.value })}
+                                        onChange={(e) => setSpecFilters({ ...specFilters, mileage_from: Math.max(0, parseFloat(e.target.value) || 0).toString() })}
                                         className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
                                     />
                                     <input
                                         type="number"
+                                        min="0"
                                         placeholder="До"
                                         value={specFilters.mileage_to || ''}
-                                        onChange={(e) => setSpecFilters({ ...specFilters, mileage_to: e.target.value })}
+                                        onChange={(e) => setSpecFilters({ ...specFilters, mileage_to: Math.max(0, parseFloat(e.target.value) || 0).toString() })}
                                         className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
                                     />
                                 </div>
@@ -216,7 +220,7 @@ function CategoryContent() {
                         </>
                     )}
 
-                    {slug === 'real-estate' && (
+                    {(slug === 'real-estate' || slug === 'rent-apartments' || slug === 'rent-commercial') && (
                         <>
                             <div>
                                 <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Объект</label>
