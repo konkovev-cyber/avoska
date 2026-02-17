@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
+import { APP_VERSION, APP_BUILD, GITHUB_REPO, APK_DOWNLOAD_URL } from '@/lib/constants';
 
 export default function ProfilePage() {
     return (
@@ -35,6 +36,9 @@ function ProfilePageContent() {
     const [promotingAd, setPromotingAd] = useState<{ id: string, title: string } | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isOwnProfile, setIsOwnProfile] = useState(true);
+    const [hasUpdate, setHasUpdate] = useState(false);
+    const [latestVersion, setLatestVersion] = useState('');
+    const [isCapacitor, setIsCapacitor] = useState(false);
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -42,7 +46,30 @@ function ProfilePageContent() {
 
     useEffect(() => {
         fetchProfileData();
+
+        // Detect Capacitor
+        const isCap = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;
+        setIsCapacitor(isCap);
+
+        if (isCap) {
+            checkUpdates();
+        }
     }, [viewingUserId]);
+
+    const checkUpdates = async () => {
+        try {
+            const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
+            if (!response.ok) return;
+            const data = await response.json();
+            const latest = data.tag_name.replace('v', '');
+            setLatestVersion(latest);
+            if (latest !== APP_VERSION) {
+                setHasUpdate(true);
+            }
+        } catch (e) {
+            console.error('Update check failed:', e);
+        }
+    };
 
     const fetchProfileData = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -353,6 +380,23 @@ function ProfilePageContent() {
                                     На Авоське с {new Date(profile?.created_at).getFullYear()}г.
                                 </div>
                             </div>
+
+                            {/* Version & Build Info Badge - NEW */}
+                            <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-lg text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                    <Smartphone className="h-3 w-3" />
+                                    v{APP_VERSION}
+                                    {hasUpdate && (
+                                        <span className="flex h-2 w-2 relative ml-1">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-lg text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                                    Build {APP_BUILD}
+                                </div>
+                            </div>
                         </div>
                     )}
                     {!isEditing && (
@@ -637,56 +681,48 @@ function ProfilePageContent() {
                 />
             )}
 
-            {/* Version Display & Update Check - APK Only */}
-            {(() => {
-                const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;
-                if (!isCapacitor) return null;
+            {/* APK Only Support & Update Actions */}
+            {isCapacitor && (
+                <div className="mt-12 text-center pb-12 space-y-4">
+                    <div className="flex flex-col items-center gap-3">
+                        <button
+                            onClick={async () => {
+                                const toastId = toast.loading('Проверка обновлений...');
+                                try {
+                                    const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`);
+                                    if (!response.ok) throw new Error();
+                                    const data = await response.json();
+                                    const latest = data.tag_name.replace('v', '');
 
-                return (
-                    <div className="mt-12 text-center pb-12 space-y-4">
-                        <div className="flex flex-col items-center gap-3">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface border-2 border-primary/10 rounded-2xl text-[11px] font-black text-primary/60 uppercase tracking-[0.2em] shadow-sm">
-                                <Smartphone className="h-3 w-3" />
-                                Avoska+ v0.1.3
-                            </div>
-
-                            <button
-                                onClick={async () => {
-                                    const toastId = toast.loading('Проверка обновлений...');
-                                    try {
-                                        const response = await fetch(`https://api.github.com/repos/konkovev-cyber/avoska/releases/latest`);
-                                        if (!response.ok) throw new Error();
-                                        const data = await response.json();
-                                        const latest = data.tag_name.replace('v', '');
-                                        const current = '0.1.3';
-
-                                        if (latest !== current) {
-                                            toast.dismiss(toastId);
-                                            toast.success(`Доступна новая версия: ${latest}`, {
-                                                description: 'Нажмите, чтобы скачать',
-                                                action: {
-                                                    label: 'Скачать',
-                                                    onClick: () => window.open(`https://github.com/konkovev-cyber/avoska/releases/latest/download/avoska.apk`, '_blank')
-                                                },
-                                                duration: 10000
-                                            });
-                                        } else {
-                                            toast.dismiss(toastId);
-                                            toast.info('У вас установлена последняя версия');
-                                        }
-                                    } catch (e) {
+                                    if (latest !== APP_VERSION) {
                                         toast.dismiss(toastId);
-                                        toast.error('Не удалось проверить обновления');
+                                        toast.success(`Доступна новая версия: ${latest}`, {
+                                            description: 'Нажмите, чтобы скачать',
+                                            action: {
+                                                label: 'Скачать',
+                                                onClick: () => window.open(APK_DOWNLOAD_URL, '_blank')
+                                            },
+                                            duration: 10000
+                                        });
+                                    } else {
+                                        toast.dismiss(toastId);
+                                        toast.info('У вас установлена последняя версия');
                                     }
-                                }}
-                                className="text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors tracking-tight"
-                            >
-                                Проверить обновления
-                            </button>
-                        </div>
+                                } catch (e) {
+                                    toast.dismiss(toastId);
+                                    toast.error('Не удалось проверить обновления');
+                                }
+                            }}
+                            className={cn(
+                                "px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg",
+                                hasUpdate ? "bg-primary text-white shadow-primary/20" : "bg-surface border border-border text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            {hasUpdate ? `Обновить до v${latestVersion}` : 'Проверить обновления'}
+                        </button>
                     </div>
-                );
-            })()}
+                </div>
+            )}
         </div>
     );
 }

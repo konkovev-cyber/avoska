@@ -71,7 +71,7 @@ export default function BottomNav() {
 
     return (
         <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-[100] pb-safe shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
-            <div className="flex items-center justify-around py-2">
+            <div className="flex items-center justify-around py-1">
                 {navItems.map((item, idx) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
@@ -82,12 +82,12 @@ export default function BottomNav() {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className="relative -top-6 flex flex-col items-center group active:scale-90 transition-all"
+                                className="relative -top-4 flex flex-col items-center group active:scale-90 transition-all"
                             >
-                                <div className="w-14 h-14 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl shadow-primary/40 border-4 border-background">
-                                    <Icon className="h-7 w-7" />
+                                <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl shadow-primary/40 border-4 border-background">
+                                    <Icon className="h-6 w-6" />
                                 </div>
-                                <span className="text-[9px] font-black uppercase tracking-tighter mt-1 text-primary">{item.label}</span>
+                                <span className="text-[8px] font-black uppercase tracking-tighter mt-1 text-primary">{item.label}</span>
                             </Link>
                         );
                     }
@@ -97,7 +97,7 @@ export default function BottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center gap-1 min-w-[60px] h-12 transition-all active:scale-90 relative",
+                                "flex flex-col items-center justify-center gap-0.5 min-w-[60px] h-10 transition-all active:scale-90 relative",
                                 isActive ? "text-primary" : "text-muted"
                             )}
                         >
