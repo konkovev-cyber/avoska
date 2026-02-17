@@ -1,0 +1,341 @@
+
+> Configure project :app
+google-services.json not found, push notifications may not work correctly
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+
+> Configure project :capacitor-android
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+
+> Configure project :capacitor-app
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+
+> Configure project :capacitor-cordova-android-plugins
+WARNING: Using flatDir should be avoided because it doesn't support any meta-data formats.
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+
+> Configure project :capacitor-haptics
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+
+> Configure project :capacitor-keyboard
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+
+> Configure project :capacitor-push-notifications
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+WARNING: The property android.dependency.excludeLibraryComponentsFromConstraints improves project import performance for very large projects. It should be enabled to improve performance.
+To suppress this warning, add android.generateSyncIssueWhenLibraryConstraintsAreEnabled=false to gradle.properties
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :capacitor-android:preBuild UP-TO-DATE
+> Task :capacitor-android:preDebugBuild UP-TO-DATE
+> Task :capacitor-app:preBuild UP-TO-DATE
+> Task :capacitor-app:preDebugBuild UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:preBuild UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:preDebugBuild UP-TO-DATE
+> Task :capacitor-haptics:preBuild UP-TO-DATE
+> Task :capacitor-haptics:preDebugBuild UP-TO-DATE
+> Task :capacitor-app:writeDebugAarMetadata
+> Task :capacitor-cordova-android-plugins:writeDebugAarMetadata
+> Task :capacitor-android:writeDebugAarMetadata
+> Task :capacitor-keyboard:preBuild UP-TO-DATE
+> Task :capacitor-keyboard:preDebugBuild UP-TO-DATE
+> Task :capacitor-push-notifications:preBuild UP-TO-DATE
+> Task :capacitor-push-notifications:preDebugBuild UP-TO-DATE
+> Task :capacitor-haptics:writeDebugAarMetadata
+> Task :capacitor-keyboard:writeDebugAarMetadata
+> Task :capacitor-push-notifications:writeDebugAarMetadata
+> Task :capacitor-android:processDebugNavigationResources
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :capacitor-app:processDebugNavigationResources
+> Task :capacitor-cordova-android-plugins:processDebugNavigationResources
+> Task :capacitor-haptics:processDebugNavigationResources
+> Task :capacitor-keyboard:processDebugNavigationResources
+> Task :capacitor-push-notifications:processDebugNavigationResources
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :capacitor-android:generateDebugResValues
+> Task :capacitor-android:generateDebugResources
+> Task :capacitor-android:packageDebugResources
+> Task :capacitor-app:generateDebugResValues
+> Task :capacitor-app:generateDebugResources
+> Task :capacitor-app:packageDebugResources
+> Task :capacitor-cordova-android-plugins:generateDebugResValues
+> Task :capacitor-cordova-android-plugins:generateDebugResources
+> Task :capacitor-cordova-android-plugins:packageDebugResources
+> Task :capacitor-haptics:generateDebugResValues
+> Task :capacitor-haptics:generateDebugResources
+> Task :capacitor-haptics:packageDebugResources
+> Task :capacitor-keyboard:generateDebugResValues
+> Task :capacitor-keyboard:generateDebugResources
+> Task :capacitor-keyboard:packageDebugResources
+> Task :capacitor-push-notifications:generateDebugResValues
+> Task :capacitor-push-notifications:generateDebugResources
+> Task :capacitor-push-notifications:packageDebugResources
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :capacitor-android:extractDeepLinksDebug
+> Task :capacitor-app:extractDeepLinksDebug
+> Task :capacitor-cordova-android-plugins:extractDeepLinksDebug
+> Task :capacitor-haptics:extractDeepLinksDebug
+> Task :capacitor-keyboard:extractDeepLinksDebug
+> Task :capacitor-push-notifications:extractDeepLinksDebug
+> Task :capacitor-app:processDebugManifest
+> Task :capacitor-cordova-android-plugins:processDebugManifest
+> Task :capacitor-android:processDebugManifest
+> Task :capacitor-haptics:processDebugManifest
+> Task :capacitor-keyboard:processDebugManifest
+> Task :capacitor-push-notifications:processDebugManifest
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :capacitor-android:compileDebugLibraryResources
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :capacitor-app:compileDebugLibraryResources
+> Task :capacitor-cordova-android-plugins:compileDebugLibraryResources
+> Task :capacitor-haptics:compileDebugLibraryResources
+> Task :capacitor-keyboard:compileDebugLibraryResources
+> Task :capacitor-app:parseDebugLocalResources
+> Task :capacitor-cordova-android-plugins:parseDebugLocalResources
+> Task :capacitor-push-notifications:compileDebugLibraryResources
+> Task :capacitor-haptics:parseDebugLocalResources
+> Task :capacitor-keyboard:parseDebugLocalResources
+> Task :capacitor-android:parseDebugLocalResources
+> Task :capacitor-push-notifications:parseDebugLocalResources
+> Task :capacitor-app:generateDebugRFile
+> Task :capacitor-cordova-android-plugins:generateDebugRFile
+> Task :capacitor-keyboard:generateDebugRFile
+> Task :capacitor-haptics:generateDebugRFile
+> Task :capacitor-android:generateDebugRFile
+> Task :capacitor-push-notifications:generateDebugRFile
+> Task :capacitor-android:javaPreCompileDebug
+> Task :app:processDebugResources UP-TO-DATE
+
+> Task :capacitor-android:compileDebugJavaWithJavac
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :capacitor-app:javaPreCompileDebug
+> Task :capacitor-cordova-android-plugins:javaPreCompileDebug
+> Task :capacitor-haptics:javaPreCompileDebug
+> Task :capacitor-cordova-android-plugins:compileDebugJavaWithJavac NO-SOURCE
+> Task :capacitor-keyboard:javaPreCompileDebug
+> Task :capacitor-cordova-android-plugins:bundleLibCompileToJarDebug
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :capacitor-android:generateDebugAssets UP-TO-DATE
+> Task :capacitor-push-notifications:javaPreCompileDebug
+> Task :capacitor-android:bundleLibCompileToJarDebug
+> Task :capacitor-android:mergeDebugAssets
+> Task :capacitor-app:compileDebugJavaWithJavac
+> Task :capacitor-app:bundleLibCompileToJarDebug
+> Task :capacitor-haptics:compileDebugJavaWithJavac
+> Task :capacitor-haptics:bundleLibCompileToJarDebug
+> Task :capacitor-keyboard:compileDebugJavaWithJavac
+> Task :capacitor-keyboard:bundleLibCompileToJarDebug
+> Task :capacitor-push-notifications:compileDebugJavaWithJavac
+> Task :capacitor-app:generateDebugAssets UP-TO-DATE
+> Task :capacitor-push-notifications:bundleLibCompileToJarDebug
+> Task :capacitor-app:mergeDebugAssets
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:generateDebugAssets UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:mergeDebugAssets
+> Task :capacitor-haptics:generateDebugAssets UP-TO-DATE
+> Task :capacitor-haptics:mergeDebugAssets
+> Task :capacitor-keyboard:generateDebugAssets UP-TO-DATE
+> Task :capacitor-keyboard:mergeDebugAssets
+> Task :capacitor-push-notifications:generateDebugAssets UP-TO-DATE
+> Task :capacitor-push-notifications:mergeDebugAssets
+> Task :app:mergeDebugAssets
+> Task :capacitor-app:bundleLibRuntimeToJarDebug
+> Task :capacitor-haptics:bundleLibRuntimeToJarDebug
+> Task :capacitor-keyboard:bundleLibRuntimeToJarDebug
+> Task :capacitor-push-notifications:bundleLibRuntimeToJarDebug
+> Task :app:compressDebugAssets
+> Task :capacitor-android:bundleLibRuntimeToJarDebug
+> Task :capacitor-cordova-android-plugins:bundleLibRuntimeToJarDebug
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :capacitor-android:processDebugJavaRes NO-SOURCE
+> Task :capacitor-app:processDebugJavaRes NO-SOURCE
+> Task :capacitor-cordova-android-plugins:processDebugJavaRes NO-SOURCE
+> Task :capacitor-haptics:processDebugJavaRes NO-SOURCE
+> Task :capacitor-keyboard:processDebugJavaRes NO-SOURCE
+> Task :capacitor-push-notifications:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:bundleLibRuntimeToDirDebug
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :capacitor-app:bundleLibRuntimeToDirDebug
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :capacitor-android:mergeDebugJniLibFolders
+> Task :capacitor-android:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-push-notifications:bundleLibRuntimeToDirDebug
+> Task :capacitor-keyboard:bundleLibRuntimeToDirDebug
+> Task :capacitor-haptics:bundleLibRuntimeToDirDebug
+> Task :capacitor-android:copyDebugJniLibsProjectOnly
+> Task :capacitor-app:mergeDebugJniLibFolders
+> Task :capacitor-app:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-app:copyDebugJniLibsProjectOnly
+> Task :capacitor-cordova-android-plugins:mergeDebugJniLibFolders
+> Task :capacitor-cordova-android-plugins:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-cordova-android-plugins:copyDebugJniLibsProjectOnly
+> Task :capacitor-haptics:mergeDebugJniLibFolders
+> Task :capacitor-haptics:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-haptics:copyDebugJniLibsProjectOnly
+> Task :capacitor-keyboard:mergeDebugJniLibFolders
+> Task :capacitor-keyboard:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-keyboard:copyDebugJniLibsProjectOnly
+> Task :capacitor-push-notifications:mergeDebugJniLibFolders
+> Task :capacitor-push-notifications:mergeDebugNativeLibs NO-SOURCE
+> Task :capacitor-push-notifications:copyDebugJniLibsProjectOnly
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :capacitor-android:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-android:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-android:checkDebugAarMetadata
+> Task :capacitor-android:extractDebugAnnotations
+> Task :capacitor-android:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :capacitor-android:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :capacitor-android:mergeDebugConsumerProguardFiles
+> Task :capacitor-android:prepareDebugArtProfile UP-TO-DATE
+> Task :capacitor-android:prepareLintJarForPublish UP-TO-DATE
+> Task :capacitor-android:bundleLibRuntimeToDirDebug
+> Task :capacitor-app:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-app:checkDebugAarMetadata
+> Task :capacitor-app:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-app:extractDebugAnnotations
+> Task :capacitor-app:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :capacitor-app:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :capacitor-app:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :capacitor-app:prepareDebugArtProfile UP-TO-DATE
+> Task :capacitor-app:prepareLintJarForPublish UP-TO-DATE
+> Task :capacitor-android:mergeDebugJavaResource
+> Task :capacitor-app:mergeDebugJavaResource
+> Task :capacitor-cordova-android-plugins:checkDebugAarMetadata
+> Task :capacitor-android:syncDebugLibJars
+> Task :capacitor-android:bundleDebugAar
+> Task :capacitor-android:assembleDebug
+> Task :capacitor-app:syncDebugLibJars
+> Task :capacitor-app:bundleDebugAar
+> Task :capacitor-app:assembleDebug
+> Task :capacitor-cordova-android-plugins:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-cordova-android-plugins:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-cordova-android-plugins:extractDebugAnnotations
+> Task :capacitor-cordova-android-plugins:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:prepareDebugArtProfile UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:prepareLintJarForPublish UP-TO-DATE
+> Task :capacitor-cordova-android-plugins:mergeDebugJavaResource
+> Task :capacitor-haptics:checkDebugAarMetadata
+> Task :capacitor-cordova-android-plugins:syncDebugLibJars
+> Task :capacitor-cordova-android-plugins:bundleDebugAar
+> Task :capacitor-cordova-android-plugins:assembleDebug
+> Task :capacitor-haptics:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-haptics:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-haptics:extractDebugAnnotations
+> Task :capacitor-haptics:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :capacitor-haptics:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :capacitor-haptics:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :capacitor-haptics:prepareDebugArtProfile UP-TO-DATE
+> Task :capacitor-haptics:prepareLintJarForPublish UP-TO-DATE
+> Task :capacitor-haptics:mergeDebugJavaResource
+> Task :capacitor-keyboard:checkDebugAarMetadata
+> Task :capacitor-haptics:syncDebugLibJars
+> Task :capacitor-haptics:bundleDebugAar
+> Task :capacitor-haptics:assembleDebug
+> Task :capacitor-keyboard:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-keyboard:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-keyboard:extractDebugAnnotations
+> Task :capacitor-keyboard:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :capacitor-keyboard:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :capacitor-keyboard:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :capacitor-keyboard:prepareDebugArtProfile UP-TO-DATE
+> Task :capacitor-keyboard:prepareLintJarForPublish UP-TO-DATE
+> Task :capacitor-keyboard:mergeDebugJavaResource
+> Task :capacitor-keyboard:syncDebugLibJars
+> Task :capacitor-push-notifications:checkDebugAarMetadata
+> Task :capacitor-keyboard:bundleDebugAar
+> Task :capacitor-keyboard:assembleDebug
+> Task :capacitor-push-notifications:stripDebugDebugSymbols NO-SOURCE
+> Task :capacitor-push-notifications:copyDebugJniLibsProjectAndLocalJars
+> Task :capacitor-push-notifications:extractDebugAnnotations
+> Task :capacitor-push-notifications:extractDeepLinksForAarDebug UP-TO-DATE
+> Task :capacitor-push-notifications:mergeDebugGeneratedProguardFiles UP-TO-DATE
+> Task :capacitor-push-notifications:mergeDebugConsumerProguardFiles UP-TO-DATE
+> Task :capacitor-push-notifications:prepareDebugArtProfile UP-TO-DATE
+> Task :capacitor-push-notifications:prepareLintJarForPublish UP-TO-DATE
+> Task :capacitor-push-notifications:mergeDebugJavaResource
+> Task :capacitor-push-notifications:syncDebugLibJars
+> Task :capacitor-push-notifications:bundleDebugAar
+> Task :capacitor-push-notifications:assembleDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug
+
+[Incubating] Problems report is available at: file:///D:/!AiSite/avoska/avoska/android/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 19s
+208 actionable tasks: 147 executed, 61 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.2.1/userguide/configuration_cache_enabling.html

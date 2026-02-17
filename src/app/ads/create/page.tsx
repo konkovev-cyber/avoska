@@ -14,9 +14,9 @@ const CATEGORIES = [
     { name: 'Недвижимость', slug: 'real-estate' },
     { name: 'Аренда квартир', slug: 'rent-apartments' },
     { name: 'Аренда коммерции', slug: 'rent-commercial' },
-    { name: 'Услуги', slug: 'services' },
-    { name: 'Работа', slug: 'jobs' },
     { name: 'Аренда авто', slug: 'rent-cars' },
+    { name: 'Работа', slug: 'jobs' },
+    { name: 'Услуги', slug: 'services' },
     { name: 'Аренда инструмента', slug: 'rent-tools' },
     { name: 'Электроника', slug: 'electronics' },
     { name: 'Дом и дача', slug: 'home' },
@@ -26,6 +26,8 @@ const CATEGORIES = [
     { name: 'Животные', slug: 'pets' },
     { name: 'Красота', slug: 'beauty' },
     { name: 'Детское', slug: 'kids' },
+    { name: 'Для бизнеса', slug: 'business' },
+    { name: 'Спорт и отдых', slug: 'sport' },
 ];
 
 export default function CreateAdPage() {
@@ -198,6 +200,7 @@ export default function CreateAdPage() {
                                 onChange={setCategory}
                                 options={CATEGORIES.map(c => ({ value: c.slug, label: c.name }))}
                                 placeholder="Выберите категорию"
+                                columns={2}
                             />
                         </div>
                     </div>

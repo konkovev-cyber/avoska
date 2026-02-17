@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { X, AlertCircle, PlusSquare, Rocket, CheckCircle2, ChevronLeft } from 'lucide-react';
+import { X, PlusSquare, Rocket, CheckCircle2, AlertCircle, ChevronDown, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
@@ -14,9 +14,9 @@ const CATEGORIES = [
     { name: 'Недвижимость', slug: 'real-estate' },
     { name: 'Аренда квартир', slug: 'rent-apartments' },
     { name: 'Аренда коммерции', slug: 'rent-commercial' },
-    { name: 'Услуги', slug: 'services' },
-    { name: 'Работа', slug: 'jobs' },
     { name: 'Аренда авто', slug: 'rent-cars' },
+    { name: 'Работа', slug: 'jobs' },
+    { name: 'Услуги', slug: 'services' },
     { name: 'Аренда инструмента', slug: 'rent-tools' },
     { name: 'Электроника', slug: 'electronics' },
     { name: 'Дом и дача', slug: 'home' },
@@ -26,6 +26,8 @@ const CATEGORIES = [
     { name: 'Животные', slug: 'pets' },
     { name: 'Красота', slug: 'beauty' },
     { name: 'Детское', slug: 'kids' },
+    { name: 'Для бизнеса', slug: 'business' },
+    { name: 'Спорт и отдых', slug: 'sport' },
 ];
 
 function EditAdContent() {
@@ -56,6 +58,8 @@ function EditAdContent() {
     const [newImages, setNewImages] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
+    // Modals - removed as handled by ResponsiveSelect
+
     useEffect(() => {
         if (!id) {
             router.push('/profile');
@@ -65,12 +69,20 @@ function EditAdContent() {
         fetchCities();
     }, [id]);
 
+    // Reset specifications when category changes (but not on initial load if possible? 
+    // Actually, we load data then setCategory. If we setCategory, this effect runs and clears specs?
+    // We need to prevent clearing specs on initial load.
+    // Let's use a ref or just manage it carefully. 
+    // For now, simpler to not clear strictly or clear only if user changes it manually.
+    // The previous implementation had `useEffect(() => setSpecifications({}), [category])`. 
+    // This wipes data when we populate the form. 
+    // I'll remove that effect and handle clearing in the category change handler.
+
     const checkUserAndFetchAd = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
             toast.error('Сначала нужно войти в аккаунт');
-            router.push('/login');
-            return;
+            return router.push('/login');
         }
 
         const { data: ad, error } = await supabase
@@ -86,12 +98,14 @@ function EditAdContent() {
         }
 
         if (ad.user_id !== session.user.id) {
-            setError('У вас нет прав на редактирование этого объявления');
-            setLoading(false);
-            return;
+            const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+            if (profile?.role !== 'admin') {
+                setError('У вас нет прав на редактирование этого объявления');
+                setLoading(false);
+                return;
+            }
         }
 
-        // Populate fields
         setTitle(ad.title);
         setDescription(ad.description);
         setAddress(ad.address || '');
@@ -120,7 +134,7 @@ function EditAdContent() {
             return;
         }
 
-        const toastId = toast.loading('Сжатие изображений...');
+        const toastId = toast.loading('Обработка фото...');
         try {
             const processedFiles: File[] = [];
             const urls: string[] = [];
@@ -131,7 +145,7 @@ function EditAdContent() {
             }
             setNewImages([...newImages, ...processedFiles]);
             setPreviewUrls([...previewUrls, ...urls]);
-            toast.success('Готово', { id: toastId });
+            toast.success('Фото добавлены', { id: toastId });
         } catch (err) {
             toast.error('Ошибка обработки', { id: toastId });
         } finally {
@@ -155,11 +169,11 @@ function EditAdContent() {
         }
 
         setSubmitting(true);
-        const toastId = toast.loading('Обновляем объявление...');
+        const toastId = toast.loading('Сохраняем...');
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) throw new Error('Пользователь не авторизован');
+            if (!session) throw new Error('Нет сессии');
 
             const uploadedImageUrls: string[] = [];
             for (const file of newImages) {
@@ -193,10 +207,11 @@ function EditAdContent() {
 
             if (updateError) throw updateError;
 
-            toast.success('Объявление обновлено!', { id: toastId });
-            router.push('/profile');
+            toast.success('Сохранено!', { id: toastId });
+            router.back();
             router.refresh();
         } catch (error: any) {
+            console.error(error);
             toast.error(error.message, { id: toastId });
         } finally {
             setSubmitting(false);
@@ -204,38 +219,39 @@ function EditAdContent() {
     };
 
     if (loading) return (
-        <div className="container mx-auto px-4 py-20 flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="min-h-screen flex items-center justify-center bg-[#f3f3f3]">
+            <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
         </div>
     );
 
     if (error) return (
-        <div className="container mx-auto px-4 py-20 text-center">
-            <AlertCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
-            <h1 className="text-2xl font-black mb-4 uppercase tracking-tighter">Ошибка</h1>
-            <p className="text-muted-foreground font-medium">{error}</p>
-            <button onClick={() => router.back()} className="mt-8 text-primary font-black uppercase text-xs tracking-widest hover:underline">Вернуться назад</button>
+        <div className="container mx-auto px-4 py-20 flex flex-col items-center text-center">
+            <AlertCircle className="h-16 w-16 text-rose-500 mb-6" />
+            <h1 className="text-2xl font-black mb-4">Ошибка доступа</h1>
+            <p className="text-slate-500 mb-8 max-w-md">{error}</p>
+            <button onClick={() => router.back()} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold">Назад</button>
         </div>
     );
 
     return (
-        <div className="container mx-auto px-2 md:px-4 py-2 max-w-3xl pb-24">
+        <div className="container mx-auto px-2 md:px-4 py-2 max-w-3xl pb-32">
+
             <div className="bg-surface border border-border rounded-[2rem] p-4 md:p-6 shadow-2xl shadow-black/5">
-                <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-xl md:text-2xl font-black tracking-tight flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                        Редактирование
+                    </h1>
                     <button
                         onClick={() => router.back()}
-                        className="p-2 hover:bg-muted rounded-full transition-colors"
-                        title="Назад"
+                        className="p-2 hover:bg-muted/20 rounded-full text-muted-foreground"
                     >
-                        <ChevronLeft className="h-6 w-6" />
+                        <X className="h-6 w-6" />
                     </button>
-                    <h1 className="text-xl md:text-2xl font-black tracking-tight flex items-center gap-2">
-                        <Rocket className="h-5 w-5 text-primary" />
-                        Редактировать
-                    </h1>
                 </div>
 
                 <div className="space-y-3">
+                    {/* Main Info Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1">
                             <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Заголовок</label>
@@ -251,9 +267,13 @@ function EditAdContent() {
                             <ResponsiveSelect
                                 label="Категория"
                                 value={category}
-                                onChange={setCategory}
+                                onChange={(val) => {
+                                    setCategory(val);
+                                    setSpecifications({}); // Clear specs on category change
+                                }}
                                 options={CATEGORIES.map(c => ({ value: c.slug, label: c.name }))}
                                 placeholder="Выберите категорию"
+                                columns={2}
                             />
                         </div>
                     </div>
@@ -277,9 +297,8 @@ function EditAdContent() {
                                     <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Цена (₽)</label>
                                     <input
                                         type="number"
-                                        min="0"
                                         value={price}
-                                        onChange={(e) => setPrice(e.target.value.replace(/^-/, ''))}
+                                        onChange={(e) => setPrice(e.target.value)}
                                         className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black text-lg transition-all"
                                         placeholder="0"
                                     />
@@ -317,7 +336,7 @@ function EditAdContent() {
                         )}
                     </div>
 
-                    {/* Specifications (Conditional) */}
+                    {/* Specifications */}
                     {(category === 'transport' || category === 'real-estate' || category === 'rent-apartments' || category === 'rent-commercial' || category === 'rent-cars') && (
                         <div className="bg-white rounded-2xl p-4 border border-border shadow-sm space-y-3 animate-in fade-in zoom-in-95 duration-200">
                             <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Характеристики</h3>
@@ -338,31 +357,16 @@ function EditAdContent() {
                                             <input type="number" placeholder="50000" value={specifications.mileage || ''} onChange={(e) => setSpecifications({ ...specifications, mileage: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
                                         </div>
                                     )}
-                                    <div className="space-y-1">
-                                        <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">КПП</label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setSpecifications({ ...specifications, transmission: 'auto' })}
-                                                className={cn(
-                                                    "py-2 rounded-lg text-[10px] font-black uppercase transition-all border",
-                                                    specifications.transmission === 'auto' ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
-                                                )}
-                                            >
-                                                Автомат
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setSpecifications({ ...specifications, transmission: 'manual' })}
-                                                className={cn(
-                                                    "py-2 rounded-lg text-[10px] font-black uppercase transition-all border",
-                                                    specifications.transmission === 'manual' ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
-                                                )}
-                                            >
-                                                Механика
-                                            </button>
-                                        </div>
-                                    </div>
+                                    <ResponsiveSelect
+                                        label="КПП"
+                                        value={specifications.transmission || ''}
+                                        onChange={(val) => setSpecifications({ ...specifications, transmission: val })}
+                                        options={[
+                                            { value: 'auto', label: 'Автомат' },
+                                            { value: 'manual', label: 'Механика' }
+                                        ]}
+                                        placeholder="..."
+                                    />
                                 </div>
                             )}
 
@@ -377,51 +381,33 @@ function EditAdContent() {
                                             </div>
                                         </div>
                                     )}
-                                    {category === 'real-estate' && (
-                                        <div className="space-y-1">
-                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Тип недвижимости</label>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {[
-                                                    { value: 'apartment', label: 'Квартира' },
-                                                    { value: 'house', label: 'Дом' },
-                                                    { value: 'plot', label: 'Участок' },
-                                                    { value: 'commercial', label: 'Коммерция' }
-                                                ].map(t => (
-                                                    <button
-                                                        key={t.value}
-                                                        type="button"
-                                                        onClick={() => setSpecifications({ ...specifications, type: t.value })}
-                                                        className={cn(
-                                                            "py-2 rounded-lg text-[9px] font-black uppercase transition-all border",
-                                                            specifications.type === t.value ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
-                                                        )}
-                                                    >
-                                                        {t.label}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                    <ResponsiveSelect
+                                        label="Тип недвижимости"
+                                        value={specifications.type || ''}
+                                        onChange={(val) => setSpecifications({ ...specifications, type: val })}
+                                        options={[
+                                            { value: 'apartment', label: 'Квартира' },
+                                            { value: 'house', label: 'Дом, дача' },
+                                            { value: 'plot', label: 'Участок' },
+                                            { value: 'commercial', label: 'Коммерческая' }
+                                        ]}
+                                        placeholder="Выберите..."
+                                    />
                                     {(specifications.type === 'apartment' || category === 'rent-apartments') && (
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className="space-y-1">
-                                                <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Комнат</label>
-                                                <div className="grid grid-cols-5 gap-1">
-                                                    {['studio', '1', '2', '3', '4+'].map(r => (
-                                                        <button
-                                                            key={r}
-                                                            type="button"
-                                                            onClick={() => setSpecifications({ ...specifications, rooms: r })}
-                                                            className={cn(
-                                                                "py-1.5 rounded text-[9px] font-black uppercase transition-all border",
-                                                                specifications.rooms === r ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
-                                                            )}
-                                                        >
-                                                            {r}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
+                                            <ResponsiveSelect
+                                                label="Комнат"
+                                                value={specifications.rooms || ''}
+                                                onChange={(val) => setSpecifications({ ...specifications, rooms: val })}
+                                                options={[
+                                                    { value: 'studio', label: 'Студия' },
+                                                    { value: '1', label: '1' },
+                                                    { value: '2', label: '2' },
+                                                    { value: '3', label: '3' },
+                                                    { value: '4+', label: '4+' }
+                                                ]}
+                                                placeholder="..."
+                                            />
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Площадь (м²)</label>
                                                 <input type="number" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
@@ -463,7 +449,7 @@ function EditAdContent() {
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="w-full p-3 md:p-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium text-sm min-h-[120px] transition-all resize-none placeholder:text-muted-foreground/50 leading-relaxed"
+                            className="w-full p-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium text-sm min-h-[140px] transition-all resize-none placeholder:text-muted-foreground/50 leading-relaxed"
                             placeholder="Опишите товар подробнее..."
                         />
                     </div>
@@ -480,15 +466,14 @@ function EditAdContent() {
 
                             {/* Existing Images */}
                             {existingImages.map((url, index) => (
-                                <div key={`existing-${index}`} className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-border/60 shadow-sm group bg-background animate-in fade-in zoom-in-95">
+                                <div key={`ex-${index}`} className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-border/60 shadow-sm group bg-background animate-in fade-in zoom-in-95">
                                     <img src={url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                                     <button
                                         onClick={() => removeExistingImage(index)}
-                                        className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-md hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                        className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-md hover:bg-rose-500 transition-colors opacity-0 group-hover:opacity-100"
                                     >
                                         <X className="h-3 w-3" />
                                     </button>
-                                    {/* Small indicator for old images */}
                                     <div className="absolute bottom-0 inset-x-0 h-1 bg-primary/20" />
                                 </div>
                             ))}
@@ -499,7 +484,7 @@ function EditAdContent() {
                                     <img src={url} alt="" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                                     <button
                                         onClick={() => removeNewImage(index)}
-                                        className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-md hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                                        className="absolute top-1 right-1 p-1 bg-black/50 text-white rounded-md hover:bg-rose-500 transition-colors opacity-0 group-hover:opacity-100"
                                     >
                                         <X className="h-3 w-3" />
                                     </button>
@@ -509,7 +494,7 @@ function EditAdContent() {
                         </div>
                     </div>
 
-                    {/* Location Row (Compact Group) */}
+                    {/* Location Row */}
                     <div className="bg-white rounded-2xl p-4 border border-border shadow-sm">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
@@ -535,27 +520,21 @@ function EditAdContent() {
                     </div>
                 </div>
 
-                {/* Actions */}
-                <div className="mt-8 flex gap-3">
+                {/* Submit */}
+                <div className="mt-8">
                     <button
                         onClick={handleSubmit}
                         disabled={submitting}
-                        className="flex-1 h-14 bg-primary text-white rounded-xl font-black text-lg uppercase tracking-wider shadow-lg shadow-primary/20 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:scale-100"
+                        className="w-full h-16 bg-primary text-white rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:scale-100"
                     >
                         {submitting ? (
                             <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/20 border-t-white" />
                         ) : (
                             <>
-                                <Rocket className="h-5 w-5" />
+                                <Rocket className="h-6 w-6" />
                                 <span>Сохранить</span>
                             </>
                         )}
-                    </button>
-                    <button
-                        onClick={() => router.back()}
-                        className="w-24 h-14 bg-white border border-border text-muted-foreground rounded-xl font-black text-xs uppercase tracking-wider hover:bg-muted/30 active:scale-95 transition-all shadow-sm"
-                    >
-                        Отмена
                     </button>
                 </div>
             </div>
@@ -565,7 +544,7 @@ function EditAdContent() {
 
 export default function EditAdPage() {
     return (
-        <Suspense fallback={<div className="container mx-auto px-4 py-20 text-center font-black uppercase tracking-widest opacity-30 text-xs">Загрузка объявления...</div>}>
+        <Suspense fallback={<div className="container mx-auto px-4 py-20 flex justify-center"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
             <EditAdContent />
         </Suspense>
     );

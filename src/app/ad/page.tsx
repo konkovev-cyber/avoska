@@ -24,13 +24,15 @@ import {
     Image as ImageIcon,
     Check,
     CheckCheck,
-    Ban
+    Ban,
+    Camera
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { getShareableUrl } from '@/lib/share';
 import RightSidebar from '@/components/layout/RightSidebar';
+import { compressImage } from '@/lib/image-utils';
 
 const YandexMapView = dynamic(() => import('@/components/YandexMapView'), {
     ssr: false,
@@ -57,6 +59,13 @@ function AdContent() {
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const chatChannelRef = useRef<any>(null);
 
+    // Review states
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [reviewRating, setReviewRating] = useState(5);
+    const [reviewComment, setReviewComment] = useState('');
+    const [reviewImages, setReviewImages] = useState<string[]>([]);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
     useEffect(() => {
         if (id) {
             fetchAd();
@@ -67,6 +76,34 @@ function AdContent() {
             setLoading(false);
         }
     }, [id]);
+
+    const [sellerReviews, setSellerReviews] = useState<any[]>([]);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+
+    useEffect(() => {
+        if (ad?.user_id) {
+            fetchSellerReviews();
+        }
+    }, [ad?.user_id]);
+
+    const fetchSellerReviews = async () => {
+        if (!ad?.user_id) return;
+        setReviewsLoading(true);
+        try {
+            const { data } = await supabase
+                .from('reviews')
+                .select('*, reviewer:profiles!reviewer_id(full_name, avatar_url)')
+                .eq('target_user_id', ad.user_id)
+                .order('created_at', { ascending: false })
+                .limit(3);
+
+            setSellerReviews(data || []);
+        } catch (e) {
+            console.error('Error fetching reviews:', e);
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
 
     const getCurrentUser = async () => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -242,6 +279,69 @@ function AdContent() {
         }
     };
 
+    const handleReviewImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            try {
+                const compressedFile = await compressImage(file, 800, 0.7);
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+                const filePath = `reviews/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('review-images')
+                    .upload(filePath, compressedFile);
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('review-images')
+                    .getPublicUrl(filePath);
+
+                setReviewImages(prev => [...prev, publicUrl]);
+            } catch (err) {
+                console.error('Review image upload error:', err);
+                toast.error('Ошибка загрузки фото');
+            }
+        }
+    };
+
+    const handleReviewSubmit = async () => {
+        if (!currentUser) return router.push('/login');
+        if (!reviewComment.trim()) return toast.error('Напишите комментарий');
+        if (currentUser.id === ad.user_id) return toast.error('Вы не можете оставить отзыв самому себе');
+
+        setIsSubmittingReview(true);
+        try {
+            const { error } = await supabase
+                .from('reviews')
+                .insert({
+                    reviewer_id: currentUser.id,
+                    target_user_id: ad.user_id,
+                    ad_id: ad.id,
+                    rating: reviewRating,
+                    comment: reviewComment,
+                    images: reviewImages
+                });
+
+            if (error) throw error;
+
+            toast.success('Отзыв отправлен!');
+            setShowReviewForm(false);
+            setReviewComment('');
+            setReviewRating(5);
+            setReviewImages([]);
+            fetchSellerReviews();
+        } catch (e: any) {
+            console.error('Review error:', e);
+            toast.error(e.message || 'Ошибка при отправке отзыва');
+        } finally {
+            setIsSubmittingReview(false);
+        }
+    };
+
     const handleSendMessage = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         if (!newMessage.trim() || !ad) return;
@@ -370,7 +470,7 @@ function AdContent() {
         <div className="bg-background min-h-screen pb-40">
             {isZoomed && (
                 <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-2 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsZoomed(false)}>
-                    <button className="absolute top-4 right-4 p-2 bg-white/10 rounded-full text-white hover:bg-white/20">
+                    <button className="absolute top-4 right-4 p-2 bg-surface/20 rounded-full text-white hover:bg-surface/40 transition-all active:scale-90">
                         <X className="h-6 w-6" />
                     </button>
                     <img src={ad.images[currentImageIndex]} className="max-w-full max-h-full object-contain" alt="" />
@@ -431,10 +531,10 @@ function AdContent() {
                             />
                             {ad.images.length > 1 && (
                                 <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-                                    <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1)); }} className="p-1.5 bg-white/80 rounded-full pointer-events-auto">
+                                    <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1)); }} className="p-1.5 bg-surface/80 text-foreground rounded-full pointer-events-auto shadow-lg backdrop-blur-md hover:bg-surface transition-all active:scale-90">
                                         <ChevronLeft className="h-5 w-5" />
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1)); }} className="p-1.5 bg-white/80 rounded-full pointer-events-auto">
+                                    <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1)); }} className="p-1.5 bg-surface/80 text-foreground rounded-full pointer-events-auto shadow-lg backdrop-blur-md hover:bg-surface transition-all active:scale-90">
                                         <ChevronRight className="h-5 w-5" />
                                     </button>
                                 </div>
@@ -460,8 +560,8 @@ function AdContent() {
                         <div className="space-y-2">
                             <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Характеристики</h2>
                             <div className="grid grid-cols-1 gap-1">
-                                {!(ad.category?.slug === 'services' || ad.category?.slug === 'rent-commercial' || (ad.category?.slug === 'real-estate' && (ad.specifications?.type === 'house' || ad.specifications?.type === 'plot'))) && (
-                                    <div className="flex justify-between py-1 border-b border-border/50 text-xs">
+                                {!(ad.category?.slug === 'services' || ad.category?.slug === 'jobs' || ad.category?.slug === 'rent-commercial' || (ad.category?.slug === 'real-estate' && (ad.specifications?.type === 'house' || ad.specifications?.type === 'plot'))) && (
+                                    <div className="flex justify-between py-1 border-b border-border/50 text-xs text-foreground/80">
                                         <span className="text-muted">{(ad.category?.slug === 'real-estate' && ad.specifications?.type === 'apartment') || ad.category?.slug === 'rent-apartments' ? 'Тип жилья' : 'Состояние'}</span>
                                         <span className="font-bold">
                                             {ad.condition === 'new' ? 'Новое' :
@@ -471,12 +571,10 @@ function AdContent() {
                                         </span>
                                     </div>
                                 )}
-                                {ad.category && (
-                                    <div className="flex justify-between py-1 border-b border-border/50 text-xs">
-                                        <span className="text-muted">Категория</span>
-                                        <span className="font-bold">{ad.category.name}</span>
-                                    </div>
-                                )}
+                                <div className="flex justify-between py-1 border-b border-border/50 text-xs text-foreground/80">
+                                    <span className="text-muted">Категория</span>
+                                    <span className="font-bold text-primary">{ad.category?.name || 'Не указана'}</span>
+                                </div>
                                 {ad.specifications && Object.entries(ad.specifications).map(([k, v]) => {
                                     const labels: Record<string, string> = {
                                         brand: 'Марка',
@@ -536,6 +634,121 @@ function AdContent() {
                                     );
                                 })}
                             </div>
+                        </div>
+
+                        {/* Reviews Section */}
+                        <div className="space-y-4 pt-6 border-t border-border/50">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Отзывы о продавце</h2>
+                                <div className="flex items-center gap-3">
+                                    <Link href={`/user?id=${ad.user_id}&tab=reviews`} className="text-[10px] font-black uppercase text-primary hover:underline">Все отзывы</Link>
+                                    {currentUser && currentUser.id !== ad.user_id && !showReviewForm && (
+                                        <button
+                                            onClick={() => setShowReviewForm(true)}
+                                            className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-lg hover:bg-primary/20 transition-all"
+                                        >
+                                            Написать
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {showReviewForm && (
+                                <div className="bg-surface p-5 rounded-2xl border-2 border-primary/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-xs font-black uppercase tracking-widest text-primary">Ваш отзыв</h3>
+                                        <button onClick={() => setShowReviewForm(false)} className="p-1 hover:bg-muted rounded-full">
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-1 mb-4">
+                                        {[1, 2, 3, 4, 5].map((s) => (
+                                            <button key={s} onClick={() => setReviewRating(s)}>
+                                                <Star className={cn("h-6 w-6 transition-all", s <= reviewRating ? "fill-orange-500 text-orange-500" : "text-muted hover:text-orange-300")} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <textarea
+                                        value={reviewComment}
+                                        onChange={(e) => setReviewComment(e.target.value)}
+                                        placeholder="Расскажите о сделке..."
+                                        className="w-full h-24 p-4 text-xs font-bold rounded-2xl bg-muted/5 border border-border outline-none focus:border-primary transition-all resize-none"
+                                    />
+
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {reviewImages.map((img, idx) => (
+                                            <div key={idx} className="relative w-12 h-12 rounded-xl overflow-hidden border border-border group">
+                                                <img src={img} className="w-full h-full object-cover" />
+                                                <button
+                                                    onClick={() => setReviewImages(prev => prev.filter((_, i) => i !== idx))}
+                                                    className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                >
+                                                    <X className="h-4 w-4 text-white" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <label className="w-12 h-12 rounded-xl bg-muted/20 border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-all group">
+                                            <Camera className="h-4 w-4 text-muted group-hover:text-primary transition-colors" />
+                                            <input type="file" accept="image/*" multiple onChange={handleReviewImageUpload} className="hidden" />
+                                        </label>
+                                    </div>
+
+                                    <button
+                                        onClick={handleReviewSubmit}
+                                        disabled={isSubmittingReview}
+                                        className="w-full mt-4 h-11 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-lg disabled:opacity-50 transition-all"
+                                    >
+                                        {isSubmittingReview ? 'Отправка...' : 'Отправить отзыв'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {reviewsLoading ? (
+                                <div className="space-y-3">
+                                    {[1, 2].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
+                                </div>
+                            ) : sellerReviews.length > 0 ? (
+                                <div className="space-y-3">
+                                    {sellerReviews.map((rev) => (
+                                        <div key={rev.id} className="bg-surface/50 p-4 rounded-2xl border border-border/40">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-6 h-6 rounded-full bg-muted overflow-hidden">
+                                                    {rev.reviewer?.avatar_url ? (
+                                                        <img src={rev.reviewer.avatar_url} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-[8px] font-black">
+                                                            {rev.reviewer?.full_name?.charAt(0).toUpperCase() || '?'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="text-xs font-bold truncate max-w-[120px]">{rev.reviewer?.full_name}</span>
+                                                <div className="flex gap-0.5 ml-auto">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Star key={i} className={cn("h-2.5 w-2.5", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted/30")} />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-foreground/80 leading-relaxed italic line-clamp-2">"{rev.comment}"</p>
+                                            {rev.images?.length > 0 && (
+                                                <div className="flex gap-1.5 mt-2 overflow-x-auto pb-1 scrollbar-hide">
+                                                    {rev.images.map((img: string, idx: number) => (
+                                                        <div key={idx} className="w-12 h-12 rounded-lg border border-border/50 overflow-hidden shrink-0">
+                                                            <img src={getOptimizedImageUrl(img, { width: 100, quality: 60 })} className="w-full h-full object-cover" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-muted/5 p-6 rounded-2xl border border-dashed border-border flex flex-col items-center justify-center text-center">
+                                    <Star className="h-8 w-8 text-muted/20 mb-2" />
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">
+                                        У этого продавца пока нет отзывов.<br />Станьте первым!
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Interactive Map */}
@@ -609,7 +822,7 @@ function AdContent() {
                                 <div className="flex items-center gap-1 text-[10px] text-orange-500 font-bold">
                                     <Star className="h-3 w-3 fill-current" />
                                     <span>{ad.profiles?.rating || '5.0'}</span>
-                                    <span className="text-muted-foreground font-medium ml-1">Открыть профиль</span>
+                                    <span className="text-muted-foreground font-medium ml-1">({sellerReviews.length > 0 ? sellerReviews.length : '0'} отзывов)</span>
                                 </div>
                             </div>
                         </Link>

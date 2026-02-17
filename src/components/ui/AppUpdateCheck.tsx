@@ -16,9 +16,6 @@ export default function AppUpdateCheck() {
         setIsMobileApp(isCapacitor);
 
         if (isCapacitor) {
-            // Force light mode for APK
-            document.documentElement.classList.remove('dark');
-            document.documentElement.setAttribute('data-theme', 'light');
             checkForUpdates();
         }
     }, []);

@@ -8,6 +8,7 @@ create table public.profiles (
   full_name text,
   avatar_url text,
   rating numeric default 0,
+  role text default 'user', -- 'user', 'admin'
   is_verified boolean default false,
   created_at timestamptz default now()
 );
@@ -109,6 +110,15 @@ create policy "Users can delete their own ads"
   on public.ads for delete
   using ( auth.uid() = user_id );
 
+create policy "Admins can delete any ad"
+  on public.ads for delete
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
 -- 3.1 Trigger for Max 10 Active Ads
 create or replace function check_ad_limit()
 returns trigger as $$
@@ -187,6 +197,8 @@ create table public.reviews (
   ad_id uuid references public.ads(id),
   rating int check (rating >= 1 and rating <= 5),
   comment text,
+  images jsonb default '[]', -- For photo reviews
+  reply text, -- Seller response
   created_at timestamptz default now()
 );
 
@@ -198,6 +210,19 @@ create policy "Reviews are public"
 create policy "Authenticated users can create reviews"
   on public.reviews for insert
   with check ( auth.uid() = reviewer_id );
+
+create policy "Admins can delete reviews"
+  on public.reviews for delete
+  using (
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+  );
+
+create policy "Sellers can reply to reviews"
+  on public.reviews for update
+  using ( auth.uid() = target_user_id );
 
 
 -- 7. Push Subscriptions Table

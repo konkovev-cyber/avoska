@@ -226,11 +226,11 @@ function ChatContent() {
 
     return (
         <div className="max-w-7xl mx-auto md:px-4 h-[calc(100vh-6rem)] md:h-[65vh] md:min-h-[500px] flex flex-col justify-center my-auto pb-4 md:pb-0">
-            <div className="bg-white md:border md:border-gray-200 md:rounded-[1.5rem] overflow-hidden md:shadow-xl flex flex-col md:flex-row w-full h-full relative font-sans">
+            <div className="bg-surface md:border md:border-border/50 md:rounded-[1.5rem] overflow-hidden md:shadow-xl flex flex-col md:flex-row w-full h-full relative font-sans">
                 {/* Global Close Button (Desktop & Mobile) */}
                 <button
                     onClick={() => router.push('/')}
-                    className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center bg-gray-50 border border-gray-100 rounded-full text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-all active:scale-90"
+                    className="absolute top-4 right-4 z-50 w-8 h-8 flex items-center justify-center bg-background border border-border/50 rounded-full text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all active:scale-90"
                     title="Закрыть"
                 >
                     <X className="h-5 w-5" />
@@ -238,20 +238,20 @@ function ChatContent() {
 
                 {/* Sidebar: Conversations */}
                 <div className={cn(
-                    "w-full md:w-80 border-r border-gray-100 flex flex-col bg-gray-50 z-10",
+                    "w-full md:w-80 border-r border-border/50 flex flex-col bg-background/50 z-10",
                     activeChat ? "hidden md:flex" : "flex h-full"
                 )}>
-                    <div className="p-4 border-b border-gray-100 sticky top-0 bg-gray-50 z-10">
+                    <div className="p-4 border-b border-border/50 sticky top-0 bg-background/80 backdrop-blur-md z-10">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-xl font-black tracking-tight text-gray-900">Сообщения</h2>
+                            <h2 className="text-xl font-black tracking-tight text-foreground">Сообщения</h2>
                         </div>
                         <div className="relative group">
                             <input
                                 type="text"
                                 placeholder="Поиск чатов..."
-                                className="w-full h-10 pl-9 pr-4 rounded-lg bg-white border border-gray-200 focus:border-primary/50 text-sm font-bold outline-none transition-all placeholder:text-gray-400 text-gray-900 shadow-sm"
+                                className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface border border-border/50 focus:border-primary/50 text-sm font-bold outline-none transition-all placeholder:text-muted-foreground/40 text-foreground shadow-sm"
                             />
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400 group-focus-within:text-primary transition-colors" />
+                            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         </div>
                     </div>
                     <div className="flex-1 overflow-y-auto scrollbar-thin">
@@ -261,12 +261,12 @@ function ChatContent() {
                                     key={conv.userId}
                                     onClick={() => selectChat(conv)}
                                     className={cn(
-                                        "w-full p-3 flex items-center gap-3 hover:bg-white transition-all border-b border-gray-100 last:border-0 group relative",
-                                        activeChat?.userId === conv.userId && "bg-white shadow-sm z-10 ring-1 ring-gray-100"
+                                        "w-full p-3 flex items-center gap-3 hover:bg-surface transition-all border-b border-border/50 last:border-0 group relative",
+                                        activeChat?.userId === conv.userId && "bg-surface shadow-sm z-10 ring-1 ring-primary/20"
                                     )}
                                 >
                                     <div className="relative shrink-0">
-                                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center font-bold text-lg text-gray-500 overflow-hidden shrink-0 border border-gray-200">
+                                        <div className="w-12 h-12 rounded-full bg-muted/10 flex items-center justify-center font-bold text-lg text-muted-foreground overflow-hidden shrink-0 border border-border/50">
                                             {conv.user.avatar_url ? (
                                                 <img src={conv.user.avatar_url} alt="" className="w-full h-full object-cover" />
                                             ) : (
@@ -276,14 +276,14 @@ function ChatContent() {
                                     </div>
                                     <div className="flex-1 text-left min-w-0">
                                         <div className="flex justify-between items-baseline mb-0.5">
-                                            <div className="font-bold truncate text-[14px] text-gray-900">{conv.user.full_name}</div>
-                                            <div className="text-[10px] text-gray-400 font-bold">
+                                            <div className="font-bold truncate text-[14px] text-foreground">{conv.user.full_name}</div>
+                                            <div className="text-[10px] text-muted-foreground font-bold">
                                                 {new Date(conv.lastMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </div>
-                                        <div className="text-xs text-gray-500 truncate font-medium flex items-center">
+                                        <div className="text-xs text-muted-foreground truncate font-medium flex items-center">
                                             {conv.lastMessage?.ad && (
-                                                <span className="shrink-0 font-bold text-gray-700 mr-1.5 uppercase tracking-wide text-[9px] bg-gray-100 px-1.5 py-0.5 rounded">
+                                                <span className="shrink-0 font-bold text-foreground/80 mr-1.5 uppercase tracking-wide text-[9px] bg-muted/10 px-1.5 py-0.5 rounded">
                                                     {conv.lastMessage.ad.title}
                                                 </span>
                                             )}
@@ -294,8 +294,8 @@ function ChatContent() {
                             ))
                         ) : (
                             <div className="flex flex-col items-center justify-center h-64 text-center p-8 opacity-40">
-                                <MessageCircle className="h-10 w-10 mb-3 text-gray-400" />
-                                <p className="font-bold text-gray-400 text-sm">Нет сообщений</p>
+                                <MessageCircle className="h-10 w-10 mb-3 text-muted-foreground" />
+                                <p className="font-bold text-muted-foreground text-sm">Нет сообщений</p>
                             </div>
                         )}
                     </div>
@@ -303,18 +303,18 @@ function ChatContent() {
 
                 {/* Main: Chat Window */}
                 <div className={cn(
-                    "flex-1 flex flex-col bg-white relative min-h-0",
-                    !activeChat ? "hidden md:flex items-center justify-center bg-gray-50" : "flex h-full"
+                    "flex-1 flex flex-col bg-surface relative min-h-0",
+                    !activeChat ? "hidden md:flex items-center justify-center bg-background" : "flex h-full"
                 )}>
                     {activeChat ? (
                         <>
                             {/* Chat Header */}
-                            <div className="h-18 px-5 py-3 bg-white border-b border-gray-100 flex items-center gap-3 shrink-0 z-20">
-                                <button onClick={() => setActiveChat(null)} className="md:hidden p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors">
-                                    <ChevronLeft className="h-6 w-6 text-gray-800" />
+                            <div className="h-18 px-5 py-3 bg-surface border-b border-border/50 flex items-center gap-3 shrink-0 z-20">
+                                <button onClick={() => setActiveChat(null)} className="md:hidden p-2 -ml-2 hover:bg-background rounded-full transition-colors">
+                                    <ChevronLeft className="h-6 w-6 text-foreground" />
                                 </button>
 
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300 flex items-center justify-center text-gray-600 font-bold text-lg overflow-hidden shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-muted/5 to-muted/10 border border-border/50 flex items-center justify-center text-muted-foreground font-bold text-lg overflow-hidden shrink-0">
                                     {activeChat.user.avatar_url ? (
                                         <img src={activeChat.user.avatar_url} alt="" className="w-full h-full object-cover" />
                                     ) : (
@@ -323,12 +323,12 @@ function ChatContent() {
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-black text-lg text-gray-900 truncate leading-none mb-1">
+                                    <div className="font-black text-lg text-foreground truncate leading-none mb-1">
                                         {activeChat.user.full_name}
                                     </div>
                                     {activeAd ? (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-xs font-bold text-gray-800 uppercase tracking-wide truncate max-w-[200px] bg-gray-100 px-2 py-0.5 rounded">
+                                            <span className="text-xs font-bold text-foreground/80 uppercase tracking-wide truncate max-w-[200px] bg-muted/10 px-2 py-0.5 rounded">
                                                 {activeAd.title}
                                             </span>
                                             <span className="text-xs font-black text-primary whitespace-nowrap">
@@ -336,20 +336,20 @@ function ChatContent() {
                                             </span>
                                         </div>
                                     ) : (
-                                        <div className="text-[10px] text-green-600 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                        <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                                             Онлайн
                                         </div>
                                     )}
                                 </div>
 
                                 <div className="flex items-center gap-1">
-                                    <button className="w-8 h-8 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors text-gray-300 hover:text-yellow-400">
+                                    <button className="w-8 h-8 flex items-center justify-center hover:bg-background rounded-full transition-colors text-muted-foreground hover:text-yellow-400">
                                         <Star className="h-5 w-5" />
                                     </button>
                                     <button
                                         onClick={() => setActiveChat(null)}
-                                        className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-900"
+                                        className="w-8 h-8 flex items-center justify-center hover:bg-background rounded-full transition-colors text-muted-foreground hover:text-foreground"
                                         title="Закрыть чат"
                                     >
                                         <X className="h-5 w-5" />
@@ -358,11 +358,11 @@ function ChatContent() {
                             </div>
 
                             {/* Messages Area */}
-                            <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-6 scroll-smooth scrollbar-thin bg-gray-50/50">
+                            <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 space-y-6 scroll-smooth scrollbar-thin bg-background/30">
                                 {(Object.entries(groupedMessages) as [string, any[]][]).map(([date, msgs]) => (
                                     <div key={date} className="space-y-4">
                                         <div className="flex justify-center sticky top-0 z-10 pt-2 pb-2">
-                                            <span className="px-3 py-1 bg-gray-200/80 backdrop-blur text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded-full">
+                                            <span className="px-3 py-1 bg-muted/10 backdrop-blur text-muted-foreground text-[10px] font-bold uppercase tracking-widest rounded-full">
                                                 {date}
                                             </span>
                                         </div>
@@ -375,8 +375,8 @@ function ChatContent() {
                                                         className={cn(
                                                             "max-w-[85%] md:max-w-[70%] px-3 py-1.5 rounded-2xl text-[14px] leading-relaxed shadow-sm relative group animate-in fade-in slide-in-from-bottom-1 duration-200",
                                                             isOurs
-                                                                ? "self-end bg-[#E8F5E9] text-gray-900 border border-[#C8E6C9] rounded-br-sm"
-                                                                : "self-start bg-white text-gray-900 border border-gray-200 rounded-bl-sm"
+                                                                ? "self-end bg-primary/10 text-foreground border border-primary/20 rounded-br-sm"
+                                                                : "self-start bg-background text-foreground border border-border/50 rounded-bl-sm"
                                                         )}
                                                     >
                                                         {msg.type === 'image' && msg.attachment_url ? (
@@ -389,7 +389,7 @@ function ChatContent() {
 
                                                         <div className={cn(
                                                             "text-[9px] mt-1 flex items-center justify-end gap-1 opacity-70 font-bold tracking-wide",
-                                                            isOurs ? "text-green-800" : "text-gray-400"
+                                                            isOurs ? "text-primary" : "text-muted-foreground"
                                                         )}>
                                                             {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             {isOurs && (
@@ -408,7 +408,7 @@ function ChatContent() {
                             </div>
 
                             {/* Input Area */}
-                            <div className="p-3 md:p-4 bg-white border-t border-gray-100 flex items-end gap-2 shrink-0">
+                            <div className="p-3 md:p-4 bg-surface border-t border-border/50 flex items-end gap-2 shrink-0">
                                 <input
                                     type="file"
                                     ref={fileInputRef}
@@ -420,12 +420,12 @@ function ChatContent() {
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
                                     disabled={isUploading}
-                                    className="h-10 w-10 flex items-center justify-center text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all active:scale-95 shrink-0"
+                                    className="h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-xl transition-all active:scale-95 shrink-0"
                                 >
                                     {isUploading ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" /> : <PlusSquare className="h-6 w-6" />}
                                 </button>
 
-                                <form onSubmit={handleSendMessage} className="flex-1 flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-[1.2rem] px-4 py-2 focus-within:bg-white focus-within:border-primary/40 focus-within:shadow-md focus-within:shadow-primary/5 transition-all">
+                                <form onSubmit={handleSendMessage} className="flex-1 flex items-end gap-2 bg-background border border-border/50 rounded-[1.2rem] px-4 py-2 focus-within:bg-background focus-within:border-primary/40 focus-within:shadow-md focus-within:shadow-primary/5 transition-all">
                                     <textarea
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
@@ -436,7 +436,7 @@ function ChatContent() {
                                             }
                                         }}
                                         placeholder="Напишите сообщение..."
-                                        className="flex-1 bg-transparent border-none outline-none py-1.5 text-[14px] font-medium text-gray-900 resize-none max-h-[100px] scrollbar-hide placeholder:text-gray-400"
+                                        className="flex-1 bg-transparent border-none outline-none py-1.5 text-[14px] font-medium text-foreground resize-none max-h-[100px] scrollbar-hide placeholder:text-muted-foreground/40"
                                         rows={1}
                                         style={{ minHeight: '32px' }}
                                     />
@@ -445,7 +445,7 @@ function ChatContent() {
                                         disabled={!newMessage.trim() || isSending}
                                         className={cn(
                                             "w-8 h-8 mb-0.5 flex items-center justify-center rounded-lg transition-all active:scale-90 shrink-0",
-                                            newMessage.trim() ? "bg-primary text-white shadow-md shadow-primary/20 hover:shadow-primary/30 rotate-0" : "text-gray-300 rotate-12"
+                                            newMessage.trim() ? "bg-primary text-white shadow-md shadow-primary/20 hover:shadow-primary/30 rotate-0" : "text-muted-foreground/40 rotate-12"
                                         )}
                                     >
                                         <Send className={cn("h-4 w-4 ml-0.5", isSending && "animate-spin")} />
@@ -454,12 +454,12 @@ function ChatContent() {
                             </div>
                         </>
                     ) : (
-                        <div className="hidden md:flex flex-col items-center justify-center p-12 text-center animate-in fade-in zoom-in-95 duration-500">
-                            <div className="w-20 h-20 bg-gray-50 rounded-[2rem] flex items-center justify-center mb-6 border border-gray-100">
-                                <MessageCircle className="h-10 w-10 text-gray-300" />
+                        <div className="hidden md:flex flex-col items-center justify-center p-12 text-center animate-in fade-in zoom-in-95 duration-500 bg-background">
+                            <div className="w-20 h-20 bg-surface rounded-[2rem] flex items-center justify-center mb-6 border border-border/50">
+                                <MessageCircle className="h-10 w-10 text-muted-foreground/30" />
                             </div>
-                            <h3 className="font-black text-xl text-gray-900 mb-2">Выберите чат</h3>
-                            <p className="text-gray-500 font-medium max-w-xs text-sm">Общайтесь с продавцами и покупателями в защищенном чате Авоська+</p>
+                            <h3 className="font-black text-xl text-foreground mb-2">Выберите чат</h3>
+                            <p className="text-muted-foreground font-medium max-w-xs text-sm">Общайтесь с продавцами и покупателями в защищенном чате Авоська+</p>
                         </div>
                     )}
                 </div>

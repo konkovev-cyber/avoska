@@ -10,10 +10,11 @@ import { getStoredCity, setStoredCity, initCity } from '@/lib/geo';
 import { getTheme, setTheme, initTheme, Theme } from '@/lib/theme';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
 
 export default function Header() {
     const [user, setUser] = useState<User | null>(null);
-    const [city, setCity] = useState<string>('...');
+    const [city, setCity] = useState<string>('Все города');
     const [cities, setCities] = useState<any[]>([]);
     const [showCityPicker, setShowCityPicker] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -125,8 +126,8 @@ export default function Header() {
 
     return (
         <header className="sticky top-0 z-[100] bg-background border-b border-border/50 pt-safe shadow-sm">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-14 md:h-20 flex items-center gap-3 md:gap-8">
-                <Link href="/" className="hidden md:flex shrink-0 items-center group gap-2">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center gap-3 lg:gap-8">
+                <Link href="/" className="hidden lg:flex shrink-0 items-center group gap-2">
                     <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
                         <span className="text-white font-black text-xl tracking-tighter">А+</span>
                     </div>
@@ -136,7 +137,7 @@ export default function Header() {
                     </div>
                 </Link>
 
-                <Link href="/" className="md:hidden shrink-0 flex items-center group">
+                <Link href="/" className="lg:hidden shrink-0 flex items-center group">
                     <div className="flex items-center gap-1.5 active:scale-95 transition-transform">
                         <div className="w-9 h-9 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20">
                             <span className="text-white font-black text-lg tracking-tighter">А+</span>
@@ -145,88 +146,43 @@ export default function Header() {
                 </Link>
 
                 {/* City Picker & Filter - Mobile */}
-                <div className="md:hidden shrink-0">
-                    <button
-                        onClick={() => setShowCityPicker(!showCityPicker)}
-                        className="flex items-center justify-center w-10 h-10 bg-surface rounded-xl border border-border/50 text-muted-foreground active:scale-95 transition-transform"
-                    >
-                        <ChevronDown className={cn("h-5 w-5 transition-transform", showCityPicker && "rotate-180")} />
-                    </button>
-                    {/* Mobile City Dropdown */}
-                    {showCityPicker && (
-                        <>
-                            <div className="fixed inset-0 z-[110] bg-black/20 backdrop-blur-sm" onClick={() => setShowCityPicker(false)} />
-                            <div className="absolute top-[calc(100%+0.5rem)] left-4 w-64 bg-background border border-border rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 z-[120]">
-                                <div className="p-3 border-b border-border/50 bg-muted/30">
-                                    <div className="text-xs font-black uppercase tracking-widest text-muted-foreground">Выберите город</div>
-                                </div>
-                                <div className="max-h-[60vh] overflow-y-auto p-2 space-y-1">
-                                    {cities.map((c) => (
-                                        <button
-                                            key={c.name}
-                                            onClick={() => handleCityChange(c.name)}
-                                            className={cn(
-                                                "w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98]",
-                                                c.name === city ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-muted text-foreground"
-                                            )}
-                                        >
-                                            {c.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </>
-                    )}
+                <div className="lg:hidden flex-shrink-1 min-w-0">
+                    <ResponsiveSelect
+                        value={city}
+                        onChange={handleCityChange}
+                        options={cities.map(c => ({ value: c.name, label: c.name }))}
+                        placeholder="Город"
+                        prefixIcon={<MapPin className="h-3 w-3 text-primary shrink-0" />}
+                        triggerClassName="h-10 !px-2.5 bg-surface rounded-xl border border-border/50 text-foreground !flex items-center gap-1 [&>svg:last-child]:h-3 [&>svg:last-child]:w-3 min-w-[70px] max-w-[110px] text-[10px] font-black uppercase tracking-tight shadow-sm active:scale-95 transition-all"
+                    />
                 </div>
 
                 {/* City Picker - Desktop */}
-                <div className="relative shrink-0 hidden md:block">
-                    <button
-                        onClick={() => setShowCityPicker(!showCityPicker)}
-                        className="flex items-center gap-2 px-3 py-2 hover:bg-surface rounded-xl transition-all active:scale-95 border border-transparent hover:border-border max-w-[180px]"
-                    >
-                        <MapPin className="h-4 w-4 text-primary shrink-0" />
-                        <span className="text-[11px] font-black uppercase tracking-wider truncate">{city}</span>
-                        <ChevronDown className={cn("h-3 w-3 text-muted transition-transform shrink-0", showCityPicker && "rotate-180")} />
-                    </button>
-
-                    {showCityPicker && (
-                        <>
-                            <div className="fixed inset-0 z-[110]" onClick={() => setShowCityPicker(false)} />
-                            <div className="absolute top-full left-0 mt-2 w-64 bg-background border border-border rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[120]">
-                                <div className="max-h-60 overflow-y-auto p-2 space-y-1">
-                                    {cities.map((c) => (
-                                        <button
-                                            key={c.name}
-                                            onClick={() => handleCityChange(c.name)}
-                                            className={cn(
-                                                "w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-[0.98]",
-                                                c.name === city ? "bg-primary text-white" : "hover:bg-muted"
-                                            )}
-                                        >
-                                            {c.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </>
-                    )}
+                <div className="relative shrink-0 hidden lg:block">
+                    <ResponsiveSelect
+                        value={city}
+                        onChange={handleCityChange}
+                        options={cities.map(c => ({ value: c.name, label: c.name }))}
+                        placeholder="Город"
+                        prefixIcon={<MapPin className="h-4 w-4 text-primary shrink-0" />}
+                        triggerClassName="!h-auto !w-auto bg-transparent border-transparent hover:bg-surface !px-3 !py-2 rounded-xl transition-all active:scale-95 border border-transparent hover:border-border max-w-[180px] text-[11px] font-black uppercase tracking-wider [&>svg:last-child]:h-3 [&>svg:last-child]:w-3"
+                    />
                 </div>
 
                 {/* Search Bar */}
-                <div className="flex-1 min-w-0 max-w-2xl">
+                <div className="flex-1 min-w-0">
                     <form onSubmit={handleSearch} className="relative group w-full">
                         <input
                             type="text"
-                            placeholder={`Поиск в ${city === '...' || city === 'Все города' ? 'Авоське' : 'г. ' + city}`}
+                            placeholder={city === '...' || city === 'Все города' ? 'Авоська' : 'г. ' + city}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-11 md:h-12 pl-4 md:pl-5 pr-12 md:pr-14 rounded-2xl bg-surface border border-border hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-[16px] md:text-sm font-bold outline-none placeholder:text-muted-foreground/60"
+                            className="w-full h-10 md:h-12 pl-4 md:pl-5 pr-10 md:pr-14 rounded-2xl bg-surface border border-border hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-[13px] md:text-sm font-bold outline-none placeholder:text-muted-foreground/60"
                         />
                         <button
                             type="submit"
                             title="Найти"
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 md:h-9 md:w-11 bg-primary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all"
+                            className="absolute right-0.5 top-1/2 -translate-y-1/2 h-9 w-9 md:h-9 md:w-11 bg-primary text-white rounded-[14px] flex items-center justify-center shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all"
                         >
                             <Search className="h-4 w-4 md:h-5 md:w-5" />
                         </button>
@@ -234,7 +190,7 @@ export default function Header() {
                 </div>
 
                 {/* Desktop Actions */}
-                <div className="hidden xl:flex items-center gap-2">
+                <div className="hidden lg:flex items-center gap-2">
                     <Link href="/favorites" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Избранное">
                         <Heart className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
                         {favoritesCount > 0 && (
@@ -305,7 +261,7 @@ export default function Header() {
                 </div >
 
                 {/* Mobile Actions - Simplified */}
-                < div className="xl:hidden flex items-center gap-1" >
+                <div className="lg:hidden flex items-center gap-1">
                     {/* Only show Notifications on mobile header, others are in BottomNav */}
                     {
                         user && (

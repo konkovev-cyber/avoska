@@ -22,20 +22,22 @@ import HoverImageGallery from '@/components/ui/HoverImageGallery';
 const CATEGORIES = [
   { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },
   { name: 'Недвижимость', slug: 'real-estate', image: '/categories/real-estate.jpg' },
-  { name: 'Аренда квартир', slug: 'rent-apartments', image: '/categories/rent-apartments.jpg' },
-  { name: 'Аренда коммерции', slug: 'rent-commercial', image: '/categories/rent-commercial.jpg' },
-  { name: 'Аренда авто', slug: 'rent-cars', image: '/categories/rent-cars.jpg' },
+  { name: 'Для бизнеса', slug: 'business', image: '/categories/business.jpg' },
+  { name: 'Спорт и отдых', slug: 'sport', image: '/categories/sport.jpg' },
   { name: 'Работа', slug: 'jobs', image: '/categories/jobs.jpg' },
   { name: 'Услуги', slug: 'services', image: '/categories/services.jpg' },
-  { name: 'Аренда инструмента', slug: 'rent-tools', image: '/categories/rent-tools.jpg' },
   { name: 'Электроника', slug: 'electronics', image: '/categories/electronics.jpg' },
   { name: 'Дом и дача', slug: 'home', image: '/categories/home.jpg' },
   { name: 'Одежда', slug: 'clothing', image: '/categories/clothing.jpg' },
+  { name: 'Детское', slug: 'kids', image: '/categories/kids.jpg' },
+  { name: 'Аренда квартир', slug: 'rent-apartments', image: '/categories/rent-apartments.jpg' },
+  { name: 'Аренда коммерции', slug: 'rent-commercial', image: '/categories/rent-commercial.jpg' },
+  { name: 'Аренда авто', slug: 'rent-cars', image: '/categories/rent-cars.jpg' },
+  { name: 'Аренда инструмента', slug: 'rent-tools', image: '/categories/rent-tools.jpg' },
   { name: 'Запчасти', slug: 'parts', image: '/categories/parts.jpg' },
   { name: 'Хобби', slug: 'hobby', image: '/categories/hobby.jpg' },
   { name: 'Животные', slug: 'pets', image: '/categories/pets.jpg' },
   { name: 'Красота', slug: 'beauty', image: '/categories/beauty.jpg' },
-  { name: 'Детское', slug: 'kids', image: '/categories/kids.jpg' },
 ];
 
 export default function HomePage() {
@@ -322,7 +324,7 @@ export default function HomePage() {
 
           {/* Mobile Categories - Responsive Grid */}
           <div className="md:hidden grid grid-cols-4 gap-2 px-1">
-            {CATEGORIES.slice(0, 12).map((cat) => (
+            {CATEGORIES.slice(0, 8).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}
@@ -358,7 +360,7 @@ export default function HomePage() {
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
+                <div key={i} className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
               ))}
             </div>
           ) : (
@@ -367,7 +369,7 @@ export default function HomePage() {
                 <Link
                   key={ad.id}
                   href={`/ad?id=${ad.id}`}
-                  className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
+                  className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
                 >
                   <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                     <HoverImageGallery
@@ -398,7 +400,7 @@ export default function HomePage() {
               ))}
             </div>
           )}
-          
+
           <div className="mt-2 flex justify-start md:justify-center px-1">
             <Link
               href="/search?sort=newest"
@@ -446,7 +448,7 @@ export default function HomePage() {
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
+                <div key={i} className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
               ))}
             </div>
           ) : ads.length > 0 ? (
@@ -455,7 +457,7 @@ export default function HomePage() {
                 <Link
                   key={ad.id}
                   href={`/ad?id=${ad.id}`}
-                  className="group relative flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
+                  className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
                 >
                   <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                     <HoverImageGallery

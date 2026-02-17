@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { Package, Star, Share2, MapPin, User as UserIcon, Calendar, MessageCircle, Camera, X } from 'lucide-react';
+import { Package, Star, Share2, MapPin, User as UserIcon, Calendar, MessageCircle, Camera, X, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -27,6 +27,7 @@ function PublicProfileContent() {
     const [reviewComment, setReviewComment] = useState('');
     const [reviewImages, setReviewImages] = useState<string[]>([]);
     const [uploadingReviewImages, setUploadingReviewImages] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
     useEffect(() => {
@@ -44,7 +45,12 @@ function PublicProfileContent() {
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            setCurrentUser(session?.user || null);
+            if (session?.user) {
+                setCurrentUser(session.user);
+                const { data: currProfile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single();
+                const ADMIN_EMAILS = ['ht-elk@yandex.ru', 'dron-vbg@yandex.ru', 'konkev@bk.ru', 'konkovev@gmail.com'];
+                setIsAdmin(currProfile?.role === 'admin' || ADMIN_EMAILS.includes(session.user.email || ''));
+            }
 
             if (session?.user?.id === id) {
                 router.replace('/profile');
@@ -171,6 +177,19 @@ function PublicProfileContent() {
             toast.error('Ошибка при сохранении отзыва');
         } finally {
             setIsSubmittingReview(false);
+        }
+    };
+
+    const handleDeleteReview = async (reviewId: string) => {
+        if (!confirm('Удалить этот отзыв?')) return;
+        try {
+            const { error } = await supabase.from('reviews').delete().eq('id', reviewId);
+            if (error) throw error;
+            toast.success('Отзыв удален');
+            fetchPublicData();
+        } catch (error) {
+            console.error(error);
+            toast.error('Ошибка при удалении отзыва');
         }
     };
 
@@ -330,6 +349,11 @@ function PublicProfileContent() {
                                         </div>
                                     </div>
                                     <div className="text-[10px] text-muted font-bold uppercase">{new Date(rev.created_at).toLocaleDateString()}</div>
+                                    {isAdmin && (
+                                        <button onClick={() => handleDeleteReview(rev.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    )}
                                 </div>
                                 <p className="text-sm leading-relaxed">{rev.comment}</p>
                                 {rev.images?.length > 0 && (

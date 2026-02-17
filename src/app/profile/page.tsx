@@ -261,7 +261,7 @@ function ProfilePageContent() {
     );
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="container mx-auto px-4 py-8 pb-32 max-w-6xl">
             <div className="bg-surface border border-border rounded-3xl p-6 md:p-8 mb-8 shadow-sm">
                 <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
                     <div className="relative group/avatar">
@@ -312,7 +312,7 @@ function ProfilePageContent() {
                                 </button>
                                 <button
                                     onClick={() => setIsEditing(false)}
-                                    className="px-6 h-12 bg-white border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 font-black uppercase text-[10px] tracking-widest rounded-xl active:scale-95 transition-all"
+                                    className="px-6 h-12 bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted font-black uppercase text-[10px] tracking-widest rounded-xl active:scale-95 transition-all"
                                 >
                                     Отмена
                                 </button>
@@ -456,7 +456,7 @@ function ProfilePageContent() {
                                         </button>
                                         <Link
                                             href={`/ads/edit?id=${ad.id}`}
-                                            className="p-2 md:p-3 rounded-lg md:rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all"
+                                            className="p-2 md:p-3 rounded-lg md:rounded-xl border border-blue-500/20 text-blue-500 hover:bg-blue-500/10 transition-all"
                                             title="Редактировать"
                                         >
                                             <div className="h-4 w-4 md:h-5 md:w-5">
@@ -469,7 +469,7 @@ function ProfilePageContent() {
                                             onClick={() => toggleAdStatus(ad.id, ad.status)}
                                             className={cn(
                                                 "p-2 md:p-3 rounded-lg md:rounded-xl border transition-all",
-                                                ad.status === 'active' ? "text-orange-600 border-orange-200 hover:bg-orange-50" : "text-green-600 border-green-200 hover:bg-green-50"
+                                                ad.status === 'active' ? "text-orange-500 border-orange-500/20 hover:bg-orange-500/10" : "text-green-500 border-green-500/20 hover:bg-green-500/10"
                                             )}
                                             title={ad.status === 'active' ? "Снять с публикации" : "Активировать"}
                                         >
@@ -477,7 +477,7 @@ function ProfilePageContent() {
                                         </button>
                                         <button
                                             onClick={() => deleteAd(ad.id)}
-                                            className="p-2 md:p-3 rounded-lg md:rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-all"
+                                            className="p-2 md:p-3 rounded-lg md:rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 transition-all"
                                             title="Удалить навсегда"
                                         >
                                             <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
@@ -627,13 +627,6 @@ function ProfilePageContent() {
                     </div>
                 )}
             </div>
-            {/* Version Display */}
-            <div className="mt-12 text-center pb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface border-2 border-primary/10 rounded-2xl text-[11px] font-black text-primary/60 uppercase tracking-[0.2em] shadow-sm">
-                    <Smartphone className="h-3 w-3" />
-                    Avoska+ v0.1.2
-                </div>
-            </div>
             {/* Promotion Modal */}
             {promotingAd && (
                 <PromotionModal
@@ -643,6 +636,57 @@ function ProfilePageContent() {
                     onUpdate={fetchProfileData}
                 />
             )}
+
+            {/* Version Display & Update Check - APK Only */}
+            {(() => {
+                const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;
+                if (!isCapacitor) return null;
+
+                return (
+                    <div className="mt-12 text-center pb-12 space-y-4">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-surface border-2 border-primary/10 rounded-2xl text-[11px] font-black text-primary/60 uppercase tracking-[0.2em] shadow-sm">
+                                <Smartphone className="h-3 w-3" />
+                                Avoska+ v0.1.3
+                            </div>
+
+                            <button
+                                onClick={async () => {
+                                    const toastId = toast.loading('Проверка обновлений...');
+                                    try {
+                                        const response = await fetch(`https://api.github.com/repos/konkovev-cyber/avoska/releases/latest`);
+                                        if (!response.ok) throw new Error();
+                                        const data = await response.json();
+                                        const latest = data.tag_name.replace('v', '');
+                                        const current = '0.1.3';
+
+                                        if (latest !== current) {
+                                            toast.dismiss(toastId);
+                                            toast.success(`Доступна новая версия: ${latest}`, {
+                                                description: 'Нажмите, чтобы скачать',
+                                                action: {
+                                                    label: 'Скачать',
+                                                    onClick: () => window.open(`https://github.com/konkovev-cyber/avoska/releases/latest/download/avoska.apk`, '_blank')
+                                                },
+                                                duration: 10000
+                                            });
+                                        } else {
+                                            toast.dismiss(toastId);
+                                            toast.info('У вас установлена последняя версия');
+                                        }
+                                    } catch (e) {
+                                        toast.dismiss(toastId);
+                                        toast.error('Не удалось проверить обновления');
+                                    }
+                                }}
+                                className="text-[10px] font-black uppercase text-muted-foreground hover:text-primary transition-colors tracking-tight"
+                            >
+                                Проверить обновления
+                            </button>
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 }
