@@ -27,7 +27,6 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Авоська+",
   },
-  themeColor: "#22C55E",
 };
 
 export const viewport = {
@@ -35,6 +34,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: 0,
+  themeColor: "#22C55E",
 };
 
 export default function RootLayout({
