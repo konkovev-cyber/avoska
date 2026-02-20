@@ -318,7 +318,7 @@ function PublicProfileContent() {
                 {activeTab === 'ads' && (
                     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {ads.length > 0 ? ads.map(ad => (
-                            <Link key={ad.id} href={`/ad?id=${ad.id}`} className="group relative flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98]">
+                            <Link key={ad.id} href={`/ad/?id=${ad.id}`} className="group relative flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98]">
                                 <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                                     {ad.images?.[0] ? <img src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-full flex items-center justify-center text-[10px] opacity-30">Нет фото</div>}
                                 </div>

@@ -67,7 +67,7 @@ export default function FavoritesPage() {
                         {favorites.map(({ ads: ad }) => (
                             <Link
                                 key={ad.id}
-                                href={`/ad?id=${ad.id}`}
+                                href={`/ad/?id=${ad.id}`}
                                 className="bg-surface border border-border rounded-3xl overflow-hidden hover:shadow-lg transition-all flex flex-col group"
                             >
                                 <div className="aspect-square bg-muted relative overflow-hidden">

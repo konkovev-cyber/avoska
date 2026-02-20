@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -13,19 +13,22 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
     const [loading, setLoading] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
-    const errorParam = searchParams.get('error');
+    const errorParam = useMemo(() => searchParams.get('error'), [searchParams]);
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
+            // Безопасное получение origin только на клиенте
+            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+            
             if (mode === 'register') {
                 const { data, error } = await supabase.auth.signUp({
                     email,
                     password,
                     options: {
-                        emailRedirectTo: `${window.location.origin}/auth/callback`,
+                        emailRedirectTo: `${origin}/auth/callback`,
                         data: {
                             full_name: fullName,
                         },
@@ -52,7 +55,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 router.refresh();
             } else if (mode === 'forgot-password') {
                 const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+                    redirectTo: `${origin}/auth/callback?next=/update-password`,
                 });
                 if (error) throw error;
                 toast.success('Проверьте почту!', {

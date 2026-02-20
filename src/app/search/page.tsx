@@ -405,7 +405,7 @@ function SearchContent() {
                             {ads.map((ad) => (
                                 <Link
                                     key={ad.id}
-                                    href={`/ad?id=${ad.id}`}
+                                    href={`/ad/?id=${ad.id}`}
                                     className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200"
                                 >
                                     <div className="aspect-[4/3] relative overflow-hidden bg-muted">

@@ -404,7 +404,7 @@ function CategoryContent() {
                                 {ads.map((ad) => (
                                     <Link
                                         key={ad.id}
-                                        href={`/ad?id=${ad.id}`}
+                                        href={`/ad/?id=${ad.id}`}
                                         className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40"
                                     >
                                         <div className="aspect-[4/3] relative overflow-hidden bg-muted">

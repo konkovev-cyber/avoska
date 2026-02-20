@@ -18,23 +18,23 @@ import "./globals.css";
 //   subsets: ["latin"],
 // });
 
-export const viewport = {
-  themeColor: "#22C55E",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: 0,
-};
-
 export const metadata: Metadata = {
   title: "Авоська+ | Доска объявлений",
-  description: "Покупай and продавай легко с Авоська+",
+  description: "Покупай и продавай легко с Авоська+",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Авоська+",
   },
+  themeColor: "#22C55E",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: 0,
 };
 
 export default function RootLayout({
@@ -43,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru">
+    <html lang="ru" suppressHydrationWarning>
       <body
         className="antialiased flex flex-col min-h-screen"
       >

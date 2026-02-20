@@ -463,7 +463,7 @@ function ProfilePageContent() {
                     myAds.length > 0 ? (
                         myAds.map(ad => (
                             <div key={ad.id} className="bg-surface border border-border rounded-2xl p-3 md:p-4 flex gap-3 md:gap-6 items-center hover:shadow-md transition-all overflow-hidden">
-                                <Link href={`/ad?id=${ad.id}`} className="w-16 h-16 md:w-32 md:h-32 bg-muted rounded-xl overflow-hidden shrink-0 border border-border">
+                                <Link href={`/ad/?id=${ad.id}`} className="w-16 h-16 md:w-32 md:h-32 bg-muted rounded-xl overflow-hidden shrink-0 border border-border">
                                     {ad.images?.[0] ? (
                                         <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
                                     ) : (
@@ -480,7 +480,7 @@ function ProfilePageContent() {
                                         </span>
                                         <span className="text-[8px] text-muted font-bold uppercase truncate">{ad.categories?.name}</span>
                                     </div>
-                                    <Link href={`/ad?id=${ad.id}`} className="block text-sm md:text-lg font-bold truncate hover:text-primary transition-colors">
+                                    <Link href={`/ad/?id=${ad.id}`} className="block text-sm md:text-lg font-bold truncate hover:text-primary transition-colors">
                                         {ad.title}
                                     </Link>
                                     <div className="text-base md:text-xl font-black mt-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
@@ -543,7 +543,7 @@ function ProfilePageContent() {
                     favorites.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {favorites.map(({ ads: ad }) => (
-                                <Link key={ad.id} href={`/ad?id=${ad.id}`} className="bg-surface border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col group">
+                                <Link key={ad.id} href={`/ad/?id=${ad.id}`} className="bg-surface border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col group">
                                     <div className="aspect-square bg-muted relative">
                                         {ad.images?.[0] ? (
                                             <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />

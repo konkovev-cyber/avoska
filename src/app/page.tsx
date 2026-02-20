@@ -368,14 +368,14 @@ export default function HomePage() {
               {(newAds.length > 0 ? newAds : ads).slice(0, 6).map((ad) => (
                 <Link
                   key={ad.id}
-                  href={`/ad?id=${ad.id}`}
+                  href={`/ad/?id=${ad.id}`}
                   className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
                 >
                   <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                     <HoverImageGallery
                       images={ad.images}
                       alt={ad.title}
-                      href={`/ad?id=${ad.id}`}
+                      href={`/ad/?id=${ad.id}`}
                       layout="horizontal"
                     />
                     {ad.condition === 'new' && (
@@ -456,14 +456,14 @@ export default function HomePage() {
               {ads.slice(0, 6).map((ad) => (
                 <Link
                   key={ad.id}
-                  href={`/ad?id=${ad.id}`}
+                  href={`/ad/?id=${ad.id}`}
                   className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
                 >
                   <div className="aspect-[4/3] relative overflow-hidden bg-muted">
                     <HoverImageGallery
                       images={ad.images}
                       alt={ad.title}
-                      href={`/ad?id=${ad.id}`}
+                      href={`/ad/?id=${ad.id}`}
                       layout="horizontal"
                     />
                     {ad.condition === 'new' && (

@@ -56,7 +56,7 @@ export default function AllAdsPage() {
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {filteredAds.map(ad => (
-                        <Link href={`/ad?id=${ad.id}`} key={ad.id} className="group">
+                        <Link href={`/ad/?id=${ad.id}`} key={ad.id} className="group">
                             <div className="bg-surface rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-all hover:border-primary h-full flex flex-col">
                                 <div className="aspect-square relative overflow-hidden bg-muted">
                                     {ad.images?.[0] ? (

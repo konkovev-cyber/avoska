@@ -756,7 +756,7 @@ export default function AdminDashboard() {
                             {ads.map(ad => (
                                 <Link
                                     key={ad.id}
-                                    href={`/ad?id=${ad.id}`}
+                                    href={`/ad/?id=${ad.id}`}
                                     className="bg-white rounded-lg shadow-sm border border-gray-200/50 overflow-hidden hover:shadow-md transition-all group"
                                 >
                                     <div className="aspect-video bg-gray-100 relative overflow-hidden">
@@ -803,7 +803,7 @@ export default function AdminDashboard() {
                                     {ads.map(ad => (
                                         <tr key={ad.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-4 py-2">
-                                                <Link href={`/ad?id=${ad.id}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1 block">
+                                                <Link href={`/ad/?id=${ad.id}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-1 block">
                                                     {ad.title}
                                                 </Link>
                                                 <p className="text-xs text-gray-500 line-clamp-1">{ad.description}</p>
