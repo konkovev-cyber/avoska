@@ -62,8 +62,11 @@ export default function RootLayout({
         <BottomNav />
         <AppUpdateCheck />
         <Toaster />
-        {/* Yandex Maps API */}
-        <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=87870950-716b-4560-9d04-58a44b58153b" type="text/javascript"></script>
+        {/* Yandex Maps API - ключ загружается из переменной окружения */}
+        <script 
+          src={`https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || ''}`} 
+          type="text/javascript"
+        />
       </body>
     </html>
   );

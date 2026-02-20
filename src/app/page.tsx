@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { supabase } from '@/lib/supabase/client';
 import { getStoredCity, initCity } from '@/lib/geo';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import {
   ChevronRight,
   Heart,
@@ -17,7 +19,11 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { recommendationService } from '@/lib/recommendations';
-import HoverImageGallery from '@/components/ui/HoverImageGallery';
+
+// Dynamic imports для оптимизации bundle
+const HoverImageGallery = dynamic(() => import('@/components/ui/HoverImageGallery'), {
+  loading: () => <div className="bg-muted animate-pulse aspect-[4/3]" />
+});
 
 const CATEGORIES = [
   { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },

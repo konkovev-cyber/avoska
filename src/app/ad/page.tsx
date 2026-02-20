@@ -31,12 +31,17 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { getShareableUrl } from '@/lib/share';
-import RightSidebar from '@/components/layout/RightSidebar';
 import { compressImage } from '@/lib/image-utils';
 
+// Dynamic imports для оптимизации bundle
 const YandexMapView = dynamic(() => import('@/components/YandexMapView'), {
     ssr: false,
     loading: () => <div className="h-[200px] w-full bg-surface animate-pulse rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest text-muted opacity-30">Карта...</div>
+});
+
+const RightSidebar = dynamic(() => import('@/components/layout/RightSidebar'), {
+    ssr: false,
+    loading: () => <div className="hidden lg:block w-[300px] bg-surface animate-pulse rounded-2xl" />
 });
 
 function AdContent() {

@@ -3,6 +3,38 @@ Options -Indexes -MultiViews
 RewriteEngine On
 RewriteBase /
 
+# ============================================
+# SECURITY HEADERS
+# ============================================
+
+# Prevent clickjacking
+Header always set X-Frame-Options "SAMEORIGIN"
+
+# Prevent MIME type sniffing
+Header always set X-Content-Type-Options "nosniff"
+
+# XSS Protection
+Header always set X-XSS-Protection "1; mode=block"
+
+# Referrer Policy
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# Content Security Policy
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://api-maps.yandex.ru https://api.telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.telegram.org; font-src 'self' data:; frame-src 'self';"
+
+# Permissions Policy
+Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(self)"
+
+# DNS Prefetch Control
+Header always set X-DNS-Prefetch-Control "on"
+
+# HSTS (HTTPS Strict Transport Security)
+Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+
+# ============================================
+# ROUTING
+# ============================================
+
 # 1. Redirect /index.html to /
 RewriteRule ^index\.html$ / [R=301,L]
 

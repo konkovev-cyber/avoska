@@ -6,7 +6,7 @@ const CONFIG = {
     ftp: {
         host: "konkevlk.beget.tech",
         user: "konkevlk_boss",
-        password: process.env.FTP_PASSWORD || "Kk1478963!!!",
+        password: process.env.FTP_PASSWORD,
         secure: false
     },
     remotePath: "/avoska.353290.ru/public_html/",
@@ -16,6 +16,13 @@ const CONFIG = {
 };
 
 async function run() {
+    // Проверка наличия пароля
+    if (!CONFIG.ftp.password) {
+        console.error("❌ Ошибка: FTP_PASSWORD не установлен в переменных окружения");
+        console.error("   Создайте файл .env.local и добавьте FTP_PASSWORD=ваш_пароль");
+        process.exit(1);
+    }
+
     const client = new ftp.Client();
     client.ftp.verbose = true;
     try {
