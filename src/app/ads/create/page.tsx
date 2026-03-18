@@ -8,27 +8,8 @@ import { X, PlusSquare, Rocket, CheckCircle2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
+import { CATEGORIES } from '@/lib/constants';
 
-const CATEGORIES = [
-    { name: 'Транспорт', slug: 'transport' },
-    { name: 'Недвижимость', slug: 'real-estate' },
-    { name: 'Аренда квартир', slug: 'rent-apartments' },
-    { name: 'Аренда коммерции', slug: 'rent-commercial' },
-    { name: 'Аренда авто', slug: 'rent-cars' },
-    { name: 'Работа', slug: 'jobs' },
-    { name: 'Услуги', slug: 'services' },
-    { name: 'Аренда инструмента', slug: 'rent-tools' },
-    { name: 'Электроника', slug: 'electronics' },
-    { name: 'Дом и дача', slug: 'home' },
-    { name: 'Одежда', slug: 'clothing' },
-    { name: 'Запчасти', slug: 'parts' },
-    { name: 'Хобби', slug: 'hobby' },
-    { name: 'Животные', slug: 'pets' },
-    { name: 'Красота', slug: 'beauty' },
-    { name: 'Детское', slug: 'kids' },
-    { name: 'Для бизнеса', slug: 'business' },
-    { name: 'Спорт и отдых', slug: 'sport' },
-];
 
 export default function CreateAdPage() {
     const [title, setTitle] = useState('');
@@ -117,15 +98,17 @@ export default function CreateAdPage() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('Пользователь не авторизован');
 
-            const uploadedImageUrls: string[] = [];
-            for (const file of images) {
-                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-                const filePath = `${session.user.id}/${fileName}`;
-                const { error: uploadError } = await supabase.storage.from('ad-images').upload(filePath, file);
-                if (uploadError) throw uploadError;
-                const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(filePath);
-                uploadedImageUrls.push(publicUrl);
-            }
+            // Параллельная загрузка всех фото — значительно быстрее
+            const uploadedImageUrls: string[] = await Promise.all(
+                images.map(async (file) => {
+                    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+                    const filePath = `${session.user.id}/${fileName}`;
+                    const { error: uploadError } = await supabase.storage.from('ad-images').upload(filePath, file);
+                    if (uploadError) throw uploadError;
+                    const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(filePath);
+                    return publicUrl;
+                })
+            );
 
             const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).single();
             if (!catData) throw new Error('Категория не найдена');
@@ -155,7 +138,15 @@ export default function CreateAdPage() {
             router.push('/');
             router.refresh();
         } catch (error: any) {
-            toast.error(error.message, { id: toastId });
+            console.error('Create ad error:', error);
+
+            let userMessage = error.message || 'Произошла непредвиденная ошибка при публикации.';
+            if (error.code === '23505') userMessage = 'Подобное объявление уже существует.';
+            if (error.code === '23503') userMessage = 'Вам необходимо полностью заполнить профиль для публикации.';
+            if (error.code === '23514') userMessage = 'Ошибка структуры данных. Категория могла быть удалена.';
+            if (error.message?.includes('bucket not found')) userMessage = 'Серверная ошибка (хранилище не настроено).';
+
+            toast.error(userMessage, { id: toastId });
         } finally {
             setLoading(false);
         }

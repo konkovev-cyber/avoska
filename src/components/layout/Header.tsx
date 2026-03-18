@@ -27,7 +27,6 @@ export default function Header() {
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
             if (session?.user) {
-                fetchUnread();
                 fetchFavoritesCount();
             }
         });
@@ -50,32 +49,18 @@ export default function Header() {
         initTheme();
         setInternalTheme(getTheme());
 
-        // Initial unread count
-        fetchUnread();
-
-        // Subscribe to messages for unread count
-        const channel = supabase.channel('header-messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
-                fetchUnread();
-            })
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
-                fetchUnread();
-            })
-            .subscribe();
-
-        // Subscription for favorites
+        // Subscribe to favorites count changes
         const favChannel = supabase.channel('header-favorites')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'favorites' }, () => {
                 fetchFavoritesCount();
             })
             .subscribe();
 
-        // Detect Capacitor
+        // Detect Capacitor (Android APK)
         setIsCapacitor(typeof window !== 'undefined' && (window as any).Capacitor !== undefined);
 
         return () => {
             subscription.unsubscribe();
-            supabase.removeChannel(channel);
             supabase.removeChannel(favChannel);
         };
     }, []);
@@ -90,10 +75,9 @@ export default function Header() {
         if (count !== null) setFavoritesCount(count);
     };
 
-    const fetchUnread = async () => {
-        // Unread status disabled by user request
-        setUnreadCount(0);
-    };
+    // Счётчик непрочитанных отключён по запросу.
+    // Для включения: fetchUnread в useEffect + реальный запрос к messages
+    // const fetchUnread = async () => { ... };
 
     const toggleTheme = () => {
         let current = theme;

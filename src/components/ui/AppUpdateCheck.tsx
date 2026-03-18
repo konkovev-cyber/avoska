@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Download, RefreshCw, X } from 'lucide-react';
-
-const CURRENT_VERSION = '0.1.2'; // Should match package.json
-const GITHUB_REPO = 'konkovev-cyber/avoska';
+import { Download, RefreshCw } from 'lucide-react';
+import { APP_VERSION, GITHUB_REPO, APK_DOWNLOAD_URL } from '@/lib/constants';
 
 export default function AppUpdateCheck() {
     const [isMobileApp, setIsMobileApp] = useState(false);
@@ -28,7 +26,7 @@ export default function AppUpdateCheck() {
             const data = await response.json();
             const latestVersion = data.tag_name.replace('v', '');
 
-            if (isNewerVersion(latestVersion, CURRENT_VERSION)) {
+            if (isNewerVersion(latestVersion, APP_VERSION)) {
                 showUpdateToast(latestVersion);
             }
         } catch (error) {
@@ -64,7 +62,7 @@ export default function AppUpdateCheck() {
 
                 <div className="flex gap-2">
                     <a
-                        href={`https://github.com/${GITHUB_REPO}/releases/latest/download/avoska.apk`}
+                        href={APK_DOWNLOAD_URL}
                         className="flex-1 bg-primary text-white py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20"
                         onClick={() => toast.dismiss(t)}
                     >

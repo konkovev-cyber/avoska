@@ -19,32 +19,13 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { recommendationService } from '@/lib/recommendations';
-
-// Dynamic imports для оптимизации bundle
+import { CATEGORIES, APK_DOWNLOAD_URL } from '@/lib/constants';
+import { AdCard } from '@/components/ui/AdCard';
 const HoverImageGallery = dynamic(() => import('@/components/ui/HoverImageGallery'), {
   loading: () => <div className="bg-muted animate-pulse aspect-[4/3]" />
 });
 
-const CATEGORIES = [
-  { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },
-  { name: 'Недвижимость', slug: 'real-estate', image: '/categories/real-estate.jpg' },
-  { name: 'Для бизнеса', slug: 'business', image: '/categories/business.jpg' },
-  { name: 'Спорт и отдых', slug: 'sport', image: '/categories/sport.jpg' },
-  { name: 'Работа', slug: 'jobs', image: '/categories/jobs.jpg' },
-  { name: 'Услуги', slug: 'services', image: '/categories/services.jpg' },
-  { name: 'Электроника', slug: 'electronics', image: '/categories/electronics.jpg' },
-  { name: 'Дом и дача', slug: 'home', image: '/categories/home.jpg' },
-  { name: 'Одежда', slug: 'clothing', image: '/categories/clothing.jpg' },
-  { name: 'Детское', slug: 'kids', image: '/categories/kids.jpg' },
-  { name: 'Аренда квартир', slug: 'rent-apartments', image: '/categories/rent-apartments.jpg' },
-  { name: 'Аренда коммерции', slug: 'rent-commercial', image: '/categories/rent-commercial.jpg' },
-  { name: 'Аренда авто', slug: 'rent-cars', image: '/categories/rent-cars.jpg' },
-  { name: 'Аренда инструмента', slug: 'rent-tools', image: '/categories/rent-tools.jpg' },
-  { name: 'Запчасти', slug: 'parts', image: '/categories/parts.jpg' },
-  { name: 'Хобби', slug: 'hobby', image: '/categories/hobby.jpg' },
-  { name: 'Животные', slug: 'pets', image: '/categories/pets.jpg' },
-  { name: 'Красота', slug: 'beauty', image: '/categories/beauty.jpg' },
-];
+
 
 export default function HomePage() {
   const [ads, setAds] = useState<any[]>([]);
@@ -132,7 +113,9 @@ export default function HomePage() {
       const from = pageNum * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
-      console.log('Fetching ads for city:', currentCity);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Fetching ads for city:', currentCity);
+      }
 
       let q = supabase
         .from('ads')
@@ -153,9 +136,10 @@ export default function HomePage() {
 
       if (error) throw error;
 
-      // Fallback: If no ads in selected city, fetch all ads
       if (isInitial && (!data || data.length === 0) && currentCity && currentCity !== 'Все города') {
-        console.log('No ads in city, falling back to all cities');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('No ads in city, falling back to all cities');
+        }
         await fetchAds(0, true, 'Все города');
         return;
       }
@@ -372,37 +356,7 @@ export default function HomePage() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
               {(newAds.length > 0 ? newAds : ads).slice(0, 6).map((ad) => (
-                <Link
-                  key={ad.id}
-                  href={`/ad/?id=${ad.id}`}
-                  className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
-                >
-                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                    <HoverImageGallery
-                      images={ad.images}
-                      alt={ad.title}
-                      href={`/ad/?id=${ad.id}`}
-                      layout="horizontal"
-                    />
-                    {ad.condition === 'new' && (
-                      <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-[9px] font-bold uppercase rounded shadow-sm z-20 pointer-events-none">
-                        Новое
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-2.5 flex flex-col flex-1 gap-1">
-                    <div className="text-[15px] font-black text-foreground tracking-tight leading-none">
-                      {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
-                    </div>
-                    <h3 className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em] group-hover:text-primary transition-colors">
-                      {ad.title}
-                    </h3>
-                    <div className="mt-auto pt-1.5 flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
-                      <MapPin className="h-2.5 w-2.5 shrink-0" />
-                      <span className="truncate">{ad.city || 'Город'}</span>
-                    </div>
-                  </div>
-                </Link>
+                <AdCard key={ad.id} ad={ad} isHoverGallery={true} />
               ))}
             </div>
           )}
@@ -434,7 +388,7 @@ export default function HomePage() {
                 </div>
 
                 <a
-                  href="https://github.com/konkovev-cyber/avoska/releases/latest/download/avoska.apk"
+                  href={APK_DOWNLOAD_URL}
                   className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <span>Скачать .apk</span>
@@ -460,37 +414,7 @@ export default function HomePage() {
           ) : ads.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
               {ads.slice(0, 6).map((ad) => (
-                <Link
-                  key={ad.id}
-                  href={`/ad/?id=${ad.id}`}
-                  className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
-                >
-                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                    <HoverImageGallery
-                      images={ad.images}
-                      alt={ad.title}
-                      href={`/ad/?id=${ad.id}`}
-                      layout="horizontal"
-                    />
-                    {ad.condition === 'new' && (
-                      <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-[9px] font-bold uppercase rounded shadow-sm z-20 pointer-events-none">
-                        Новое
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-2.5 flex flex-col flex-1 gap-1">
-                    <div className="text-[15px] font-black text-foreground tracking-tight leading-none">
-                      {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
-                    </div>
-                    <h3 className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em] group-hover:text-primary transition-colors">
-                      {ad.title}
-                    </h3>
-                    <div className="mt-auto pt-1.5 flex items-center gap-1 text-[9px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
-                      <MapPin className="h-2.5 w-2.5 shrink-0" />
-                      <span className="truncate">{ad.city || 'Город'}</span>
-                    </div>
-                  </div>
-                </Link>
+                <AdCard key={ad.id} ad={ad} isHoverGallery={true} />
               ))}
             </div>
           ) : (

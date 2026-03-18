@@ -9,27 +9,9 @@ import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { Home, Car, Smartphone, Shirt, Gamepad, Armchair, ChevronRight, ChevronLeft, CheckCircle, Info, Filter, X, Search, Plus, Heart, Briefcase, Wrench, Settings, Baby, Sparkles, MapPin, Check, ChevronDown, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
+import { AdCard } from '@/components/ui/AdCard';
+import { CATEGORIES } from '@/lib/constants';
 
-const CATEGORIES = [
-    { name: 'Транспорт', slug: 'transport', image: '/categories/transport.jpg' },
-    { name: 'Недвижимость', slug: 'real-estate', image: '/categories/real-estate.jpg' },
-    { name: 'Аренда квартир', slug: 'rent-apartments', image: '/categories/rent-apartments.jpg' },
-    { name: 'Аренда коммерции', slug: 'rent-commercial', image: '/categories/rent-commercial.jpg' },
-    { name: 'Аренда авто', slug: 'rent-cars', image: '/categories/rent-cars.jpg' },
-    { name: 'Работа', slug: 'jobs', image: '/categories/jobs.jpg' },
-    { name: 'Услуги', slug: 'services', image: '/categories/services.jpg' },
-    { name: 'Аренда инструмента', slug: 'rent-tools', image: '/categories/rent-tools.jpg' },
-    { name: 'Электроника', slug: 'electronics', image: '/categories/electronics.jpg' },
-    { name: 'Дом и дача', slug: 'home', image: '/categories/home.jpg' },
-    { name: 'Одежда', slug: 'clothing', image: '/categories/clothing.jpg' },
-    { name: 'Запчасти', slug: 'parts', image: '/categories/parts.jpg' },
-    { name: 'Хобби', slug: 'hobby', image: '/categories/hobby.jpg' },
-    { name: 'Животные', slug: 'pets', image: '/categories/pets.jpg' },
-    { name: 'Красота', slug: 'beauty', image: '/categories/beauty.jpg' },
-    { name: 'Детское', slug: 'kids', image: '/categories/kids.jpg' },
-    { name: 'Для бизнеса', slug: 'business', image: '/categories/business.jpg' },
-    { name: 'Спорт и отдых', slug: 'sport', image: '/categories/sport.jpg' },
-];
 
 function CategoryContent() {
     const searchParams = useSearchParams();
@@ -113,7 +95,9 @@ function CategoryContent() {
                 setAds(filteredData);
             }
         } catch (err) {
-            console.error('Fetch ads error:', err);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Fetch ads error:', err);
+            }
         } finally {
             setLoading(false);
         }
@@ -402,62 +386,7 @@ function CategoryContent() {
                         ) : ads.length > 0 ? (
                             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                                 {ads.map((ad) => (
-                                    <Link
-                                        key={ad.id}
-                                        href={`/ad/?id=${ad.id}`}
-                                        className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40"
-                                    >
-                                        <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                                            {ad.images?.[0] ? (
-                                                <img
-                                                    src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
-                                                    alt={ad.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-muted italic text-[10px]">Нет фото</div>
-                                            )}
-                                            <button className="absolute top-2 right-2 p-1.5 bg-surface/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface text-muted hover:text-red-500">
-                                                <Heart className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                        <div className="p-3 flex flex-col flex-1 gap-1">
-                                            <div className="text-base md:text-lg font-black text-foreground tracking-tight leading-none">
-                                                {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
-                                            </div>
-
-                                            <h3 className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em] group-hover:text-primary transition-colors">
-                                                {ad.title}
-                                            </h3>
-
-                                            <div className="mt-auto pt-2 space-y-2">
-                                                <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wide opacity-70">
-                                                    <div className="flex items-center gap-1 truncate">
-                                                        <MapPin className="h-3 w-3 shrink-0" />
-                                                        <span className="truncate">{ad.city}</span>
-                                                    </div>
-                                                    <span className="shrink-0">{new Date(ad.created_at).toLocaleDateString()}</span>
-                                                </div>
-
-                                                <div className="pt-2 border-t border-border/40 flex items-center justify-between">
-                                                    <div className="flex items-center gap-1.5 min-w-0">
-                                                        <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-[7px] font-black shrink-0">
-                                                            {ad.profiles?.avatar_url ? (
-                                                                <img src={ad.profiles.avatar_url} className="w-full h-full object-cover rounded-full" />
-                                                            ) : (
-                                                                ad.profiles?.full_name?.charAt(0) || '?'
-                                                            )}
-                                                        </div>
-                                                        <span className="text-[9px] font-bold truncate text-muted-foreground">{ad.profiles?.full_name?.split(' ')[0]}</span>
-                                                    </div>
-                                                    <div className="flex items-center gap-0.5 text-orange-500">
-                                                        <Star className="h-2.5 w-2.5 fill-current" />
-                                                        <span className="text-[9px] font-black">{ad.profiles?.rating?.toFixed(1) || '5.0'}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
+                                    <AdCard key={ad.id} ad={ad} />
                                 ))}
                             </div>
                         ) : (

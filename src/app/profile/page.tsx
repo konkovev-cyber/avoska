@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import { APP_VERSION, APP_BUILD, GITHUB_REPO, APK_DOWNLOAD_URL } from '@/lib/constants';
+import { AdCard } from '@/components/ui/AdCard';
+import { Ad, Profile } from '@/lib/types';
 
 export default function ProfilePage() {
     return (
@@ -20,9 +22,9 @@ export default function ProfilePage() {
 }
 
 function ProfilePageContent() {
-    const [profile, setProfile] = useState<any>(null);
-    const [myAds, setMyAds] = useState<any[]>([]);
-    const [favorites, setFavorites] = useState<any[]>([]);
+    const [profile, setProfile] = useState<Profile | null>(null);
+    const [myAds, setMyAds] = useState<Ad[]>([]);
+    const [favorites, setFavorites] = useState<{ ads: Ad }[]>([]);
     const [reviews, setReviews] = useState<any[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [fullName, setFullName] = useState('');
@@ -377,7 +379,7 @@ function ProfilePageContent() {
                                 </div>
                                 <div className="flex items-center gap-1 text-muted">
                                     <Rocket className="h-4 w-4" />
-                                    На Авоське с {new Date(profile?.created_at).getFullYear()}г.
+                                    На Авоське с {profile?.created_at ? new Date(profile.created_at).getFullYear() : new Date().getFullYear()}г.
                                 </div>
                             </div>
 
@@ -543,23 +545,7 @@ function ProfilePageContent() {
                     favorites.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {favorites.map(({ ads: ad }) => (
-                                <Link key={ad.id} href={`/ad/?id=${ad.id}`} className="bg-surface border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all flex flex-col group">
-                                    <div className="aspect-square bg-muted relative">
-                                        {ad.images?.[0] ? (
-                                            <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-muted">Нет фото</div>
-                                        )}
-                                    </div>
-                                    <div className="p-4">
-                                        <div className="text-lg font-black mb-1">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
-                                        <div className="text-sm font-medium line-clamp-1 mb-2 group-hover:text-primary transition-colors">{ad.title}</div>
-                                        <div className="flex justify-between text-[10px] text-muted font-bold uppercase">
-                                            <span>{ad.categories.name}</span>
-                                            <span>{ad.city}</span>
-                                        </div>
-                                    </div>
-                                </Link>
+                                <AdCard key={ad.id} ad={ad} />
                             ))}
                         </div>
                     ) : (

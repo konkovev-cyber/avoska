@@ -8,27 +8,8 @@ import { X, PlusSquare, Rocket, CheckCircle2, AlertCircle, ChevronDown, Check, L
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
+import { CATEGORIES } from '@/lib/constants';
 
-const CATEGORIES = [
-    { name: 'Транспорт', slug: 'transport' },
-    { name: 'Недвижимость', slug: 'real-estate' },
-    { name: 'Аренда квартир', slug: 'rent-apartments' },
-    { name: 'Аренда коммерции', slug: 'rent-commercial' },
-    { name: 'Аренда авто', slug: 'rent-cars' },
-    { name: 'Работа', slug: 'jobs' },
-    { name: 'Услуги', slug: 'services' },
-    { name: 'Аренда инструмента', slug: 'rent-tools' },
-    { name: 'Электроника', slug: 'electronics' },
-    { name: 'Дом и дача', slug: 'home' },
-    { name: 'Одежда', slug: 'clothing' },
-    { name: 'Запчасти', slug: 'parts' },
-    { name: 'Хобби', slug: 'hobby' },
-    { name: 'Животные', slug: 'pets' },
-    { name: 'Красота', slug: 'beauty' },
-    { name: 'Детское', slug: 'kids' },
-    { name: 'Для бизнеса', slug: 'business' },
-    { name: 'Спорт и отдых', slug: 'sport' },
-];
 
 function EditAdContent() {
     const searchParams = useSearchParams();
@@ -175,15 +156,17 @@ function EditAdContent() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) throw new Error('Нет сессии');
 
-            const uploadedImageUrls: string[] = [];
-            for (const file of newImages) {
-                const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-                const filePath = `${session.user.id}/${fileName}`;
-                const { error: uploadError } = await supabase.storage.from('ad-images').upload(filePath, file);
-                if (uploadError) throw uploadError;
-                const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(filePath);
-                uploadedImageUrls.push(publicUrl);
-            }
+            // Параллельная загрузка фото — быстрее, чем појдючно
+            const uploadedImageUrls: string[] = await Promise.all(
+                newImages.map(async (file) => {
+                    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+                    const filePath = `${session.user.id}/${fileName}`;
+                    const { error: uploadError } = await supabase.storage.from('ad-images').upload(filePath, file);
+                    if (uploadError) throw uploadError;
+                    const { data: { publicUrl } } = supabase.storage.from('ad-images').getPublicUrl(filePath);
+                    return publicUrl;
+                })
+            );
 
             const finalImages = [...existingImages, ...uploadedImageUrls];
 
@@ -211,8 +194,14 @@ function EditAdContent() {
             router.back();
             router.refresh();
         } catch (error: any) {
-            console.error(error);
-            toast.error(error.message, { id: toastId });
+            console.error('Edit ad error:', error);
+            let userMessage = error.message || 'Произошла непредвиденная ошибка при сохранении.';
+            if (error.code === '23505') userMessage = 'Подобное объявление уже существует.';
+            if (error.code === '23503') userMessage = 'Вам необходимо полностью заполнить профиль.';
+            if (error.code === '23514') userMessage = 'Ошибка структуры данных.';
+            if (error.message?.includes('bucket not found')) userMessage = 'Серверная ошибка (хранилище не настроено).';
+
+            toast.error(userMessage, { id: toastId });
         } finally {
             setSubmitting(false);
         }
