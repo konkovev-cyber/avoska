@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
 import { CATEGORIES } from '@/lib/constants';
+import YandexMapPicker from '@/components/YandexMapPicker';
 
 
 function EditAdContent() {
@@ -32,6 +33,7 @@ function EditAdContent() {
     const [cities, setCities] = useState<any[]>([]);
     const [condition, setCondition] = useState('used');
     const [delivery, setDelivery] = useState(false);
+    const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
     const [specifications, setSpecifications] = useState<Record<string, string>>({});
 
     // Images
@@ -99,6 +101,10 @@ function EditAdContent() {
         setDelivery(ad.delivery_possible || false);
         setSpecifications(ad.specifications || {});
         setExistingImages(ad.images || []);
+
+        if (ad.latitude && ad.longitude) {
+            setCoordinates([ad.latitude, ad.longitude]);
+        }
 
         setLoading(false);
     };
@@ -185,7 +191,9 @@ function EditAdContent() {
                 delivery_possible: delivery,
                 images: finalImages,
                 condition: (category === 'jobs' || category === 'services') ? 'new' : condition,
-                specifications
+                specifications,
+                latitude: coordinates ? coordinates[0] : null,
+                longitude: coordinates ? coordinates[1] : null
             }).eq('id', id);
 
             if (updateError) throw updateError;
@@ -496,16 +504,17 @@ function EditAdContent() {
                                     placeholder="Выберите город"
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Адрес (необязательно)</label>
-                                <input
-                                    type="text"
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    className="w-full h-10 px-3 rounded-lg bg-surface border border-border outline-none focus:border-primary font-bold text-sm transition-all placeholder:font-normal"
-                                    placeholder="Улица, дом"
-                                />
-                            </div>
+                        </div>
+
+                        {/* Map Picker Selection */}
+                        <div className="mt-4">
+                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1 mb-2 block">
+                                Изменить местоположение на карте
+                            </label>
+                            <YandexMapPicker
+                                initialPos={coordinates || undefined}
+                                onChange={(pos) => setCoordinates(pos)}
+                            />
                         </div>
                     </div>
                 </div>

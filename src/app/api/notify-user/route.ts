@@ -10,34 +10,30 @@ export async function POST(request: Request) {
         );
 
         const body = await request.json();
-        const { ad, author, authorEmail } = body;
+        const { email, fullName, uid } = body;
 
-        // Fetch all admin settings that have telegram_chat_id and want new ad notifications
         const { data: adminSettings } = await supabaseAdmin
             .from('admin_settings')
-            .select('telegram_chat_id, notify_new_ads')
-            .eq('notify_new_ads', true)
+            .select('telegram_chat_id, notify_new_users')
+            .eq('notify_new_users', true)
             .not('telegram_chat_id', 'is', null)
             .neq('telegram_chat_id', '');
 
         const message = `
-🚨 <b>Требует модерации: Новое объявление</b>
+👤 <b>Новая регистрация!</b>
 
-<b>Заголовок:</b> ${ad.title}
-<b>Цена:</b> ${ad.price ? ad.price + ' ₽' : 'Договорная'}
-<b>Город:</b> ${ad.city}
-<b>Разместил:</b> ${author} ${authorEmail ? `(${authorEmail})` : ''}
+<b>Имя:</b> ${fullName || 'Не указано'}
+<b>Email:</b> ${email}
+<b>ID:</b> <code>${uid || 'Неизвестен'}</code>
 
-<a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://avoska.353290.ru'}/ad/?id=${ad.id}">👀 Посмотреть и проверить</a>
+Новый пользователь зарегистрировался на сайте.
         `;
 
-        // Send to all admins who want this notification
         if (adminSettings && adminSettings.length > 0) {
             await Promise.all(
                 adminSettings.map(s => sendTelegramMessage(s.telegram_chat_id, message))
             );
         } else {
-            // Fallback to env variable or hardcoded ID if no settings found
             const fallbackId = process.env.TELEGRAM_GROUP_ID || '977966870';
             await sendTelegramMessage(fallbackId, message);
         }

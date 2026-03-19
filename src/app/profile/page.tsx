@@ -12,6 +12,7 @@ import { compressImage } from '@/lib/image-utils';
 import { APP_VERSION, APP_BUILD, GITHUB_REPO, APK_DOWNLOAD_URL } from '@/lib/constants';
 import { AdCard } from '@/components/ui/AdCard';
 import { Ad, Profile } from '@/lib/types';
+import PushSubscriptionManager from '@/components/notifications/PushSubscriptionManager';
 
 export default function ProfilePage() {
     return (
@@ -424,6 +425,8 @@ function ProfilePageContent() {
                     )}
                 </div>
             </div>
+
+            {isOwnProfile && <PushSubscriptionManager />}
 
             {/* Tabs Navigation - Wrap for mobile/APK */}
             <div className="flex flex-wrap border-b border-border mb-8">

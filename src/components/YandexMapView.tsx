@@ -33,17 +33,31 @@ export default function YandexMapView({ pos }: YandexMapViewProps) {
     useEffect(() => {
         if (!ymapsLoaded || !mapRef.current || mapInstance.current) return;
 
-        mapInstance.current = new window.ymaps.Map(mapRef.current, {
-            center: pos,
-            zoom: 15,
-            controls: []
-        });
+        try {
+            const map = new window.ymaps.Map(mapRef.current, {
+                center: pos,
+                zoom: 15,
+                controls: []
+            }, {
+                autoFitToViewport: 'always'
+            });
 
-        const placemark = new window.ymaps.Placemark(pos, {}, {
-            preset: 'islands#redDotIcon'
-        });
+            mapInstance.current = map;
 
-        mapInstance.current.geoObjects.add(placemark);
+            const placemark = new window.ymaps.Placemark(pos, {}, {
+                preset: 'islands#redDotIcon'
+            });
+
+            map.geoObjects.add(placemark);
+
+            // Force size update
+            setTimeout(() => {
+                map.container.fitToViewport();
+            }, 500);
+
+        } catch (err) {
+            console.error('Map view init error:', err);
+        }
 
     }, [ymapsLoaded, pos]);
 

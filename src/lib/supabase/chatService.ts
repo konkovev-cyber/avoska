@@ -73,6 +73,22 @@ export const chatService = {
             .single();
 
         if (error) throw error;
+
+        // Trigger push notification (don't wait for it)
+        const { data: senderData } = await supabase.from('profiles').select('full_name').eq('id', session.user.id).single();
+        const senderName = senderData?.full_name || 'Пользователь';
+
+        fetch('/api/push/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: receiverId,
+                title: senderName,
+                body: type === 'text' ? content : '📷 Фотография',
+                url: `/chat?userId=${session.user.id}`
+            })
+        }).catch(err => console.error('Push trigger error:', err));
+
         return data;
     },
 
@@ -95,5 +111,36 @@ export const chatService = {
             .channel('messages')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, callback)
             .subscribe();
+    },
+
+    // Presence subscription
+    subscribeToPresence(channelName: string, userId: string, onSync: (state: any) => void) {
+        const channel = supabase.channel(channelName);
+
+        channel
+            .on('presence', { event: 'sync' }, () => {
+                onSync(channel.presenceState());
+            })
+            .subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') {
+                    await channel.track({
+                        user_id: userId,
+                        is_typing: false,
+                        online_at: new Date().toISOString(),
+                    });
+                }
+            });
+
+        return channel;
+    },
+
+    // Set typing status
+    async setTypingStatus(channel: any, userId: string, isTyping: boolean) {
+        if (!channel) return;
+        return channel.track({
+            user_id: userId,
+            is_typing: isTyping,
+            online_at: new Date().toISOString(),
+        });
     }
 };

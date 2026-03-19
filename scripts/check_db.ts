@@ -1,4 +1,4 @@
-import { supabase } from './src/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 
 async function checkTable() {
     const { data, error } = await supabase.from('reviews').select('*').limit(1);

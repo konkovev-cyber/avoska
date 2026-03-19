@@ -1,27 +1,27 @@
 import type { Metadata } from "next";
-// import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { Toaster } from "sonner";
 import Header from "@/components/layout/Header";
 import ConditionalFooter from "@/components/layout/ConditionalFooter";
 import BottomNav from "@/components/layout/BottomNav";
 import PageAnimatePresence from "@/components/layout/PageAnimatePresence";
 import AppUpdateCheck from "@/components/ui/AppUpdateCheck";
+import ServiceWorkerRegistration from "@/components/notifications/ServiceWorkerRegistration";
 import "./globals.css";
-
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
 
 export const metadata: Metadata = {
   title: "Авоська+ | Доска объявлений",
   description: "Покупай и продавай легко с Авоська+",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '48x48' },
+    ],
+    apple: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -44,8 +44,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" suppressHydrationWarning>
+      <head />
       <body
         className="antialiased flex flex-col min-h-screen"
+        suppressHydrationWarning
       >
         <Header />
 
@@ -61,14 +63,15 @@ export default function RootLayout({
         <ConditionalFooter />
         <BottomNav />
         <AppUpdateCheck />
+        <ServiceWorkerRegistration />
         <Toaster />
-        {/* Yandex Maps API - ключ загружается из переменной окружения */}
-        <script 
-          src={`https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY || ''}`} 
-          type="text/javascript"
+
+        {/* Yandex Maps API */}
+        <Script
+          src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=d446ac2a-b5c1-4b45-86de-d25432622c8a"
+          strategy="afterInteractive"
         />
       </body>
     </html>
   );
 }
-

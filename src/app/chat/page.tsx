@@ -23,6 +23,9 @@ function ChatContent() {
     const [newMessage, setNewMessage] = useState('');
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+    const [presenceChannel, setPresenceChannel] = useState<any>(null);
+    const typingTimeoutRef = useRef<any>(null);
 
     // Refs for state accessible inside subscription callback without re-running effect
     const activeChatRef = useRef<any>(null);
@@ -48,25 +51,54 @@ function ChatContent() {
     useEffect(() => {
         if (!currentUser) return;
 
-        const channel = chatService.subscribe((payload) => {
+        const msgChannel = chatService.subscribe((payload) => {
             const msg = payload.new;
             const currentActive = activeChatRef.current;
             const user = currentUserRef.current;
 
-            // Only add message if it belongs to the active chat
-            if (currentActive && user && (
-                (msg.sender_id === user.id && msg.receiver_id === currentActive.userId) ||
-                (msg.sender_id === currentActive.userId && msg.receiver_id === user.id)
-            )) {
-                setMessages(prev => [...prev, msg]);
+            if (payload.eventType === 'INSERT') {
+                if (currentActive && user && (
+                    (msg.sender_id === user.id && msg.receiver_id === currentActive.userId) ||
+                    (msg.sender_id === currentActive.userId && msg.receiver_id === user.id)
+                )) {
+                    setMessages(prev => [...prev, msg]);
+                }
+            } else if (payload.eventType === 'UPDATE') {
+                setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, ...msg } : m));
             }
             refreshConversations();
         });
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(msgChannel);
         };
     }, [currentUser]);
+
+    // Presence subscription
+    useEffect(() => {
+        if (!currentUser || !activeChat) {
+            if (presenceChannel) {
+                supabase.removeChannel(presenceChannel);
+                setPresenceChannel(null);
+            }
+            setIsOtherUserTyping(false);
+            return;
+        }
+
+        const channelName = `presence_${[currentUser.id, activeChat.userId].sort().join('_')}`;
+        const channel = chatService.subscribeToPresence(channelName, currentUser.id, (state) => {
+            const isTyping = Object.values(state).some((presences: any) =>
+                presences.some((p: any) => p.user_id === activeChat.userId && p.is_typing)
+            );
+            setIsOtherUserTyping(isTyping);
+        });
+
+        setPresenceChannel(channel);
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [currentUser, activeChat?.userId]);
 
     useEffect(() => {
         if (messages.length > 0) {
@@ -191,10 +223,12 @@ function ChatContent() {
         setNewMessage('');
         setIsSending(true);
 
+        // Stop typing indicator
+        chatService.setTypingStatus(presenceChannel, currentUser.id, false);
+
         try {
             const currentAdId = (adId && adId !== 'null' ? adId : null) || activeChat.lastMessage?.ad_id || activeChat.ad?.id || null;
             await chatService.sendMessage(activeChat.userId, msg, currentAdId || undefined);
-            // Message update handled by subscription
         } catch (error) {
             console.error('Send message error:', error);
             setNewMessage(msg);
@@ -202,6 +236,18 @@ function ChatContent() {
         } finally {
             setIsSending(false);
         }
+    };
+
+    const handleTyping = (text: string) => {
+        setNewMessage(text);
+        if (!presenceChannel || !currentUser) return;
+
+        chatService.setTypingStatus(presenceChannel, currentUser.id, true);
+
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => {
+            chatService.setTypingStatus(presenceChannel, currentUser.id, false);
+        }, 2000);
     };
 
     const groupedMessages = messages.reduce((acc: any, msg: any) => {
@@ -326,21 +372,32 @@ function ChatContent() {
                                     <div className="font-black text-lg text-foreground truncate leading-none mb-1">
                                         {activeChat.user.full_name}
                                     </div>
-                                    {activeAd ? (
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs font-bold text-foreground/80 uppercase tracking-wide truncate max-w-[200px] bg-muted/10 px-2 py-0.5 rounded">
-                                                {activeAd.title}
-                                            </span>
-                                            <span className="text-xs font-black text-primary whitespace-nowrap">
-                                                {activeAd.price ? `${activeAd.price.toLocaleString()} ₽` : 'Цена договорная'}
-                                            </span>
-                                        </div>
-                                    ) : (
-                                        <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                                            Онлайн
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-2 h-4">
+                                        {isOtherUserTyping ? (
+                                            <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1.5 animate-in fade-in slide-in-from-left-1 duration-300">
+                                                <span className="flex gap-0.5">
+                                                    <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                                                    <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                                                    <span className="w-1 h-1 rounded-full bg-primary animate-bounce" />
+                                                </span>
+                                                печатает...
+                                            </div>
+                                        ) : activeAd ? (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs font-bold text-foreground/80 uppercase tracking-wide truncate max-w-[200px] bg-muted/10 px-2 py-0.5 rounded">
+                                                    {activeAd.title}
+                                                </span>
+                                                <span className="text-xs font-black text-primary whitespace-nowrap">
+                                                    {activeAd.price ? `${activeAd.price.toLocaleString()} ₽` : 'Цена договорная'}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                                                Онлайн
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center gap-1">
@@ -428,7 +485,7 @@ function ChatContent() {
                                 <form onSubmit={handleSendMessage} className="flex-1 flex items-end gap-2 bg-background border border-border/50 rounded-[1.2rem] px-4 py-2 focus-within:bg-background focus-within:border-primary/40 focus-within:shadow-md focus-within:shadow-primary/5 transition-all">
                                     <textarea
                                         value={newMessage}
-                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onChange={(e) => handleTyping(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
                                                 e.preventDefault();

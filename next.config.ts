@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+  // Exclude Supabase Edge Functions (Deno) from Next.js TypeScript build
+  typescript: {
+    ignoreBuildErrors: false,
+  },
 };
 
 export default nextConfig;

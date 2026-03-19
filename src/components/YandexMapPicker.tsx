@@ -37,29 +37,45 @@ export default function YandexMapPicker({ initialPos, onChange }: YandexMapPicke
 
         const defaultPos = initialPos || [44.5938, 39.1296]; // Goryachy Klyuch
 
-        mapInstance.current = new window.ymaps.Map(mapRef.current, {
-            center: defaultPos,
-            zoom: 14,
-            controls: ['zoomControl', 'fullscreenControl']
-        });
+        try {
+            const map = new window.ymaps.Map(mapRef.current, {
+                center: defaultPos,
+                zoom: 14,
+                controls: ['zoomControl', 'fullscreenControl']
+            }, {
+                suppressMapOpenBlock: true,
+                autoFitToViewport: 'always'
+            });
 
-        placemarkInstance.current = new window.ymaps.Placemark(defaultPos, {}, {
-            preset: 'islands#redDotIconWithCaption',
-            draggable: true
-        });
+            mapInstance.current = map;
 
-        mapInstance.current.geoObjects.add(placemarkInstance.current);
+            const placemark = new window.ymaps.Placemark(defaultPos, {}, {
+                preset: 'islands#redDotIconWithCaption',
+                draggable: true
+            });
 
-        placemarkInstance.current.events.add('dragend', () => {
-            const coords = placemarkInstance.current.geometry.getCoordinates();
-            onChange(coords);
-        });
+            placemarkInstance.current = placemark;
+            map.geoObjects.add(placemark);
 
-        mapInstance.current.events.add('click', (e: any) => {
-            const coords = e.get('coords');
-            placemarkInstance.current.geometry.setCoordinates(coords);
-            onChange(coords);
-        });
+            placemark.events.add('dragend', () => {
+                const coords = placemark.geometry.getCoordinates();
+                onChange(coords);
+            });
+
+            map.events.add('click', (e: any) => {
+                const coords = e.get('coords');
+                placemark.geometry.setCoordinates(coords);
+                onChange(coords);
+            });
+
+            // Force size update after initialization to fix "grey box" issue
+            setTimeout(() => {
+                map.container.fitToViewport();
+            }, 500);
+
+        } catch (err) {
+            console.error('Yandex Map init error:', err);
+        }
 
     }, [ymapsLoaded, initialPos, onChange]);
 

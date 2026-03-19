@@ -22,7 +22,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
         try {
             // Безопасное получение origin только на клиенте
             const origin = typeof window !== 'undefined' ? window.location.origin : '';
-            
+
             if (mode === 'register') {
                 const { data, error } = await supabase.auth.signUp({
                     email,
@@ -36,11 +36,21 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 });
                 if (error) throw error;
 
+                const notifyData = {
+                    email,
+                    fullName,
+                    uid: data?.user?.id
+                };
+
                 if (data.user && !data.session) {
+                    fetch('/api/notify-user', { method: 'POST', body: JSON.stringify(notifyData) }).catch(console.error);
+
                     toast.success('Почти готово! Проверьте почту для подтверждения.');
                     router.push(`/verify-email?email=${encodeURIComponent(email)}`);
                     return;
                 }
+
+                fetch('/api/notify-user', { method: 'POST', body: JSON.stringify(notifyData) }).catch(console.error);
 
                 toast.success('Регистрация успешна!');
                 router.push('/login');

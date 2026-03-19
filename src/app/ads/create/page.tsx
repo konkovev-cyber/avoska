@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { X, PlusSquare, Rocket, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, PlusSquare, Rocket, CheckCircle2, AlertCircle, Camera, MapPin, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
 import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
 import { CATEGORIES } from '@/lib/constants';
+import Link from 'next/link';
+import YandexMapPicker from '@/components/YandexMapPicker';
 
 
 export default function CreateAdPage() {
@@ -28,6 +30,7 @@ export default function CreateAdPage() {
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [limitReached, setLimitReached] = useState(false);
+    const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
 
     const router = useRouter();
 
@@ -113,7 +116,7 @@ export default function CreateAdPage() {
             const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).single();
             if (!catData) throw new Error('Категория не найдена');
 
-            const { error: insertError } = await supabase.from('ads').insert({
+            const { data: insertedAd, error: insertError } = await supabase.from('ads').insert({
                 user_id: session.user.id,
                 category_id: catData.id,
                 title,
@@ -128,9 +131,9 @@ export default function CreateAdPage() {
                 status: 'pending',
                 condition: (category === 'jobs' || category === 'services') ? 'new' : condition,
                 specifications,
-                latitude: null,
-                longitude: null
-            });
+                latitude: coordinates ? coordinates[0] : null,
+                longitude: coordinates ? coordinates[1] : null
+            }).select().single();
 
             if (insertError) throw insertError;
 
@@ -452,6 +455,16 @@ export default function CreateAdPage() {
                                     placeholder="Улица, дом"
                                 />
                             </div>
+                        </div>
+
+                        {/* Map Picker Selection */}
+                        <div className="mt-4">
+                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1 mb-2 block">
+                                Укажите точное местоположение на карте
+                            </label>
+                            <YandexMapPicker
+                                onChange={(pos) => setCoordinates(pos)}
+                            />
                         </div>
                     </div>
                 </div>
