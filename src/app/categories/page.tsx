@@ -32,11 +32,11 @@ export default function CategoriesPage() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-7xl">
             <div className="flex flex-col gap-2 mb-12">
-                <Link href="/" className="inline-flex items-center gap-2 text-primary font-black mb-4 hover:translate-x-[-4px] transition-transform">
+                <Link href="/" className="inline-flex items-center gap-2 text-primary font-semibold mb-4 hover:translate-x-[-4px] transition-transform">
                     <ChevronLeft className="h-5 w-5" /> На главную
                 </Link>
-                <h1 className="text-5xl font-black tracking-tighter">Все категории</h1>
-                <p className="text-muted font-bold">Найдите то, что нужно именно вам</p>
+                <h1 className="text-5xl font-semibold tracking-tighter">Все категории</h1>
+                <p className="text-muted font-semibold">Найдите то, что нужно именно вам</p>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
@@ -72,7 +72,7 @@ export default function CategoriesPage() {
 
                         {/* Text Content */}
                         <div className="absolute bottom-0 left-0 right-0 p-5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                            <h3 className="text-white text-base font-black leading-tight drop-shadow-lg break-words">
+                            <h3 className="text-white text-base font-semibold leading-tight drop-shadow-lg break-words">
                                 {cat.name}
                             </h3>
                             <div className="w-8 h-1 bg-primary mt-2 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />

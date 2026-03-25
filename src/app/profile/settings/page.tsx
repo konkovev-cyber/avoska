@@ -71,12 +71,12 @@ export default function ProfileSettingsPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-2xl">
-            <Link href="/profile" className="inline-flex items-center gap-2 text-primary font-black mb-8 hover:translate-x-[-4px] transition-transform">
+            <Link href="/profile" className="inline-flex items-center gap-2 text-primary font-semibold mb-8 hover:translate-x-[-4px] transition-transform">
                 <ChevronLeft className="h-5 w-5" /> Назад в профиль
             </Link>
 
             <div className="bg-surface border border-border rounded-3xl p-8 shadow-sm">
-                <h1 className="text-3xl font-black mb-8">Настройки профиля</h1>
+                <h1 className="text-3xl font-semibold mb-8">Настройки профиля</h1>
 
                 <form onSubmit={handleSave} className="space-y-6">
                     <div className="flex justify-center mb-8">
@@ -84,7 +84,7 @@ export default function ProfileSettingsPage() {
                             {avatarUrl ? (
                                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl font-black text-accent uppercase">
+                                <div className="w-full h-full flex items-center justify-center text-4xl font-semibold text-accent uppercase">
                                     {fullName?.charAt(0) || '?'}
                                 </div>
                             )}
@@ -95,19 +95,19 @@ export default function ProfileSettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-muted uppercase tracking-wider ml-1">Имя пользователя</label>
+                        <label className="text-sm font-semibold text-muted uppercase tracking-wider ml-1">Имя пользователя</label>
                         <input
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full p-4 rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors font-bold"
+                            className="w-full p-4 rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors font-semibold"
                             placeholder="Ваше имя"
                             required
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-muted uppercase tracking-wider ml-1">Ссылка на аватар</label>
+                        <label className="text-sm font-semibold text-muted uppercase tracking-wider ml-1">Ссылка на аватар</label>
                         <input
                             type="url"
                             value={avatarUrl}
@@ -122,7 +122,7 @@ export default function ProfileSettingsPage() {
                         <button
                             type="submit"
                             disabled={saving}
-                            className="w-full bg-primary text-white py-4 rounded-xl font-black text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg"
+                            className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-lg"
                         >
                             {saving ? <Loader2 className="h-6 w-6 animate-spin" /> : <Save className="h-6 w-6" />}
                             Сохранить изменения

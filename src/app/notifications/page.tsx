@@ -53,7 +53,7 @@ export default function NotificationsPage() {
                     <button onClick={() => router.back()} className="p-2 hover:bg-surface rounded-full">
                         <ChevronLeft className="h-6 w-6" />
                     </button>
-                    <h1 className="text-2xl font-black">Уведомления</h1>
+                    <h1 className="text-2xl font-bold">Уведомления</h1>
                 </div>
             </div>
 
@@ -75,8 +75,8 @@ export default function NotificationsPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start">
-                                        <div className="font-bold truncate pr-4 text-sm">{n.title}</div>
-                                        <div className="text-[10px] text-muted font-bold uppercase shrink-0">{new Date(n.date).toLocaleDateString()}</div>
+                                        <div className="font-semibold truncate pr-4 text-sm">{n.title}</div>
+                                        <div className="text-[10px] text-muted font-semibold uppercase shrink-0">{new Date(n.date).toLocaleDateString()}</div>
                                     </div>
                                     <p className="text-xs text-muted-foreground line-clamp-1">{n.body}</p>
                                 </div>

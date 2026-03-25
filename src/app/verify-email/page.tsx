@@ -16,25 +16,25 @@ function VerifyEmailContent() {
                 <Mail className="h-10 w-10 text-primary" />
             </div>
 
-            <h1 className="text-3xl font-black mb-4 tracking-tighter">Подтвердите почту</h1>
+            <h1 className="text-3xl font-semibold mb-4 tracking-tighter">Подтвердите почту</h1>
 
             <p className="text-muted-foreground font-medium mb-8 leading-relaxed">
                 Мы отправили письмо с подтверждением на адрес <br />
-                <span className="text-foreground font-bold">{email || 'вашу почту'}</span>. <br />
+                <span className="text-foreground font-semibold">{email || 'вашу почту'}</span>. <br />
                 Пожалуйста, перейдите по ссылке в письме, чтобы активировать аккаунт.
             </p>
 
             <div className="space-y-4">
                 <button
                     onClick={() => router.push('/login')}
-                    className="w-full h-14 bg-primary text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/30 hover:opacity-90 active:scale-95 transition-all"
+                    className="w-full h-14 bg-primary text-white font-bold uppercase tracking-widest rounded-2xl shadow-xl shadow-primary/30 hover:opacity-90 active:scale-95 transition-all"
                 >
                     Перейти к логину
                 </button>
 
                 <Link
                     href="/"
-                    className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
+                    className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     На главную

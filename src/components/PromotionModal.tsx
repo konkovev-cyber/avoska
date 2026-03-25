@@ -81,8 +81,8 @@ export default function PromotionModal({ adId, adTitle, onClose, onUpdate }: Pro
             <div className="bg-background w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 border border-border">
                 <div className="p-6 border-b border-border flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-black">Продвижение</h2>
-                        <p className="text-xs text-muted-foreground font-bold mt-1 line-clamp-1">{adTitle}</p>
+                        <h2 className="text-xl font-semibold">Продвижение</h2>
+                        <p className="text-xs text-muted-foreground font-semibold mt-1 line-clamp-1">{adTitle}</p>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-surface rounded-full transition-colors">
                         <X className="h-6 w-6" />
@@ -104,19 +104,19 @@ export default function PromotionModal({ adId, adTitle, onClose, onUpdate }: Pro
                                 <service.icon className="h-5 w-5" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="font-black text-[11px] uppercase tracking-wider">{service.name}</div>
-                                <div className="text-[10px] text-muted-foreground font-bold truncate">{service.description}</div>
+                                <div className="font-semibold text-[11px] uppercase tracking-wider">{service.name}</div>
+                                <div className="text-[10px] text-muted-foreground font-semibold truncate">{service.description}</div>
                             </div>
                             <div className="text-right shrink-0">
-                                <div className="text-[11px] font-black text-primary">{service.price} ₽</div>
-                                <div className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Выбрать</div>
+                                <div className="text-[11px] font-semibold text-primary">{service.price} ₽</div>
+                                <div className="text-[8px] font-semibold uppercase tracking-widest text-muted-foreground">Выбрать</div>
                             </div>
                         </button>
                     ))}
                 </div>
 
                 <div className="p-6 bg-muted/30 border-t border-border mt-2">
-                    <p className="text-[10px] text-muted-foreground text-center font-bold uppercase tracking-widest leading-relaxed">
+                    <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest leading-relaxed">
                         При активации услуги она вступит в силу мгновенно.<br />
                         Это демонстрационный режим. Оплата не требуется.
                     </p>

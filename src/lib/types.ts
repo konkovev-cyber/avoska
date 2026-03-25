@@ -31,7 +31,7 @@ export interface Ad {
     longitude: number | null;
     images: string[];
     condition: 'new' | 'used' | 'secondary' | 'new_building' | string;
-    status: 'active' | 'archived' | 'rejected' | string;
+    status: 'active' | 'pending' | 'archived' | 'rejected' | string;
     delivery_possible: boolean;
     specifications: Record<string, string>;
     created_at: string;
@@ -53,4 +53,42 @@ export interface Banner {
     link_url: string | null;
     is_active: boolean;
     sort_order: number;
+    impressions_count?: number;
+    clicks_count?: number;
+    content?: string;
+}
+export interface City {
+    id: string;
+    name: string;
+}
+
+export interface Report {
+    id: string;
+    reporter_id: string;
+    ad_id: string;
+    reason: string;
+    content: string | null;
+    status: 'pending' | 'resolved' | 'dismissed';
+    created_at: string;
+    ad?: { title: string };
+    reporter?: { full_name: string };
+}
+
+export interface Review {
+    id: string;
+    reviewer_id: string;
+    user_id: string;
+    ad_id: string | null;
+    rating: number;
+    content: string;
+    created_at: string;
+    reviewer?: { full_name: string };
+}
+
+export interface AdminSettings {
+    user_id: string;
+    telegram_chat_id: string | null;
+    notify_new_ads: boolean;
+    notify_new_users: boolean;
+    updated_at: string;
 }

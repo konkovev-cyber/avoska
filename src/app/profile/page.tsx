@@ -295,7 +295,7 @@ function ProfilePageContent() {
             <div className="bg-surface border border-border rounded-3xl p-6 md:p-8 mb-8 shadow-sm">
                 <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
                     <div className="relative group/avatar">
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-accent/10 border-2 border-accent/20 flex items-center justify-center text-4xl font-black text-accent overflow-hidden shrink-0">
+                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-accent/10 border-2 border-accent/20 flex items-center justify-center text-4xl font-semibold text-accent overflow-hidden shrink-0">
                             {uploadingAvatar ? (
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                             ) : profile?.avatar_url ? (
@@ -314,35 +314,35 @@ function ProfilePageContent() {
                     {isEditing && isOwnProfile ? (
                         <div className="flex-1 w-full space-y-4 animate-in slide-in-from-top-2 duration-300">
                             <div>
-                                <label className="block text-[10px] font-black uppercase text-muted-foreground mb-1 tracking-widest ml-1">Как вас зовут?</label>
+                                <label className="block text-[10px] font-semibold uppercase text-muted-foreground mb-1 tracking-widest ml-1">Как вас зовут?</label>
                                 <input
                                     type="text"
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
-                                    className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                                    className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:border-primary outline-none transition-all font-semibold"
                                     placeholder="Ваше имя"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black uppercase text-muted-foreground mb-1 tracking-widest ml-1">Телефон для связи</label>
+                                <label className="block text-[10px] font-semibold uppercase text-muted-foreground mb-1 tracking-widest ml-1">Телефон для связи</label>
                                 <input
                                     type="tel"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
-                                    className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:border-primary outline-none transition-all font-bold"
+                                    className="w-full h-12 px-4 rounded-xl border border-border bg-background focus:border-primary outline-none transition-all font-semibold"
                                     placeholder="+7 (___) ___-__-__"
                                 />
                             </div>
                             <div className="flex gap-2 pt-2">
                                 <button
                                     onClick={handleSaveProfile}
-                                    className="flex-1 h-12 bg-primary text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all"
+                                    className="flex-1 h-12 bg-primary text-white font-bold uppercase text-[10px] tracking-widest rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all"
                                 >
                                     Сохранить
                                 </button>
                                 <button
                                     onClick={() => setIsEditing(false)}
-                                    className="px-6 h-12 bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted font-black uppercase text-[10px] tracking-widest rounded-xl active:scale-95 transition-all"
+                                    className="px-6 h-12 bg-background border border-border text-muted-foreground hover:text-foreground hover:bg-muted font-semibold uppercase text-[10px] tracking-widest rounded-xl active:scale-95 transition-all"
                                 >
                                     Отмена
                                 </button>
@@ -351,20 +351,20 @@ function ProfilePageContent() {
                     ) : (
                         <div className="flex-1 min-w-0 w-full">
                             <div className="flex items-center gap-2 mb-1">
-                                <h1 className="text-2xl md:text-3xl font-black truncate">{profile?.full_name || 'Пользователь'}</h1>
+                                <h1 className="text-2xl md:text-3xl font-semibold truncate">{profile?.full_name || 'Пользователь'}</h1>
                                 {profile?.is_verified && (
                                     <div title="Верифицирован">
                                         <ShieldCheck className="h-6 w-6 text-blue-500" />
                                     </div>
                                 )}
                                 {!isOwnProfile && isAdmin && (
-                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">Просмотр админа</span>
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">Просмотр админа</span>
                                 )}
                             </div>
                             {profile?.phone && (
-                                <div className="text-sm font-bold text-foreground/60 mb-3">{profile.phone}</div>
+                                <div className="text-sm font-semibold text-foreground/60 mb-3">{profile.phone}</div>
                             )}
-                            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-[10px] md:text-xs text-muted font-bold uppercase tracking-wider">
+                            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-[10px] md:text-xs text-muted font-semibold uppercase tracking-wider">
                                 <a
                                     href={`https://yandex.ru/maps/?text=${encodeURIComponent(profile?.city || 'Горячий Ключ')}`}
                                     target="_blank"
@@ -386,7 +386,7 @@ function ProfilePageContent() {
 
                             {/* Version & Build Info Badge - NEW */}
                             <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-lg text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-lg text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
                                     <Smartphone className="h-3 w-3" />
                                     v{APP_VERSION}
                                     {hasUpdate && (
@@ -396,7 +396,7 @@ function ProfilePageContent() {
                                         </span>
                                     )}
                                 </div>
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-lg text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface border border-border rounded-lg text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-widest">
                                     Build {APP_BUILD}
                                 </div>
                             </div>
@@ -410,7 +410,7 @@ function ProfilePageContent() {
                                     className="p-4 bg-primary/10 border border-primary/20 text-primary rounded-2xl hover:bg-primary/20 transition-all shrink-0 active:scale-90 flex items-center gap-2"
                                 >
                                     <ShieldCheck className="h-6 w-6" />
-                                    <span className="hidden md:inline font-black uppercase text-[10px] tracking-widest">Админка</span>
+                                    <span className="hidden md:inline font-semibold uppercase text-[10px] tracking-widest">Админка</span>
                                 </Link>
                             )}
                             {isOwnProfile && (
@@ -433,7 +433,7 @@ function ProfilePageContent() {
                 <button
                     onClick={() => setActiveTab('my-ads')}
                     className={cn(
-                        "px-6 py-4 font-black flex items-center gap-2 border-b-4 transition-all whitespace-nowrap",
+                        "px-6 py-4 font-semibold flex items-center gap-2 border-b-4 transition-all whitespace-nowrap",
                         activeTab === 'my-ads' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground"
                     )}
                 >
@@ -443,7 +443,7 @@ function ProfilePageContent() {
                 <button
                     onClick={() => setActiveTab('favorites')}
                     className={cn(
-                        "px-6 py-4 font-black flex items-center gap-2 border-b-4 transition-all whitespace-nowrap",
+                        "px-6 py-4 font-semibold flex items-center gap-2 border-b-4 transition-all whitespace-nowrap",
                         activeTab === 'favorites' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground"
                     )}
                 >
@@ -453,7 +453,7 @@ function ProfilePageContent() {
                 <button
                     onClick={() => setActiveTab('reviews')}
                     className={cn(
-                        "px-6 py-4 font-black flex items-center gap-2 border-b-4 transition-all whitespace-nowrap",
+                        "px-6 py-4 font-semibold flex items-center gap-2 border-b-4 transition-all whitespace-nowrap",
                         activeTab === 'reviews' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground"
                     )}
                 >
@@ -478,20 +478,20 @@ function ProfilePageContent() {
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-0.5">
                                         <span className={cn(
-                                            "text-[8px] font-black uppercase px-1.5 py-0.5 rounded",
+                                            "text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded",
                                             ad.status === 'active' ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"
                                         )}>
                                             {ad.status === 'active' ? 'Активно' : 'Снято'}
                                         </span>
-                                        <span className="text-[8px] text-muted font-bold uppercase truncate">{ad.categories?.name}</span>
+                                        <span className="text-[8px] text-muted font-semibold uppercase truncate">{ad.categories?.name}</span>
                                     </div>
-                                    <Link href={`/ad/?id=${ad.id}`} className="block text-sm md:text-lg font-bold truncate hover:text-primary transition-colors">
+                                    <Link href={`/ad/?id=${ad.id}`} className="block text-sm md:text-lg font-semibold truncate hover:text-primary transition-colors">
                                         {ad.title}
                                     </Link>
-                                    <div className="text-base md:text-xl font-black mt-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
+                                    <div className="text-base md:text-xl font-semibold mt-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
                                     <div className="flex gap-1 mt-1 flex-wrap">
-                                        {ad.is_vip && <span className="bg-purple-100 text-purple-600 text-[7px] font-black uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Crown className="h-2 w-2" /> VIP</span>}
-                                        {ad.is_turbo && <span className="bg-orange-100 text-orange-600 text-[7px] font-black uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2 w-2" /> Turbo</span>}
+                                        {ad.is_vip && <span className="bg-purple-100 text-purple-600 text-[7px] font-semibold uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Crown className="h-2 w-2" /> VIP</span>}
+                                        {ad.is_turbo && <span className="bg-orange-100 text-orange-600 text-[7px] font-semibold uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2 w-2" /> Turbo</span>}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1.5 md:flex-row md:gap-2 shrink-0">
@@ -539,7 +539,7 @@ function ProfilePageContent() {
                         <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-border">
                             <Package className="h-12 w-12 text-muted mx-auto mb-4" />
                             <div className="font-bold text-lg">У вас пока нет объявлений</div>
-                            <Link href="/ads/create" className="text-primary font-bold hover:underline mt-2 inline-block">Опубликовать первое</Link>
+                            <Link href="/ads/create" className="text-primary font-semibold hover:underline mt-2 inline-block">Опубликовать первое</Link>
                         </div>
                     )
                 )}
@@ -555,7 +555,7 @@ function ProfilePageContent() {
                         <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-border col-span-full">
                             <Heart className="h-12 w-12 text-muted mx-auto mb-4" />
                             <div className="font-bold text-lg">Вы пока ничего не добавили в избранное</div>
-                            <Link href="/" className="text-primary font-bold hover:underline mt-2 inline-block">Перейти к покупкам</Link>
+                            <Link href="/" className="text-primary font-semibold hover:underline mt-2 inline-block">Перейти к покупкам</Link>
                         </div>
                     )
                 )}
@@ -565,7 +565,7 @@ function ProfilePageContent() {
                             reviews.map(rev => (
                                 <div key={rev.id} className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
                                     <div className="flex items-center gap-4 mb-4">
-                                        <Link href={`/user?id=${rev.reviewer_id}`} className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-black text-accent overflow-hidden shrink-0 hover:opacity-80 transition-opacity">
+                                        <Link href={`/user?id=${rev.reviewer_id}`} className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-semibold text-accent overflow-hidden shrink-0 hover:opacity-80 transition-opacity">
                                             {rev.reviewer?.avatar_url ? (
                                                 <img src={rev.reviewer.avatar_url} alt={rev.reviewer.full_name} className="w-full h-full object-cover" />
                                             ) : (
@@ -573,14 +573,14 @@ function ProfilePageContent() {
                                             )}
                                         </Link>
                                         <div className="flex-1">
-                                            <Link href={`/user?id=${rev.reviewer_id}`} className="font-bold hover:underline">{rev.reviewer?.full_name}</Link>
+                                            <Link href={`/user?id=${rev.reviewer_id}`} className="font-semibold hover:underline">{rev.reviewer?.full_name}</Link>
                                             <div className="flex gap-0.5">
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star key={i} className={cn("h-3 w-3", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted opacity-30")} />
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="text-[10px] text-muted font-bold uppercase">
+                                        <div className="text-[10px] text-muted font-semibold uppercase">
                                             {new Date(rev.created_at).toLocaleDateString()}
                                         </div>
                                     </div>
@@ -601,8 +601,8 @@ function ProfilePageContent() {
                                     {rev.reply ? (
                                         <div className="bg-muted/50 rounded-xl p-4 mt-2 border border-border/50">
                                             <div className="flex items-center justify-between mb-2">
-                                                <div className="text-[10px] font-black uppercase text-primary">Ваш ответ</div>
-                                                <div className="text-[10px] text-muted font-bold uppercase">
+                                                <div className="text-[10px] font-semibold uppercase text-primary">Ваш ответ</div>
+                                                <div className="text-[10px] text-muted font-semibold uppercase">
                                                     {new Date(rev.reply_date).toLocaleDateString()}
                                                 </div>
                                             </div>
@@ -622,7 +622,7 @@ function ProfilePageContent() {
                                                 <button
                                                     onClick={() => handleSendReply(rev.id)}
                                                     disabled={isSubmittingReply}
-                                                    className="flex-1 py-2 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-wider disabled:opacity-50"
+                                                    className="flex-1 py-2 bg-primary text-white rounded-xl font-bold text-xs uppercase tracking-wider disabled:opacity-50"
                                                 >
                                                     {isSubmittingReply ? 'Отправка...' : 'Отправить ответ'}
                                                 </button>
@@ -631,7 +631,7 @@ function ProfilePageContent() {
                                                         setReplyingTo(null);
                                                         setReplyText('');
                                                     }}
-                                                    className="px-6 py-2 bg-muted rounded-xl font-bold text-xs uppercase tracking-wider"
+                                                    className="px-6 py-2 bg-muted rounded-xl font-semibold text-xs uppercase tracking-wider"
                                                 >
                                                     Отмена
                                                 </button>
@@ -643,7 +643,7 @@ function ProfilePageContent() {
                                                 setReplyingTo(rev.id);
                                                 setReplyText('');
                                             }}
-                                            className="text-primary text-xs font-black uppercase tracking-widest hover:underline"
+                                            className="text-primary text-xs font-semibold uppercase tracking-widest hover:underline"
                                         >
                                             Ответить на отзыв
                                         </button>
@@ -703,7 +703,7 @@ function ProfilePageContent() {
                                 }
                             }}
                             className={cn(
-                                "px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg",
+                                "px-8 py-3 rounded-2xl font-semibold text-xs uppercase tracking-widest transition-all active:scale-95 shadow-lg",
                                 hasUpdate ? "bg-primary text-white shadow-primary/20" : "bg-surface border border-border text-muted-foreground hover:text-foreground"
                             )}
                         >

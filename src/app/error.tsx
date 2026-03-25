@@ -24,7 +24,7 @@ export default function Error({
                 </div>
 
                 <div className="space-y-2">
-                    <h2 className="text-xl font-black tracking-tight text-foreground">Что-то пошло не так!</h2>
+                    <h2 className="text-xl font-semibold tracking-tight text-foreground">Что-то пошло не так!</h2>
                     <p className="text-sm font-medium text-muted-foreground leading-relaxed">
                         Произошла непредвиденная ошибка. Мы уже работаем над её устранением.
                     </p>
@@ -33,7 +33,7 @@ export default function Error({
                 <div className="pt-2 space-y-3">
                     <button
                         onClick={() => reset()}
-                        className="w-full h-12 bg-primary text-white flex items-center justify-center gap-2 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20"
+                        className="w-full h-12 bg-primary text-white flex items-center justify-center gap-2 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20"
                     >
                         <RefreshCw className="h-4 w-4" />
                         <span>Попробовать снова</span>
@@ -41,7 +41,7 @@ export default function Error({
 
                     <Link
                         href="/"
-                        className="w-full h-12 bg-muted/30 text-foreground flex items-center justify-center rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-muted/50 transition-all active:scale-95"
+                        className="w-full h-12 bg-muted/30 text-foreground flex items-center justify-center rounded-xl font-semibold uppercase text-[10px] tracking-widest hover:bg-muted/50 transition-all active:scale-95"
                     >
                         На главную
                     </Link>

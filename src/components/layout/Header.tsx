@@ -119,18 +119,18 @@ export default function Header() {
                     <>
                         <Link href="/" className="hidden lg:flex shrink-0 items-center group gap-2">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
-                                <span className="text-white font-black text-xl tracking-tighter">А+</span>
+                                <span className="text-white font-bold text-xl tracking-tighter">А+</span>
                             </div>
                             <div className="flex flex-col h-10 justify-between py-0.5">
-                                <span className="text-2xl font-black text-foreground tracking-tighter group-hover:text-primary transition-colors leading-none">Авоська+</span>
-                                <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground/60 leading-none">Полезное совсем рядом</span>
+                                <span className="text-2xl font-bold text-foreground tracking-tighter group-hover:text-primary transition-colors leading-none">Авоська+</span>
+                                <span className="text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/60 leading-none">Полезное совсем рядом</span>
                             </div>
                         </Link>
 
                         <Link href="/" className="lg:hidden shrink-0 flex items-center group">
                             <div className="flex items-center gap-1.5 active:scale-95 transition-transform">
                                 <div className="w-9 h-9 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20">
-                                    <span className="text-white font-black text-lg tracking-tighter">А+</span>
+                                    <span className="text-white font-bold text-lg tracking-tighter">А+</span>
                                 </div>
                             </div>
                         </Link>
@@ -145,7 +145,7 @@ export default function Header() {
                         options={cities.map(c => ({ value: c.name, label: c.name }))}
                         placeholder="Город"
                         prefixIcon={<MapPin className="h-3 w-3 text-primary shrink-0" />}
-                        triggerClassName="h-10 !px-2.5 bg-surface rounded-xl border border-border/50 text-foreground !flex items-center gap-1 [&>svg:last-child]:h-3 [&>svg:last-child]:w-3 min-w-[70px] max-w-[110px] text-[10px] font-black uppercase tracking-tight shadow-sm active:scale-95 transition-all"
+                        triggerClassName="h-10 !px-2.5 bg-surface rounded-xl border border-border/50 text-foreground !flex items-center gap-1 [&>svg:last-child]:h-3 [&>svg:last-child]:w-3 min-w-[70px] max-w-[110px] text-[10px] font-semibold uppercase tracking-tight shadow-sm active:scale-95 transition-all"
                     />
                 </div>
 
@@ -157,7 +157,7 @@ export default function Header() {
                         options={cities.map(c => ({ value: c.name, label: c.name }))}
                         placeholder="Город"
                         prefixIcon={<MapPin className="h-4 w-4 text-primary shrink-0" />}
-                        triggerClassName="!h-auto !w-auto bg-transparent border-transparent hover:bg-surface !px-3 !py-2 rounded-xl transition-all active:scale-95 border border-transparent hover:border-border max-w-[180px] text-[11px] font-black uppercase tracking-wider [&>svg:last-child]:h-3 [&>svg:last-child]:w-3"
+                        triggerClassName="!h-auto !w-auto bg-transparent border-transparent hover:bg-surface !px-3 !py-2 rounded-xl transition-all active:scale-95 border border-transparent hover:border-border max-w-[180px] text-[11px] font-semibold uppercase tracking-wider [&>svg:last-child]:h-3 [&>svg:last-child]:w-3"
                     />
                 </div>
 
@@ -169,7 +169,7 @@ export default function Header() {
                             placeholder={city === '...' || city === 'Все города' ? 'Авоська' : 'г. ' + city}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-10 md:h-12 pl-4 md:pl-5 pr-10 md:pr-14 rounded-2xl bg-surface border border-border hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-[13px] md:text-sm font-bold outline-none placeholder:text-muted-foreground/60"
+                            className="w-full h-10 md:h-12 pl-4 md:pl-5 pr-10 md:pr-14 rounded-2xl bg-surface border border-border hover:border-primary/50 focus:border-primary focus:shadow-xl focus:shadow-primary/5 transition-all text-[13px] md:text-sm font-semibold outline-none placeholder:text-muted-foreground/60"
                         />
                         <button
                             type="submit"
@@ -186,7 +186,7 @@ export default function Header() {
                     <Link href="/favorites" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Избранное">
                         <Heart className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
                         {favoritesCount > 0 && (
-                            <span className="absolute top-2.5 right-2.5 w-4 h-4 bg-primary text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-background">
+                            <span className="absolute top-2.5 right-2.5 w-4 h-4 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-background">
                                 {favoritesCount}
                             </span>
                         )}
@@ -225,7 +225,7 @@ export default function Header() {
 
                     <Link
                         href="/ads/create"
-                        className="bg-primary text-white px-6 py-3 rounded-2xl font-black text-sm hover:opacity-90 shadow-xl shadow-primary/20 transition-all hover:-translate-y-0.5"
+                        className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm hover:opacity-90 shadow-xl shadow-primary/20 transition-all hover:-translate-y-0.5"
                     >
                         Разместить
                     </Link>
@@ -247,7 +247,7 @@ export default function Header() {
                                 </button>
                             </div>
                         ) : (
-                            <Link href="/login" className="text-sm font-black uppercase tracking-widest hover:text-primary px-4 py-2 border-2 border-transparent hover:border-primary/20 rounded-2xl transition-all ml-2">Войти</Link>
+                            <Link href="/login" className="text-sm font-semibold uppercase tracking-widest hover:text-primary px-4 py-2 border-2 border-transparent hover:border-primary/20 rounded-2xl transition-all ml-2">Войти</Link>
                         )
                     }
                 </div >

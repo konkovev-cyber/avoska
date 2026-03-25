@@ -115,16 +115,16 @@ function CategoryContent() {
         <div className={cn("space-y-6", isMobile ? "p-8" : "")}>
             {!isMobile && (
                 <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-black">Фильтры</h3>
+                    <h3 className="text-lg font-semibold">Фильтры</h3>
                     {(priceFrom || priceTo || selectedCity || Object.keys(specFilters).length > 0) && (
-                        <button onClick={resetFilters} className="text-[10px] font-black uppercase text-primary hover:underline">Сбросить</button>
+                        <button onClick={resetFilters} className="text-[10px] font-semibold uppercase text-primary hover:underline">Сбросить</button>
                     )}
                 </div>
             )}
 
             {/* Price Filter */}
             <div>
-                <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-3 tracking-widest">Цена, ₽</label>
+                <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-3 tracking-widest">Цена, ₽</label>
                 <div className="flex items-center gap-2">
                     <input
                         type="number"
@@ -132,7 +132,7 @@ function CategoryContent() {
                         placeholder="От"
                         value={priceFrom}
                         onChange={(e) => setPriceFrom(Math.max(0, parseFloat(e.target.value) || 0).toString())}
-                        className="w-full h-11 px-4 text-sm rounded-xl bg-muted/5 border border-border outline-none focus:border-primary transition-all font-bold"
+                        className="w-full h-11 px-4 text-sm rounded-xl bg-muted/5 border border-border outline-none focus:border-primary transition-all font-semibold"
                     />
                     <div className="w-4 h-px bg-border shrink-0"></div>
                     <input
@@ -141,7 +141,7 @@ function CategoryContent() {
                         placeholder="До"
                         value={priceTo}
                         onChange={(e) => setPriceTo(Math.max(0, parseFloat(e.target.value) || 0).toString())}
-                        className="w-full h-11 px-4 text-sm rounded-xl bg-muted/5 border border-border outline-none focus:border-primary transition-all font-bold"
+                        className="w-full h-11 px-4 text-sm rounded-xl bg-muted/5 border border-border outline-none focus:border-primary transition-all font-semibold"
                     />
                 </div>
             </div>
@@ -164,7 +164,7 @@ function CategoryContent() {
                     {(slug === 'transport' || slug === 'rent-cars') && (
                         <>
                             <div>
-                                <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Пробег, км</label>
+                                <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-2 tracking-widest">Пробег, км</label>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="number"
@@ -172,7 +172,7 @@ function CategoryContent() {
                                         placeholder="От"
                                         value={specFilters.mileage_from || ''}
                                         onChange={(e) => setSpecFilters({ ...specFilters, mileage_from: Math.max(0, parseFloat(e.target.value) || 0).toString() })}
-                                        className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
+                                        className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-semibold outline-none"
                                     />
                                     <input
                                         type="number"
@@ -180,19 +180,19 @@ function CategoryContent() {
                                         placeholder="До"
                                         value={specFilters.mileage_to || ''}
                                         onChange={(e) => setSpecFilters({ ...specFilters, mileage_to: Math.max(0, parseFloat(e.target.value) || 0).toString() })}
-                                        className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
+                                        className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-semibold outline-none"
                                     />
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Коробка</label>
+                                <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-2 tracking-widest">Коробка</label>
                                 <div className="grid grid-cols-2 gap-2">
                                     {[{ id: 'auto', label: 'АКПП' }, { id: 'manual', label: 'МКПП' }].map(t => (
                                         <button
                                             key={t.id}
                                             onClick={() => setSpecFilters({ ...specFilters, transmission: specFilters.transmission === t.id ? '' : t.id })}
                                             className={cn(
-                                                "text-center py-2.5 rounded-xl text-[10px] font-black uppercase border transition-all",
+                                                "text-center py-2.5 rounded-xl text-[10px] font-semibold uppercase border transition-all",
                                                 specFilters.transmission === t.id ? "bg-primary text-white border-primary" : "bg-muted/5 border-border hover:border-primary/50"
                                             )}
                                         >
@@ -207,7 +207,7 @@ function CategoryContent() {
                     {(slug === 'real-estate' || slug === 'rent-apartments' || slug === 'rent-commercial') && (
                         <>
                             <div>
-                                <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Объект</label>
+                                <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-2 tracking-widest">Объект</label>
                                 <div className="grid grid-cols-2 gap-1.5">
                                     {[
                                         { id: 'apartment', label: 'Квартира' },
@@ -222,7 +222,7 @@ function CategoryContent() {
                                                 setSpecFilters({ type: newType });
                                             }}
                                             className={cn(
-                                                "py-2 rounded-xl text-[9px] font-black uppercase border transition-all",
+                                                "py-2 rounded-xl text-[9px] font-semibold uppercase border transition-all",
                                                 specFilters.type === t.id ? "bg-primary text-white border-primary" : "bg-muted/5 border-border hover:border-primary/50"
                                             )}
                                         >
@@ -234,14 +234,14 @@ function CategoryContent() {
 
                             {(specFilters.type === 'apartment' || !specFilters.type) && (
                                 <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Комнаты</label>
+                                    <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-2 tracking-widest">Комнаты</label>
                                     <div className="flex flex-wrap gap-1.5">
                                         {['studio', '1', '2', '3', '4+'].map(r => (
                                             <button
                                                 key={r}
                                                 onClick={() => setSpecFilters({ ...specFilters, rooms: specFilters.rooms === r ? '' : r })}
                                                 className={cn(
-                                                    "w-10 h-10 rounded-xl text-[10px] font-black uppercase border transition-all flex items-center justify-center",
+                                                    "w-10 h-10 rounded-xl text-[10px] font-semibold uppercase border transition-all flex items-center justify-center",
                                                     specFilters.rooms === r ? "bg-primary text-white border-primary" : "bg-muted/5 border-border hover:border-primary/50"
                                                 )}
                                             >
@@ -254,14 +254,14 @@ function CategoryContent() {
 
                             {specFilters.type === 'plot' && (
                                 <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Статус земли</label>
+                                    <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-2 tracking-widest">Статус земли</label>
                                     <div className="grid grid-cols-2 gap-1.5">
                                         {[{ id: 'izhs', label: 'ИЖС' }, { id: 'snt', label: 'СНТ' }, { id: 'dnp', label: 'ДНП' }, { id: 'prom', label: 'Пром' }].map(r => (
                                             <button
                                                 key={r.id}
                                                 onClick={() => setSpecFilters({ ...specFilters, status: specFilters.status === r.id ? '' : r.id })}
                                                 className={cn(
-                                                    "py-2 rounded-xl text-[10px] font-black uppercase border transition-all",
+                                                    "py-2 rounded-xl text-[10px] font-semibold uppercase border transition-all",
                                                     specFilters.status === r.id ? "bg-primary text-white border-primary" : "bg-muted/5 border-border hover:border-primary/50"
                                                 )}
                                             >
@@ -274,21 +274,21 @@ function CategoryContent() {
 
                             {(specFilters.type === 'plot' || specFilters.type === 'house') && (
                                 <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Участок, сот.</label>
+                                    <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-2 tracking-widest">Участок, сот.</label>
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="number"
                                             placeholder="От"
                                             value={specFilters.plot_area_from || ''}
                                             onChange={(e) => setSpecFilters({ ...specFilters, plot_area_from: e.target.value })}
-                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
+                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-semibold outline-none"
                                         />
                                         <input
                                             type="number"
                                             placeholder="До"
                                             value={specFilters.plot_area_to || ''}
                                             onChange={(e) => setSpecFilters({ ...specFilters, plot_area_to: e.target.value })}
-                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
+                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-semibold outline-none"
                                         />
                                     </div>
                                 </div>
@@ -296,21 +296,21 @@ function CategoryContent() {
 
                             {(specFilters.type === 'apartment' || specFilters.type === 'house' || specFilters.type === 'commercial') && (
                                 <div className="animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <label className="block text-[10px] font-black uppercase text-muted-foreground/60 mb-2 tracking-widest">Площадь, м²</label>
+                                    <label className="block text-[10px] font-semibold uppercase text-muted-foreground/60 mb-2 tracking-widest">Площадь, м²</label>
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="number"
                                             placeholder="От"
                                             value={specFilters.area_from || ''}
                                             onChange={(e) => setSpecFilters({ ...specFilters, area_from: e.target.value })}
-                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
+                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-semibold outline-none"
                                         />
                                         <input
                                             type="number"
                                             placeholder="До"
                                             value={specFilters.area_to || ''}
                                             onChange={(e) => setSpecFilters({ ...specFilters, area_to: e.target.value })}
-                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-bold outline-none"
+                                            className="w-full h-10 px-3 text-xs rounded-xl bg-muted/5 border border-border font-semibold outline-none"
                                         />
                                     </div>
                                 </div>
@@ -326,7 +326,7 @@ function CategoryContent() {
 
     return (
         <div className="container mx-auto px-2 md:px-4 py-6 max-w-[1200px]">
-            <Link href="/categories" className="inline-flex items-center gap-2 text-primary font-black mb-6 hover:translate-x-[-4px] transition-transform text-xs uppercase tracking-widest">
+            <Link href="/categories" className="inline-flex items-center gap-2 text-primary font-semibold mb-6 hover:translate-x-[-4px] transition-transform text-xs uppercase tracking-widest">
                 <ChevronLeft className="h-4 w-4" /> Ко всем категориям
             </Link>
             <div className="flex flex-col items-center justify-center text-center mb-10 gap-4">
@@ -338,14 +338,14 @@ function CategoryContent() {
                     />
                 </div>
                 <div className="space-y-1">
-                    <h1 className="text-xl md:text-3xl font-black tracking-tight">{category.name}</h1>
+                    <h1 className="text-xl md:text-3xl font-semibold tracking-tight">{category.name}</h1>
                     <div className="inline-flex items-center px-4 py-1 bg-primary/5 rounded-full border border-primary/10">
-                        <p className="text-primary text-[10px] font-black uppercase tracking-[0.15em]">{ads.length} объявлений</p>
+                        <p className="text-primary text-[10px] font-semibold uppercase tracking-[0.15em]">{ads.length} объявлений</p>
                     </div>
                 </div>
                 <button
                     onClick={() => setShowMobileFilters(true)}
-                    className="md:hidden w-full mt-2 p-4 bg-surface border border-border rounded-2xl flex items-center justify-center gap-2 font-black transition-all active:scale-95 shadow-sm"
+                    className="md:hidden w-full mt-2 p-4 bg-surface border border-border rounded-2xl flex items-center justify-center gap-2 font-semibold transition-all active:scale-95 shadow-sm"
                 >
                     <Filter className="h-5 w-5 text-primary" />
                     <span className="text-sm uppercase tracking-widest">Фильтры</span>
@@ -373,7 +373,7 @@ function CategoryContent() {
                             placeholder={`Поиск в категории ${category.name}...`}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-14 pl-12 pr-4 bg-surface border border-border rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold transition-all shadow-sm"
+                            className="w-full h-14 pl-12 pr-4 bg-surface border border-border rounded-2xl outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-semibold transition-all shadow-sm"
                         />
                     </div>
 
@@ -392,9 +392,9 @@ function CategoryContent() {
                         ) : (
                             <div className="py-24 text-center bg-surface rounded-[3rem] border border-dashed border-border flex flex-col items-center">
                                 <Search className="h-12 w-12 text-muted mb-4 opacity-20" />
-                                <h3 className="text-xl font-black">Ничего не нашли</h3>
+                                <h3 className="text-xl font-semibold">Ничего не нашли</h3>
                                 <p className="text-muted mt-2 max-w-xs mx-auto">Попробуйте изменить параметры фильтрации или выберите другую категорию</p>
-                                <button onClick={resetFilters} className="mt-6 text-primary font-black hover:underline cursor-pointer">Сбросить всё</button>
+                                <button onClick={resetFilters} className="mt-6 text-primary font-semibold hover:underline cursor-pointer">Сбросить всё</button>
                             </div>
                         )}
                     </div>
@@ -408,9 +408,9 @@ function CategoryContent() {
                         <div className="absolute inset-x-4 bottom-4 bg-background rounded-[2.5rem] max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-500 shadow-2xl border border-border/50 flex flex-col">
                             <div className="p-6 sticky top-0 bg-background/80 backdrop-blur-xl border-b border-border/50 flex items-center justify-between z-10 shrink-0">
                                 <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-black uppercase tracking-tight">Фильтры</h3>
+                                    <h3 className="text-lg font-semibold uppercase tracking-tight">Фильтры</h3>
                                     {(priceFrom || priceTo || selectedCity || Object.keys(specFilters).length > 0) && (
-                                        <button onClick={resetFilters} className="text-[10px] font-black uppercase text-primary underline">Сбросить</button>
+                                        <button onClick={resetFilters} className="text-[10px] font-semibold uppercase text-primary underline">Сбросить</button>
                                     )}
                                 </div>
                                 <button onClick={() => setShowMobileFilters(false)} className="p-2.5 bg-muted/10 rounded-full active:scale-95 transition-transform"><X className="h-5 w-5" /></button>
@@ -418,7 +418,7 @@ function CategoryContent() {
                             <div className="flex-1 overflow-y-auto custom-scrollbar pt-2">
                                 {renderFilters(true)}
                                 <div className="px-8 pb-10 pt-4">
-                                    <button onClick={() => setShowMobileFilters(false)} className="w-full py-5 bg-primary text-white font-black rounded-2xl shadow-xl shadow-primary/20 active:scale-95 transition-all text-sm uppercase tracking-widest">Показать результаты</button>
+                                    <button onClick={() => setShowMobileFilters(false)} className="w-full py-5 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/20 active:scale-95 transition-all text-sm uppercase tracking-widest">Показать результаты</button>
                                 </div>
                             </div>
                         </div>
@@ -431,7 +431,7 @@ function CategoryContent() {
 
 export default function CategoryPage() {
     return (
-        <Suspense fallback={<div className="p-20 text-center font-black uppercase tracking-widest opacity-30 text-xs">Загрузка...</div>}>
+        <Suspense fallback={<div className="p-20 text-center font-semibold uppercase tracking-widest opacity-30 text-xs">Загрузка...</div>}>
             <CategoryContent />
         </Suspense>
     );

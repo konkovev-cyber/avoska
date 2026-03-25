@@ -11,7 +11,7 @@ export default function HelpPage() {
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-3xl mb-4 rotate-3 hover:rotate-6 transition-transform">
                     <Heart className="h-10 w-10 text-primary fill-current" />
                 </div>
-                <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-foreground">
+                <h1 className="text-5xl md:text-6xl font-semibold tracking-tighter text-foreground">
                     Ближе к людям
                 </h1>
                 <p className="text-xl md:text-2xl text-muted font-medium max-w-3xl mx-auto leading-relaxed">
@@ -25,7 +25,7 @@ export default function HelpPage() {
                     <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <Users className="h-7 w-7" />
                     </div>
-                    <h3 className="text-2xl font-black mb-3">Сообщество</h3>
+                    <h3 className="text-2xl font-bold mb-3">Сообщество</h3>
                     <p className="text-muted leading-relaxed font-medium">
                         Мы объединяем людей, живущих рядом. Продавайте вещи, которые стали не нужны, и находите сокровища у соседей.
                     </p>
@@ -34,7 +34,7 @@ export default function HelpPage() {
                     <div className="w-14 h-14 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <ShieldCheck className="h-7 w-7" />
                     </div>
-                    <h3 className="text-2xl font-black mb-3">Честность</h3>
+                    <h3 className="text-2xl font-bold mb-3">Честность</h3>
                     <p className="text-muted leading-relaxed font-medium">
                         Открытые профили, отзывы и модерация. Мы за безопасные сделки и прозрачные отношения между людьми.
                     </p>
@@ -43,7 +43,7 @@ export default function HelpPage() {
                     <div className="w-14 h-14 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                         <MapPin className="h-7 w-7" />
                     </div>
-                    <h3 className="text-2xl font-black mb-3">Локальность</h3>
+                    <h3 className="text-2xl font-bold mb-3">Локальность</h3>
                     <p className="text-muted leading-relaxed font-medium">
                         Всё рядом. Не нужно ехать на другой конец города или ждать доставку из другой страны. Поддержим своих!
                     </p>
@@ -52,7 +52,7 @@ export default function HelpPage() {
 
             {/* FAQ Section */}
             <div className="max-w-3xl mx-auto space-y-12">
-                <h2 className="text-3xl font-black text-center mb-10 border-b border-border pb-6">Частые вопросы</h2>
+                <h2 className="text-3xl font-semibold text-center mb-10 border-b border-border pb-6">Частые вопросы</h2>
 
                 <div className="space-y-8">
                     <div className="flex gap-6">
@@ -62,7 +62,7 @@ export default function HelpPage() {
                             </div>
                         </div>
                         <div>
-                            <h3 className="text-xl font-black mb-2">Как разместить объявление?</h3>
+                            <h3 className="text-xl font-semibold mb-2">Как разместить объявление?</h3>
                             <p className="text-muted leading-relaxed font-medium">
                                 Нажмите кнопку "Разместить объявление" вверху сайта. Это бесплатно. Опишите товар честно, добавьте фото — и ваши соседи увидят его мгновенно.
                             </p>
@@ -76,7 +76,7 @@ export default function HelpPage() {
                             </div>
                         </div>
                         <div>
-                            <h3 className="text-xl font-black mb-2">Как найти нужное?</h3>
+                            <h3 className="text-xl font-semibold mb-2">Как найти нужное?</h3>
                             <p className="text-muted leading-relaxed font-medium">
                                 Просто введите название в поиск или выберите категорию. Мы покажем сначала самые свежие предложения из вашего города.
                             </p>
@@ -90,7 +90,7 @@ export default function HelpPage() {
                             </div>
                         </div>
                         <div>
-                            <h3 className="text-xl font-black mb-2">Как связаться?</h3>
+                            <h3 className="text-xl font-semibold mb-2">Как связаться?</h3>
                             <p className="text-muted leading-relaxed font-medium">
                                 Пишите продавцу во встроенном чате. Это безопасно и удобно. Договоритесь о встрече в людном месте.
                             </p>
@@ -102,7 +102,7 @@ export default function HelpPage() {
             {/* Contact / CTA */}
             <div className="mt-24 p-12 bg-gradient-to-br from-primary to-accent rounded-[3.5rem] text-center text-white shadow-2xl shadow-primary/30 relative overflow-hidden">
                 <div className="relative z-10 max-w-2xl mx-auto">
-                    <h2 className="text-4xl font-black mb-6">Мы всегда на связи</h2>
+                    <h2 className="text-4xl font-semibold mb-6">Мы всегда на связи</h2>
                     <p className="text-lg opacity-90 font-medium mb-10 leading-relaxed">
                         У вас есть идея, как сделать Авоську лучше? Или возникла проблема? Напишите нам — мы реальные люди и ответим лично.
                     </p>
@@ -110,7 +110,7 @@ export default function HelpPage() {
                         href="https://t.me/avoskaplus_bot"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-white text-primary px-10 py-5 rounded-2xl font-black hover:scale-105 transition-transform shadow-lg text-lg"
+                        className="inline-flex items-center gap-2 bg-white text-primary px-10 py-5 rounded-2xl font-semibold hover:scale-105 transition-transform shadow-lg text-lg"
                     >
                         <MessageCircle className="h-5 w-5 fill-current" />
                         Написать в поддержку
@@ -123,7 +123,7 @@ export default function HelpPage() {
             </div>
 
             <div className="mt-16 text-center">
-                <Link href="/" className="inline-flex items-center gap-2 text-muted font-bold hover:text-primary transition-colors uppercase tracking-widest text-xs">
+                <Link href="/" className="inline-flex items-center gap-2 text-muted font-semibold hover:text-primary transition-colors uppercase tracking-widest text-xs">
                     <Heart className="h-3 w-3 fill-current" /> Вернуться на главную
                 </Link>
             </div>

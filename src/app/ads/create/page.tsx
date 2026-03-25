@@ -159,7 +159,7 @@ export default function CreateAdPage() {
         return (
             <div className="container mx-auto px-4 py-20 flex flex-col items-center text-center">
                 <AlertCircle className="h-16 w-16 text-destructive mb-6" />
-                <h1 className="text-3xl font-black mb-4">Лимит достигнут</h1>
+                <h1 className="text-3xl font-semibold mb-4">Лимит достигнут</h1>
                 <p className="text-muted-foreground mb-8">Вы достигли предела бесплатных объявлений.</p>
                 <a href="https://t.me/HT_Elk" className="bg-primary text-white px-8 py-3 rounded-xl font-bold">Написать админу</a>
             </div>
@@ -169,7 +169,7 @@ export default function CreateAdPage() {
     return (
         <div className="container mx-auto px-2 md:px-4 py-2 max-w-3xl pb-24">
             <div className="bg-surface border border-border rounded-[2rem] p-4 md:p-6 shadow-2xl shadow-black/5">
-                <h1 className="text-xl md:text-2xl font-black mb-4 tracking-tight flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-bold mb-4 tracking-tight flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-primary" />
                     Новое объявление
                 </h1>
@@ -178,12 +178,12 @@ export default function CreateAdPage() {
                     {/* Main Info Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Заголовок</label>
+                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">Заголовок</label>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold transition-all placeholder:font-medium placeholder:text-muted-foreground/50"
+                                className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-semibold transition-all placeholder:font-medium placeholder:text-muted-foreground/50"
                                 placeholder="Например: Велосипед"
                             />
                         </div>
@@ -204,53 +204,53 @@ export default function CreateAdPage() {
                         {category === 'jobs' ? (
                             <div className="col-span-1 md:col-span-2 grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">З/П От</label>
-                                    <input type="number" min="0" value={salaryFrom} onChange={(e) => setSalaryFrom(Math.max(0, parseFloat(e.target.value) || 0).toString())} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black transition-all" />
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">З/П От</label>
+                                    <input type="number" min="0" value={salaryFrom} onChange={(e) => setSalaryFrom(Math.max(0, parseFloat(e.target.value) || 0).toString())} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-semibold transition-all" />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">З/П До</label>
-                                    <input type="number" min="0" value={salaryTo} onChange={(e) => setSalaryTo(Math.max(0, parseFloat(e.target.value) || 0).toString())} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black transition-all" />
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">З/П До</label>
+                                    <input type="number" min="0" value={salaryTo} onChange={(e) => setSalaryTo(Math.max(0, parseFloat(e.target.value) || 0).toString())} className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-semibold transition-all" />
                                 </div>
                             </div>
                         ) : (
                             <>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Цена (₽)</label>
+                                    <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">Цена (₽)</label>
                                     <input
                                         type="number"
                                         min="0"
                                         value={price}
                                         onChange={(e) => setPrice(Math.max(0, parseFloat(e.target.value) || 0).toString())}
-                                        className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-black text-lg transition-all"
+                                        className="w-full h-11 px-4 rounded-xl bg-white border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold text-lg transition-all"
                                         placeholder="0"
                                     />
                                 </div>
                                 <div className="flex gap-3">
                                     {!(category === 'services' || category === 'rent-commercial' || (category === 'real-estate' && (specifications.type === 'house' || specifications.type === 'plot'))) && (
                                         <div className="flex-1 space-y-1">
-                                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1 truncate block text-center md:text-left">
+                                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1 truncate block text-center md:text-left">
                                                 {(category === 'real-estate' && specifications.type === 'apartment') || category === 'rent-apartments' ? 'Жильё' : 'Состояние'}
                                             </label>
                                             <div className="flex bg-muted/10 p-1 rounded-xl h-11 border border-border/40 w-full relative">
                                                 {(category === 'real-estate' && specifications.type === 'apartment') || category === 'rent-apartments' ? (
                                                     <>
-                                                        <button onClick={() => setCondition('secondary')} className={cn("flex-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'secondary' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Втор</button>
-                                                        <button onClick={() => setCondition('new_building')} className={cn("flex-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'new_building' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Нов</button>
+                                                        <button onClick={() => setCondition('secondary')} className={cn("flex-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'secondary' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Втор</button>
+                                                        <button onClick={() => setCondition('new_building')} className={cn("flex-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'new_building' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Нов</button>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <button onClick={() => setCondition('used')} className={cn("flex-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'used' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Б/У</button>
-                                                        <button onClick={() => setCondition('new')} className={cn("flex-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'new' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Нов</button>
+                                                        <button onClick={() => setCondition('used')} className={cn("flex-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'used' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Б/У</button>
+                                                        <button onClick={() => setCondition('new')} className={cn("flex-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all flex items-center justify-center z-10", condition === 'new' ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Нов</button>
                                                     </>
                                                 )}
                                             </div>
                                         </div>
                                     )}
                                     <div className="w-[120px] space-y-1">
-                                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1 block text-center md:text-left">Доставка</label>
+                                        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1 block text-center md:text-left">Доставка</label>
                                         <div className="flex bg-muted/10 p-1 rounded-xl h-11 border border-border/40 w-full">
-                                            <button onClick={() => setDelivery(false)} className={cn("flex-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center", !delivery ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Нет</button>
-                                            <button onClick={() => setDelivery(true)} className={cn("flex-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center", delivery ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Да</button>
+                                            <button onClick={() => setDelivery(false)} className={cn("flex-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all flex items-center justify-center", !delivery ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Нет</button>
+                                            <button onClick={() => setDelivery(true)} className={cn("flex-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider transition-all flex items-center justify-center", delivery ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground")}>Да</button>
                                         </div>
                                     </div>
                                 </div>
@@ -261,32 +261,32 @@ export default function CreateAdPage() {
                     {/* Specifications (Conditional) */}
                     {(category === 'transport' || category === 'real-estate' || category === 'rent-apartments' || category === 'rent-commercial' || category === 'rent-cars') && (
                         <div className="bg-white rounded-2xl p-4 border border-border shadow-sm space-y-3 animate-in fade-in zoom-in-95 duration-200">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Характеристики</h3>
+                            <h3 className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-1">Характеристики</h3>
 
                             {(category === 'transport' || category === 'rent-cars') && (
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="space-y-1">
-                                        <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Марка</label>
-                                        <input type="text" placeholder="Toyota" value={specifications.brand || ''} onChange={(e) => setSpecifications({ ...specifications, brand: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                        <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Марка</label>
+                                        <input type="text" placeholder="Toyota" value={specifications.brand || ''} onChange={(e) => setSpecifications({ ...specifications, brand: e.target.value })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Год</label>
-                                        <input type="number" min="0" value={specifications.year || ''} onChange={(e) => setSpecifications({ ...specifications, year: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                        <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Год</label>
+                                        <input type="number" min="0" value={specifications.year || ''} onChange={(e) => setSpecifications({ ...specifications, year: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                     </div>
                                     {category === 'transport' && (
                                         <div className="space-y-1">
-                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Пробег (км)</label>
-                                            <input type="number" min="0" value={specifications.mileage || ''} onChange={(e) => setSpecifications({ ...specifications, mileage: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                            <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Пробег (км)</label>
+                                            <input type="number" min="0" value={specifications.mileage || ''} onChange={(e) => setSpecifications({ ...specifications, mileage: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                         </div>
                                     )}
                                     <div className="space-y-1">
-                                        <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">КПП</label>
+                                        <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">КПП</label>
                                         <div className="grid grid-cols-2 gap-2">
                                             <button
                                                 type="button"
                                                 onClick={() => setSpecifications({ ...specifications, transmission: 'auto' })}
                                                 className={cn(
-                                                    "py-2 rounded-lg text-[10px] font-black uppercase transition-all border",
+                                                    "py-2 rounded-lg text-[10px] font-semibold uppercase transition-all border",
                                                     specifications.transmission === 'auto' ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
                                                 )}
                                             >
@@ -296,7 +296,7 @@ export default function CreateAdPage() {
                                                 type="button"
                                                 onClick={() => setSpecifications({ ...specifications, transmission: 'manual' })}
                                                 className={cn(
-                                                    "py-2 rounded-lg text-[10px] font-black uppercase transition-all border",
+                                                    "py-2 rounded-lg text-[10px] font-semibold uppercase transition-all border",
                                                     specifications.transmission === 'manual' ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
                                                 )}
                                             >
@@ -311,16 +311,16 @@ export default function CreateAdPage() {
                                 <div className="space-y-3">
                                     {(category === 'rent-apartments' || category === 'rent-commercial') && (
                                         <div className="space-y-1">
-                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Срок аренды</label>
+                                            <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Срок аренды</label>
                                             <div className="flex bg-white p-1 rounded-lg border border-border">
-                                                <button onClick={() => setSpecifications({ ...specifications, rent_type: 'daily' })} className={cn("flex-1 py-2 rounded-md text-[10px] font-black uppercase transition-all", specifications.rent_type === 'daily' ? "bg-primary text-white" : "text-muted-foreground")}>Посуточно</button>
-                                                <button onClick={() => setSpecifications({ ...specifications, rent_type: 'long_term' })} className={cn("flex-1 py-2 rounded-md text-[10px] font-black uppercase transition-all", specifications.rent_type === 'long_term' ? "bg-primary text-white" : "text-muted-foreground")}>На долгий срок</button>
+                                                <button onClick={() => setSpecifications({ ...specifications, rent_type: 'daily' })} className={cn("flex-1 py-2 rounded-md text-[10px] font-semibold uppercase transition-all", specifications.rent_type === 'daily' ? "bg-primary text-white" : "text-muted-foreground")}>Посуточно</button>
+                                                <button onClick={() => setSpecifications({ ...specifications, rent_type: 'long_term' })} className={cn("flex-1 py-2 rounded-md text-[10px] font-semibold uppercase transition-all", specifications.rent_type === 'long_term' ? "bg-primary text-white" : "text-muted-foreground")}>На долгий срок</button>
                                             </div>
                                         </div>
                                     )}
                                     {category === 'real-estate' && (
                                         <div className="space-y-1">
-                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Тип недвижимости</label>
+                                            <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Тип недвижимости</label>
                                             <div className="grid grid-cols-2 gap-2">
                                                 {[
                                                     { value: 'apartment', label: 'Квартира' },
@@ -333,7 +333,7 @@ export default function CreateAdPage() {
                                                         type="button"
                                                         onClick={() => setSpecifications({ ...specifications, type: t.value })}
                                                         className={cn(
-                                                            "py-2 rounded-lg text-[9px] font-black uppercase transition-all border",
+                                                            "py-2 rounded-lg text-[9px] font-semibold uppercase transition-all border",
                                                             specifications.type === t.value ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
                                                         )}
                                                     >
@@ -346,7 +346,7 @@ export default function CreateAdPage() {
                                     {(specifications.type === 'apartment' || category === 'rent-apartments') && (
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-1">
-                                                <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Комнат</label>
+                                                <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Комнат</label>
                                                 <div className="grid grid-cols-5 gap-1">
                                                     {['studio', '1', '2', '3', '4+'].map(r => (
                                                         <button
@@ -354,7 +354,7 @@ export default function CreateAdPage() {
                                                             type="button"
                                                             onClick={() => setSpecifications({ ...specifications, rooms: r })}
                                                             className={cn(
-                                                                "py-1.5 rounded text-[9px] font-black uppercase transition-all border",
+                                                                "py-1.5 rounded text-[9px] font-semibold uppercase transition-all border",
                                                                 specifications.rooms === r ? "bg-primary text-white border-primary" : "bg-white text-muted-foreground border-border hover:border-primary/50"
                                                             )}
                                                         >
@@ -364,33 +364,33 @@ export default function CreateAdPage() {
                                                 </div>
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Площадь (м²)</label>
-                                                <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                                <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Площадь (м²)</label>
+                                                <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                             </div>
                                         </div>
                                     )}
                                     {(specifications.type === 'commercial' || category === 'rent-commercial') && (
                                         <div className="space-y-1">
-                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Площадь (м²)</label>
-                                            <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                            <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Площадь (м²)</label>
+                                            <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                         </div>
                                     )}
                                     {specifications.type === 'house' && (
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-1">
-                                                <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Дом (м²)</label>
-                                                <input type="number" min="0" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                                <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Дом (м²)</label>
+                                                <input type="number" min="0" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                             </div>
                                             <div className="space-y-1">
-                                                <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Участок (сот)</label>
-                                                <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                                <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Участок (сот)</label>
+                                                <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                             </div>
                                         </div>
                                     )}
                                     {specifications.type === 'plot' && (
                                         <div className="space-y-1">
-                                            <label className="text-[9px] uppercase font-bold text-muted-foreground ml-1">Участок (сот)</label>
-                                            <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-bold text-sm" />
+                                            <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Участок (сот)</label>
+                                            <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                         </div>
                                     )}
                                 </div>
@@ -400,7 +400,7 @@ export default function CreateAdPage() {
 
                     {/* Description */}
                     <div className="space-y-1">
-                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Описание</label>
+                        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">Описание</label>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
@@ -411,11 +411,11 @@ export default function CreateAdPage() {
 
                     {/* Photos */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Фотографии</label>
+                        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">Фотографии</label>
                         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                             <label className="relative w-20 h-20 shrink-0 rounded-xl border-2 border-dashed border-border/60 flex flex-col items-center justify-center gap-0.5 cursor-pointer hover:bg-muted/10 hover:border-primary/50 transition-all text-muted-foreground active:scale-95 group bg-background">
                                 <PlusSquare className="h-5 w-5 opacity-40 group-hover:text-primary group-hover:opacity-100 transition-all" />
-                                <span className="text-[8px] font-black uppercase tracking-widest text-center">Добавить</span>
+                                <span className="text-[8px] font-semibold uppercase tracking-widest text-center">Добавить</span>
                                 <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageChange} />
                             </label>
 
@@ -446,12 +446,12 @@ export default function CreateAdPage() {
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">Адрес (необязательно)</label>
+                                <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">Адрес (необязательно)</label>
                                 <input
                                     type="text"
                                     value={address}
                                     onChange={(e) => setAddress(e.target.value)}
-                                    className="w-full h-10 px-3 rounded-lg bg-surface border border-border outline-none focus:border-primary font-bold text-sm transition-all placeholder:font-normal"
+                                    className="w-full h-10 px-3 rounded-lg bg-surface border border-border outline-none focus:border-primary font-semibold text-sm transition-all placeholder:font-normal"
                                     placeholder="Улица, дом"
                                 />
                             </div>
@@ -459,7 +459,7 @@ export default function CreateAdPage() {
 
                         {/* Map Picker Selection */}
                         <div className="mt-4">
-                            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1 mb-2 block">
+                            <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1 mb-2 block">
                                 Укажите точное местоположение на карте
                             </label>
                             <YandexMapPicker
@@ -474,7 +474,7 @@ export default function CreateAdPage() {
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="w-full h-16 bg-primary text-white rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:scale-100"
+                        className="w-full h-16 bg-primary text-white rounded-2xl font-bold text-lg uppercase tracking-widest shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:scale-100"
                     >
                         {loading ? (
                             <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/20 border-t-white" />

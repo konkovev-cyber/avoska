@@ -11,16 +11,16 @@ export default function Footer() {
                     {/* Logo & Copyright */}
                     <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 text-center md:text-left">
                         <Link href="/" className="flex items-center gap-1 group">
-                            <span className="text-xl font-black text-primary tracking-tighter group-hover:opacity-80 transition-opacity">Авоська</span>
-                            <span className="text-xl font-black text-accent">+</span>
+                            <span className="text-xl font-semibold text-primary tracking-tighter group-hover:opacity-80 transition-opacity">Авоська</span>
+                            <span className="text-xl font-semibold text-accent">+</span>
                         </Link>
-                        <p className="text-xs text-muted font-bold">
+                        <p className="text-xs text-muted font-semibold">
                             © 2026 Все права защищены.
                         </p>
                     </div>
 
                     {/* Navigation Links */}
-                    <div className="flex flex-wrap justify-center gap-6 text-xs font-bold text-muted uppercase tracking-wide">
+                    <div className="flex flex-wrap justify-center gap-6 text-xs font-semibold text-muted uppercase tracking-wide">
                         <Link href="/categories" className="hover:text-primary transition-colors">Категории</Link>
                         <Link href="/help" className="hover:text-primary transition-colors">Помощь</Link>
                         <Link href="/terms" className="hover:text-primary transition-colors">Оферта</Link>
@@ -47,7 +47,7 @@ export default function Footer() {
                         >
                             <Send className="h-4 w-4" />
                         </a>
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-full text-[10px] font-black uppercase tracking-wider border border-orange-100/50">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-orange-100/50">
                             <AlertCircle className="h-3 w-3" />
                             <span>Бета</span>
                         </div>

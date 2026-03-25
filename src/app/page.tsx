@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Image from 'next/image';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { supabase } from '@/lib/supabase/client';
 import { getStoredCity, initCity } from '@/lib/geo';
 import Link from 'next/link';
@@ -11,26 +9,21 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import {
   ChevronRight,
-  Heart,
   MapPin,
-  Star,
   Smartphone
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 import { recommendationService } from '@/lib/recommendations';
 import { CATEGORIES, APK_DOWNLOAD_URL } from '@/lib/constants';
 import { AdCard } from '@/components/ui/AdCard';
+import { Ad, Banner } from '@/lib/types';
+
 const HoverImageGallery = dynamic(() => import('@/components/ui/HoverImageGallery'), {
   loading: () => <div className="bg-muted animate-pulse aspect-[4/3]" />
 });
 
-
-
 export default function HomePage() {
-  const [ads, setAds] = useState<any[]>([]);
-  const [newAds, setNewAds] = useState<any[]>([]); // New state for fresh ads
-  const [banners, setBanners] = useState<any[]>([]);
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -47,7 +40,6 @@ export default function HomePage() {
   useEffect(() => {
     fetchInitialData();
     fetchFavorites();
-    // Check for Capacitor / Mobile environment
     const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;
     setIsMobileApp(isCapacitor);
   }, []);
@@ -58,37 +50,27 @@ export default function HomePage() {
       const currentCity = await initCity();
       setCity(currentCity);
 
-      const [bannersRes, newAdsRes, settingsRes] = await Promise.all([
+      const [bannersRes, settingsRes] = await Promise.all([
         supabase.from('banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(5),
-        supabase.from('ads')
-          .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(6),
         supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
       ]);
 
-      // Only set banners if they're enabled globally
       const bannersEnabled = settingsRes.data?.value === 'true';
-      let fetchedBanners = bannersRes.data || [];
+      let fetchedBanners: Banner[] = bannersRes.data || [];
+
       if (bannersEnabled && fetchedBanners.length > 0) {
-        // Shuffle and take 4 to align with grid better
         fetchedBanners = fetchedBanners.sort(() => Math.random() - 0.5).slice(0, 4);
 
-        // Track impressions
         fetchedBanners.forEach(banner => {
           supabase.rpc('increment_banner_impression', { banner_id: banner.id }).then(({ error }) => {
             if (error) {
-              // Fallback if RPC not exists, just direct update (not ideal but works for now)
               supabase.from('banners').update({ impressions_count: (banner.impressions_count || 0) + 1 }).eq('id', banner.id);
             }
           });
         });
       }
       setBanners(bannersEnabled ? fetchedBanners : []);
-      setNewAds(newAdsRes.data || []);
 
-      // Smart feed: check last category
       const lastCatId = recommendationService.getLastCategory();
       let pCat = null;
       if (lastCatId) {
@@ -113,10 +95,6 @@ export default function HomePage() {
       const from = pageNum * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
 
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Fetching ads for city:', currentCity);
-      }
-
       let q = supabase
         .from('ads')
         .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
@@ -126,8 +104,9 @@ export default function HomePage() {
         q = q.eq('city', currentCity);
       }
 
-      if (categoryIdOverride) {
-        q = q.eq('category_id', categoryIdOverride);
+      const activeCategoryId = categoryIdOverride || personalCategory?.id;
+      if (activeCategoryId) {
+        q = q.eq('category_id', activeCategoryId);
       }
 
       const { data, error } = await q
@@ -137,29 +116,29 @@ export default function HomePage() {
       if (error) throw error;
 
       if (isInitial && (!data || data.length === 0) && currentCity && currentCity !== 'Все города') {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('No ads in city, falling back to all cities');
-        }
         await fetchAds(0, true, 'Все города');
         return;
       }
 
+      const typedData = (data || []) as Ad[];
       if (isInitial) {
-        setAds(data || []);
+        setAds(typedData);
       } else {
-        setAds(prev => [...prev, ...(data || [])]);
+        setAds(prev => [...prev, ...typedData]);
       }
 
-      setHasMore(data?.length === PAGE_SIZE);
+      setHasMore(typedData.length === PAGE_SIZE);
     } catch (error) {
       console.error('Fetch ads error:', error);
     }
   };
 
   useEffect(() => {
+    if (!hasMore || loading || loadingMore) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+        if (entries[0].isIntersecting) {
           const nextPage = page + 1;
           setPage(nextPage);
           setLoadingMore(true);
@@ -181,57 +160,6 @@ export default function HomePage() {
     if (!session) return;
     const { data } = await supabase.from('favorites').select('ad_id').eq('user_id', session.user.id);
     if (data) setFavorites(new Set(data.map(f => f.ad_id)));
-  };
-
-  const toggleFavorite = async (e: React.MouseEvent, adId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error('Войдите, чтобы добавить в избранное');
-      return router.push('/login');
-    }
-
-    const isFav = favorites.has(adId);
-
-    // Optimistic UI
-    setFavorites(prev => {
-      const next = new Set(prev);
-      if (isFav) next.delete(adId);
-      else next.add(adId);
-      return next;
-    });
-
-    try {
-      if (isFav) {
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', session.user.id)
-          .eq('ad_id', adId);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('favorites')
-          .insert({ user_id: session.user.id, ad_id: adId });
-
-        if (error) {
-          if (error.code === '23505') return; // Already exists
-          throw error;
-        }
-      }
-    } catch (error: any) {
-      console.error('Error toggling favorite:', error);
-      toast.error('Ошибка обновления избранного');
-      // Rollback
-      setFavorites(prev => {
-        const next = new Set(prev);
-        if (isFav) next.add(adId);
-        else next.delete(adId);
-        return next;
-      });
-    }
   };
 
   return (
@@ -269,12 +197,12 @@ export default function HomePage() {
                     <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/5" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3 flex flex-col justify-end">
-                    <h3 className="text-white font-bold text-xs md:text-sm line-clamp-2 leading-tight drop-shadow-md">{banner.title}</h3>
+                    <h3 className="text-white font-semibold text-xs md:text-sm line-clamp-2 leading-tight drop-shadow-md">{banner.title}</h3>
                     {banner.content && (
                       <p className="text-white/80 text-[10px] line-clamp-1 mt-0.5 hidden md:block">{banner.content}</p>
                     )}
                   </div>
-                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/40 backdrop-blur-md rounded-[3px] text-[8px] font-black text-white/80 uppercase tracking-widest border border-white/10">
+                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/40 backdrop-blur-md rounded-[3px] text-[8px] font-semibold text-white/80 uppercase tracking-widest border border-white/10">
                     Реклама
                   </div>
                 </a>
@@ -284,7 +212,7 @@ export default function HomePage() {
         )}
 
         <section className="mb-2 hidden md:block">
-          <h1 className="text-xl md:text-5xl font-black text-foreground mb-0.5 tracking-tighter">Все категории</h1>
+          <h1 className="text-xl md:text-5xl font-semibold text-foreground mb-0.5 tracking-tighter">Все категории</h1>
           <p className="text-[11px] md:text-lg text-muted-foreground font-medium max-w-2xl">Найдите то, что нужно именно вам</p>
         </section>
 
@@ -305,7 +233,7 @@ export default function HomePage() {
                   />
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
                 </div>
-                <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-center line-clamp-1 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all">
+                <span className="text-[10px] md:text-xs font-semibold uppercase tracking-widest text-center line-clamp-1 opacity-70 group-hover:opacity-100 group-hover:text-primary transition-all">
                   {cat.name}
                 </span>
               </Link>
@@ -324,7 +252,7 @@ export default function HomePage() {
                   <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="h-[2.5em] flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-center leading-tight line-clamp-2">{cat.name}</span>
+                  <span className="text-[10px] font-semibold text-center leading-tight line-clamp-2">{cat.name}</span>
                 </div>
               </Link>
             ))}
@@ -333,7 +261,7 @@ export default function HomePage() {
           <div className="mt-4 flex justify-start md:justify-center px-1">
             <Link
               href="/categories"
-              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
+              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-semibold uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
               <span>Показать все категории</span>
               <ChevronRight className="h-4 w-4" />
@@ -344,7 +272,7 @@ export default function HomePage() {
         {/* Fresh Ads Section */}
         <section className="mb-4">
           <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xl md:text-2xl font-black tracking-tight">Новое</h2>
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">Новое</h2>
           </div>
 
           {loading ? (
@@ -355,8 +283,8 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
-              {(newAds.length > 0 ? newAds : ads).slice(0, 6).map((ad) => (
-                <AdCard key={ad.id} ad={ad} isHoverGallery={true} />
+              {ads.slice(0, 6).map((ad) => (
+                <AdCard key={ad.id} ad={ad} isHoverGallery={true} initialFavorite={favorites.has(ad.id)} />
               ))}
             </div>
           )}
@@ -364,7 +292,7 @@ export default function HomePage() {
           <div className="mt-2 flex justify-start md:justify-center px-1">
             <Link
               href="/search?sort=newest"
-              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
+              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-semibold uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
               <span>Смотреть все</span>
               <ChevronRight className="h-4 w-4" />
@@ -382,14 +310,14 @@ export default function HomePage() {
                     <Smartphone className="h-7 w-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg md:text-xl font-black tracking-tight">Установите Авоську+</h3>
+                    <h3 className="text-lg md:text-xl font-semibold tracking-tight">Установите Авоську+</h3>
                     <p className="text-green-50/70 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Приложение для Android стало быстрее и удобнее</p>
                   </div>
                 </div>
 
                 <a
                   href={APK_DOWNLOAD_URL}
-                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-black text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-semibold text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
                   <span>Скачать .apk</span>
                   <ChevronRight className="h-4 w-4" />
@@ -402,7 +330,7 @@ export default function HomePage() {
         {/* Recommendations Section */}
         <section className="mb-4">
           <div className="flex items-center justify-between mb-2 px-1">
-            <h2 className="text-xl md:text-2xl font-black tracking-tight">Подборка для вас</h2>
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">Подборка для вас</h2>
           </div>
 
           {loading ? (
@@ -413,8 +341,8 @@ export default function HomePage() {
             </div>
           ) : ads.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
-              {ads.slice(0, 6).map((ad) => (
-                <AdCard key={ad.id} ad={ad} isHoverGallery={true} />
+              {ads.slice(0, 12).map((ad) => (
+                <AdCard key={ad.id} ad={ad} isHoverGallery={true} initialFavorite={favorites.has(ad.id)} />
               ))}
             </div>
           ) : (
@@ -425,13 +353,14 @@ export default function HomePage() {
           <div className="mt-2 flex justify-start md:justify-center px-1">
             <Link
               href="/search"
-              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
+              className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-semibold uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
               <span>Смотреть все</span>
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
         </section>
+        <div ref={loadMoreRef} className="h-20" />
       </div>
     </div>
   );

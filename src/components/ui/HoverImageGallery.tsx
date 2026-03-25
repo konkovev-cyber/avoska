@@ -100,7 +100,7 @@ export default function HoverImageGallery({ images, alt, href, imageClass, layou
                             </>
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                                <span className="text-[9px] uppercase font-bold tracking-widest">Нет фото</span>
+                                <span className="text-[9px] uppercase font-semibold tracking-widest">Нет фото</span>
                             </div>
                         )}
                     </div>
@@ -148,7 +148,7 @@ export default function HoverImageGallery({ images, alt, href, imageClass, layou
                         </>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                            <span className="text-[10px] uppercase font-bold tracking-widest">Нет фото</span>
+                            <span className="text-[10px] uppercase font-semibold tracking-widest">Нет фото</span>
                         </div>
                     )}
                 </div>

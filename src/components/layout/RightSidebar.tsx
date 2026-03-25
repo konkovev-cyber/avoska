@@ -78,17 +78,17 @@ export default function RightSidebar() {
                         />
 
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <h3 className="text-white font-bold text-sm line-clamp-1">{banner.title}</h3>
+                            <h3 className="text-white font-semibold text-sm line-clamp-1">{banner.title}</h3>
                             {banner.content && (
                                 <p className="text-white/80 text-xs line-clamp-2 mt-1">{banner.content}</p>
                             )}
-                            <div className="mt-2 flex items-center gap-1 text-[10px] uppercase font-black tracking-wider text-primary-foreground">
+                            <div className="mt-2 flex items-center gap-1 text-[10px] uppercase font-semibold tracking-wider text-primary-foreground">
                                 <span>Открыть</span>
                                 <ExternalLink className="h-3 w-3" />
                             </div>
                         </div>
 
-                        <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/30 backdrop-blur-md rounded text-[9px] font-bold text-white/50 uppercase tracking-widest border border-white/10">
+                        <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/30 backdrop-blur-md rounded text-[9px] font-semibold text-white/50 uppercase tracking-widest border border-white/10">
                             Реклама
                         </div>
                     </a>
@@ -104,7 +104,7 @@ export default function RightSidebar() {
 
             {/* Footer Links */}
             <div className="mt-auto pt-6 text-[10px] text-muted-foreground font-medium text-center border-t border-border/10">
-                <div className="flex items-center justify-center gap-1.5 text-primary/40 font-black uppercase tracking-widest mb-2">
+                <div className="flex items-center justify-center gap-1.5 text-primary/40 font-semibold uppercase tracking-widest mb-2">
                     <Smartphone className="h-3 w-3" />
                     <span>v0.1.2</span>
                 </div>

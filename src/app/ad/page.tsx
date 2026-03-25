@@ -38,7 +38,7 @@ import { compressImage } from '@/lib/image-utils';
 // Dynamic imports для оптимизации bundle
 const YandexMapView = dynamic(() => import('@/components/YandexMapView'), {
     ssr: false,
-    loading: () => <div className="h-[200px] w-full bg-surface animate-pulse rounded-2xl flex items-center justify-center font-black text-[10px] uppercase tracking-widest text-muted opacity-30">Карта...</div>
+    loading: () => <div className="h-[200px] w-full bg-surface animate-pulse rounded-2xl flex items-center justify-center font-semibold text-[10px] uppercase tracking-widest text-muted opacity-30">Карта...</div>
 });
 
 const RightSidebar = dynamic(() => import('@/components/layout/RightSidebar'), {
@@ -470,7 +470,7 @@ function AdContent() {
             </div>
         </div>
     );
-    if (!ad) return <div className="p-10 text-center font-bold">Не найдено</div>;
+    if (!ad) return <div className="p-10 text-center font-semibold">Не найдено</div>;
 
 
     return (
@@ -532,10 +532,10 @@ function AdContent() {
                         </div>
 
                         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none">
-                            <div className="bg-white/10 px-4 py-1.5 rounded-full text-white/80 text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                            <div className="bg-white/10 px-4 py-1.5 rounded-full text-white/80 text-[10px] font-semibold uppercase tracking-[0.2em] backdrop-blur-md">
                                 {currentImageIndex + 1} / {ad.images.length}
                             </div>
-                            <span className="text-white/40 text-[9px] font-bold uppercase tracking-widest">Листайте фото</span>
+                            <span className="text-white/40 text-[9px] font-semibold uppercase tracking-widest">Листайте фото</span>
                         </div>
                     </motion.div>
                 )}
@@ -544,20 +544,20 @@ function AdContent() {
             <div className="max-w-[1000px] mx-auto px-3 py-2">
                 {/* Header: Title + Price (Super Compact) */}
                 <div className="mb-3">
-                    <h1 className="text-xl md:text-2xl font-black leading-tight mb-1">{ad.title}</h1>
+                    <h1 className="text-xl md:text-2xl font-bold leading-tight mb-1">{ad.title}</h1>
                     <div className="flex items-center justify-between">
-                        <div className="text-2xl font-black text-primary">
+                        <div className="text-2xl font-bold text-primary">
                             {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                         </div>
                         <div className="flex gap-2">
                             {ad.status === 'pending' && (
-                                <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-black uppercase tracking-wider h-fit mt-1.5">
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-semibold uppercase tracking-wider h-fit mt-1.5">
                                     <Clock className="h-3 w-3" />
                                     На проверке
                                 </div>
                             )}
                             {ad.status === 'rejected' && (
-                                <div className="flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-wider h-fit mt-1.5">
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-semibold uppercase tracking-wider h-fit mt-1.5">
                                     <Ban className="h-3 w-3" />
                                     Заблокировано
                                 </div>
@@ -576,7 +576,7 @@ function AdContent() {
                 <a
                     href={`https://yandex.ru/maps/?text=${encodeURIComponent(ad.city + (ad.address ? ', ' + ad.address : ''))}`}
                     target="_blank"
-                    className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground mb-4 hover:text-primary transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground mb-4 hover:text-primary transition-colors"
                 >
                     <MapPin className="h-3.5 w-3.5" />
                     <span>{ad.city}{ad.address ? `, ${ad.address}` : ''}</span>
@@ -619,18 +619,18 @@ function AdContent() {
 
                         {/* Description - Compact */}
                         <div className="space-y-2">
-                            <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Описание</h2>
+                            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Описание</h2>
                             <p className="text-sm font-medium leading-normal text-foreground/90 whitespace-pre-wrap">{ad.description}</p>
                         </div>
 
                         {/* Characteristics - Compact Table style */}
                         <div className="space-y-2">
-                            <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Характеристики</h2>
+                            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Характеристики</h2>
                             <div className="grid grid-cols-1 gap-1">
                                 {!(ad.category?.slug === 'services' || ad.category?.slug === 'jobs' || ad.category?.slug === 'rent-commercial' || (ad.category?.slug === 'real-estate' && (ad.specifications?.type === 'house' || ad.specifications?.type === 'plot'))) && (
                                     <div className="flex justify-between py-1 border-b border-border/50 text-xs text-foreground/80">
                                         <span className="text-muted">{(ad.category?.slug === 'real-estate' && ad.specifications?.type === 'apartment') || ad.category?.slug === 'rent-apartments' ? 'Тип жилья' : 'Состояние'}</span>
-                                        <span className="font-bold">
+                                        <span className="font-semibold">
                                             {ad.condition === 'new' ? 'Новое' :
                                                 ad.condition === 'used' ? 'Б/у' :
                                                     ad.condition === 'secondary' ? 'Вторичка' :
@@ -640,7 +640,7 @@ function AdContent() {
                                 )}
                                 <div className="flex justify-between py-1 border-b border-border/50 text-xs text-foreground/80">
                                     <span className="text-muted">Категория</span>
-                                    <span className="font-bold text-primary">{ad.category?.name || 'Не указана'}</span>
+                                    <span className="font-semibold text-primary">{ad.category?.name || 'Не указана'}</span>
                                 </div>
                                 {ad.specifications && Object.entries(ad.specifications).map(([k, v]) => {
                                     const labels: Record<string, string> = {
@@ -696,7 +696,7 @@ function AdContent() {
                                     return (
                                         <div key={k} className="flex justify-between py-1 border-b border-border/50 text-xs">
                                             <span className="text-muted">{labels[k] || k}</span>
-                                            <span className="font-bold">{displayValue}</span>
+                                            <span className="font-semibold">{displayValue}</span>
                                         </div>
                                     );
                                 })}
@@ -706,13 +706,13 @@ function AdContent() {
                         {/* Reviews Section */}
                         <div className="space-y-4 pt-6 border-t border-border/50">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Отзывы о продавце</h2>
+                                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Отзывы о продавце</h2>
                                 <div className="flex items-center gap-3">
-                                    <Link href={`/user?id=${ad.user_id}&tab=reviews`} className="text-[10px] font-black uppercase text-primary hover:underline">Все отзывы</Link>
+                                    <Link href={`/user?id=${ad.user_id}&tab=reviews`} className="text-[10px] font-semibold uppercase text-primary hover:underline">Все отзывы</Link>
                                     {currentUser && currentUser.id !== ad.user_id && !showReviewForm && (
                                         <button
                                             onClick={() => setShowReviewForm(true)}
-                                            className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-black uppercase rounded-lg hover:bg-primary/20 transition-all"
+                                            className="px-3 py-1.5 bg-primary/10 text-primary text-[10px] font-semibold uppercase rounded-lg hover:bg-primary/20 transition-all"
                                         >
                                             Написать
                                         </button>
@@ -723,7 +723,7 @@ function AdContent() {
                             {showReviewForm && (
                                 <div className="bg-surface p-5 rounded-2xl border-2 border-primary/20 shadow-lg animate-in slide-in-from-top-2 duration-300">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-xs font-black uppercase tracking-widest text-primary">Ваш отзыв</h3>
+                                        <h3 className="text-xs font-semibold uppercase tracking-widest text-primary">Ваш отзыв</h3>
                                         <button onClick={() => setShowReviewForm(false)} className="p-1 hover:bg-muted rounded-full">
                                             <X className="h-4 w-4" />
                                         </button>
@@ -739,7 +739,7 @@ function AdContent() {
                                         value={reviewComment}
                                         onChange={(e) => setReviewComment(e.target.value)}
                                         placeholder="Расскажите о сделке..."
-                                        className="w-full h-24 p-4 text-xs font-bold rounded-2xl bg-muted/5 border border-border outline-none focus:border-primary transition-all resize-none"
+                                        className="w-full h-24 p-4 text-xs font-semibold rounded-2xl bg-muted/5 border border-border outline-none focus:border-primary transition-all resize-none"
                                     />
 
                                     <div className="flex flex-wrap gap-2 mt-4">
@@ -763,7 +763,7 @@ function AdContent() {
                                     <button
                                         onClick={handleReviewSubmit}
                                         disabled={isSubmittingReview}
-                                        className="w-full mt-4 h-11 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:shadow-lg disabled:opacity-50 transition-all"
+                                        className="w-full mt-4 h-11 bg-primary text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:shadow-lg disabled:opacity-50 transition-all"
                                     >
                                         {isSubmittingReview ? 'Отправка...' : 'Отправить отзыв'}
                                     </button>
@@ -783,12 +783,12 @@ function AdContent() {
                                                     {rev.reviewer?.avatar_url ? (
                                                         <img src={rev.reviewer.avatar_url} className="w-full h-full object-cover" />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-[8px] font-black">
+                                                        <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-[8px] font-semibold">
                                                             {rev.reviewer?.full_name?.charAt(0).toUpperCase() || '?'}
                                                         </div>
                                                     )}
                                                 </div>
-                                                <span className="text-xs font-bold truncate max-w-[120px]">{rev.reviewer?.full_name}</span>
+                                                <span className="text-xs font-semibold truncate max-w-[120px]">{rev.reviewer?.full_name}</span>
                                                 <div className="flex gap-0.5 ml-auto">
                                                     {[...Array(5)].map((_, i) => (
                                                         <Star key={i} className={cn("h-2.5 w-2.5", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted/30")} />
@@ -811,7 +811,7 @@ function AdContent() {
                             ) : (
                                 <div className="bg-muted/5 p-6 rounded-2xl border border-dashed border-border flex flex-col items-center justify-center text-center">
                                     <Star className="h-8 w-8 text-muted/20 mb-2" />
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-relaxed">
+                                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest leading-relaxed">
                                         У этого продавца пока нет отзывов.<br />Станьте первым!
                                     </p>
                                 </div>
@@ -821,7 +821,7 @@ function AdContent() {
                         {/* Interactive Map */}
                         {ad.latitude && ad.longitude && (
                             <div className="space-y-3 pt-2">
-                                <h2 className="text-sm font-black uppercase tracking-wider text-muted-foreground">Местоположение</h2>
+                                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Местоположение</h2>
                                 <div className="h-[200px] w-full rounded-2xl overflow-hidden border border-border shadow-sm">
                                     <YandexMapView pos={[ad.latitude, ad.longitude]} />
                                 </div>
@@ -837,7 +837,7 @@ function AdContent() {
                         {/* Admin Controls */}
                         {isAdmin && (
                             <div className="bg-red-500/5 backdrop-blur-md border border-red-500/20 p-4 rounded-2xl space-y-3">
-                                <div className="text-[10px] font-black text-red-600/80 uppercase tracking-widest">Панель администратора</div>
+                                <div className="text-[10px] font-semibold text-red-600/80 uppercase tracking-widest">Панель администратора</div>
                                 <div className="grid grid-cols-2 gap-2">
                                     <button
                                         onClick={async () => {
@@ -849,7 +849,7 @@ function AdContent() {
                                                 }
                                             }
                                         }}
-                                        className="bg-red-600 text-white text-[11px] font-black h-9 rounded-xl hover:bg-red-700 transition-all active:scale-95 shadow-sm"
+                                        className="bg-red-600 text-white text-[11px] font-semibold h-9 rounded-xl hover:bg-red-700 transition-all active:scale-95 shadow-sm"
                                     >
                                         Удалить
                                     </button>
@@ -863,7 +863,7 @@ function AdContent() {
                                             }
                                         }}
                                         className={cn(
-                                            "text-white text-[11px] font-black h-9 rounded-xl transition-all active:scale-95 shadow-sm",
+                                            "text-white text-[11px] font-semibold h-9 rounded-xl transition-all active:scale-95 shadow-sm",
                                             ad.status === 'rejected' ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
                                         )}
                                     >
@@ -879,7 +879,7 @@ function AdContent() {
                                                 setAd({ ...ad, status: 'active' });
                                             }
                                         }}
-                                        className="w-full bg-green-600 text-white text-[11px] font-black h-9 rounded-xl hover:bg-green-700 transition-all active:scale-95 shadow-sm"
+                                        className="w-full bg-green-600 text-white text-[11px] font-semibold h-9 rounded-xl hover:bg-green-700 transition-all active:scale-95 shadow-sm"
                                     >
                                         Опубликовать
                                     </button>
@@ -892,7 +892,7 @@ function AdContent() {
                                                 setAd({ ...ad, status: 'pending' });
                                             }
                                         }}
-                                        className="w-full bg-orange-500 text-white text-[11px] font-black h-9 rounded-xl hover:bg-orange-600 transition-all active:scale-95 shadow-sm"
+                                        className="w-full bg-orange-500 text-white text-[11px] font-semibold h-9 rounded-xl hover:bg-orange-600 transition-all active:scale-95 shadow-sm"
                                     >
                                         Снять с публикации
                                     </button>
@@ -906,14 +906,14 @@ function AdContent() {
                                 {ad.profiles?.avatar_url ? (
                                     <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" alt={ad.profiles.full_name} />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold">
+                                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-semibold">
                                         {ad.profiles?.full_name?.charAt(0).toUpperCase() || <User className="h-5 w-5" />}
                                     </div>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="font-black text-sm truncate">{ad.profiles?.full_name || 'Продавец'}</div>
-                                <div className="flex items-center gap-1 text-[10px] text-orange-500 font-bold">
+                                <div className="font-semibold text-sm truncate">{ad.profiles?.full_name || 'Продавец'}</div>
+                                <div className="flex items-center gap-1 text-[10px] text-orange-500 font-semibold">
                                     <Star className="h-3 w-3 fill-current" />
                                     <span>{ad.profiles?.rating || '5.0'}</span>
                                     <span className="text-muted-foreground font-medium ml-1">({sellerReviews.length > 0 ? sellerReviews.length : '0'} отзывов)</span>
@@ -927,9 +927,9 @@ function AdContent() {
                                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col h-[380px]">
                                     <div className="p-3 border-b border-border flex justify-between items-center bg-muted/5">
                                         <div className="flex flex-col">
-                                            <span className="text-xs font-black uppercase tracking-wider">Чат с продавцом</span>
+                                            <span className="text-xs font-semibold uppercase tracking-wider">Чат с продавцом</span>
                                             {isOtherUserTyping && (
-                                                <span className="text-[10px] text-primary animate-pulse font-bold">печатает...</span>
+                                                <span className="text-[10px] text-primary animate-pulse font-semibold">печатает...</span>
                                             )}
                                         </div>
                                         <button onClick={() => setShowChat(false)} className="p-1 hover:bg-muted rounded-full">
@@ -971,7 +971,7 @@ function AdContent() {
                                         ) : (
                                             <div className="h-full flex flex-col items-center justify-center opacity-30 text-center px-4">
                                                 <User className="h-8 w-8 mb-2" />
-                                                <p className="text-[10px] font-bold">Начните общение первым!</p>
+                                                <p className="text-[10px] font-semibold">Начните общение первым!</p>
                                             </div>
                                         )}
                                     </div>
@@ -988,7 +988,7 @@ function AdContent() {
                                         <input
                                             value={newMessage}
                                             onChange={(e) => handleTyping(e.target.value)}
-                                            className="flex-1 h-9 bg-background border border-border rounded-xl px-3 text-xs font-bold outline-none focus:ring-1 focus:ring-primary"
+                                            className="flex-1 h-9 bg-background border border-border rounded-xl px-3 text-xs font-semibold outline-none focus:ring-1 focus:ring-primary"
                                             placeholder="Сообщение..."
                                         />
                                         <button
@@ -1002,15 +1002,15 @@ function AdContent() {
                                 </div>
                             ) : (
                                 <div className="p-3 space-y-3">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                                    <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
                                         <ShieldCheck className="h-4 w-4 text-primary" />
                                         <span>Связаться с продавцом:</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <a href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'} className="h-11 bg-green-600 text-white text-[13px] font-black rounded-xl flex items-center justify-center hover:bg-green-700 transition-all shadow-lg shadow-green-600/10 active:scale-95">
+                                        <a href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'} className="h-11 bg-green-600 text-white text-[13px] font-semibold rounded-xl flex items-center justify-center hover:bg-green-700 transition-all shadow-lg shadow-green-600/10 active:scale-95">
                                             Позвонить
                                         </a>
-                                        <button onClick={() => setShowChat(true)} className="h-11 bg-primary text-white text-[13px] font-black rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 active:scale-95">
+                                        <button onClick={() => setShowChat(true)} className="h-11 bg-primary text-white text-[13px] font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 active:scale-95">
                                             Написать
                                         </button>
                                     </div>
@@ -1089,7 +1089,7 @@ function AdPageSidebar() {
 
     return (
         <div className="hidden lg:block space-y-4 pt-4 border-t border-border/50">
-            <div className="text-[10px] font-black tracking-widest text-muted-foreground uppercase mb-2 px-1">Реклама</div>
+            <div className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase mb-2 px-1">Реклама</div>
             <div className="space-y-3">
                 {banners.filter(b => b.image_url).map(banner => (
                     <a

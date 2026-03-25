@@ -201,8 +201,8 @@ function PublicProfileContent() {
 
     if (!id || !profile) return (
         <div className="container mx-auto px-4 py-20 text-center">
-            <h1 className="text-2xl font-black mb-4">Пользователь не указан</h1>
-            <Link href="/" className="text-primary font-bold hover:underline">Вернуться на главную</Link>
+            <h1 className="text-2xl font-bold mb-4">Пользователь не указан</h1>
+            <Link href="/" className="text-primary font-semibold hover:underline">Вернуться на главную</Link>
         </div>
     );
 
@@ -215,7 +215,7 @@ function PublicProfileContent() {
                 </div>
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8 text-center md:text-left">
-                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-accent/10 border-4 border-surface shadow-xl flex items-center justify-center text-4xl font-black text-accent overflow-hidden shrink-0">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-accent/10 border-4 border-surface shadow-xl flex items-center justify-center text-4xl font-semibold text-accent overflow-hidden shrink-0">
                         {profile.avatar_url ? (
                             <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
                         ) : (
@@ -224,8 +224,8 @@ function PublicProfileContent() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h1 className="text-2xl md:text-4xl font-black mb-2 truncate">{profile.full_name}</h1>
-                        <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2 text-xs md:text-sm font-bold text-muted-foreground uppercase tracking-wide mb-6">
+                        <h1 className="text-2xl md:text-4xl font-semibold mb-2 truncate">{profile.full_name}</h1>
+                        <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2 text-xs md:text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-6">
                             <div className="flex items-center gap-1.5 text-primary">
                                 <MapPin className="h-4 w-4" />
                                 <span>{profile.city || 'Город не указан'}</span>
@@ -242,7 +242,7 @@ function PublicProfileContent() {
                         </div>
 
                         <div className="flex justify-center md:justify-start gap-3">
-                            <button onClick={handleShare} className="px-6 py-2.5 bg-surface border border-border rounded-xl font-bold flex items-center gap-2 hover:bg-muted transition-all active:scale-95 text-sm uppercase tracking-wider">
+                            <button onClick={handleShare} className="px-6 py-2.5 bg-surface border border-border rounded-xl font-semibold flex items-center gap-2 hover:bg-muted transition-all active:scale-95 text-sm uppercase tracking-wider">
                                 <Share2 className="h-4 w-4" /> Поделиться
                             </button>
                             {currentUser && (
@@ -257,12 +257,12 @@ function PublicProfileContent() {
                 {showReviewForm && (
                     <div className="mt-8 pt-8 border-t border-border animate-in slide-in-from-top-4 duration-300">
                         <div className="max-w-2xl mx-auto bg-background rounded-2xl p-6 border border-border shadow-inner">
-                            <h3 className="text-xl font-black mb-6 flex items-center gap-2">
+                            <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
                                 <MessageCircle className="h-6 w-6 text-primary" /> Ваш отзыв о продавце
                             </h3>
                             <div className="space-y-6">
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-xs font-black uppercase text-muted-foreground tracking-widest">Оценка</span>
+                                    <span className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Оценка</span>
                                     <div className="flex gap-2">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <button key={star} onClick={() => setReviewRating(star)} className="transition-transform active:scale-90">
@@ -272,11 +272,11 @@ function PublicProfileContent() {
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-xs font-black uppercase text-muted-foreground tracking-widest">Ваш комментарий</span>
+                                    <span className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Ваш комментарий</span>
                                     <textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="Расскажите о вашем опыте..." className="w-full px-4 py-3 rounded-xl bg-surface border border-border focus:border-primary outline-none font-medium min-h-[120px] resize-none" />
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-xs font-black uppercase text-muted-foreground tracking-widest">Фотографии</span>
+                                    <span className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Фотографии</span>
                                     <div className="flex flex-wrap gap-2">
                                         {reviewImages.map((url, idx) => (
                                             <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden group">
@@ -293,10 +293,10 @@ function PublicProfileContent() {
                                     </div>
                                 </div>
                                 <div className="flex gap-3 pt-4">
-                                    <button onClick={handleSubmitReview} disabled={isSubmittingReview || uploadingReviewImages} className="flex-1 py-4 bg-primary text-white rounded-xl font-black uppercase tracking-wider shadow-lg active:scale-95 transition-all disabled:opacity-50">
+                                    <button onClick={handleSubmitReview} disabled={isSubmittingReview || uploadingReviewImages} className="flex-1 py-4 bg-primary text-white rounded-xl font-bold uppercase tracking-wider shadow-lg active:scale-95 transition-all disabled:opacity-50">
                                         {isSubmittingReview ? 'Публикация...' : 'Опубликовать'}
                                     </button>
-                                    <button onClick={() => setShowReviewForm(false)} className="px-8 py-4 bg-muted rounded-xl font-black uppercase active:scale-95 transition-all text-xs"> Отмена </button>
+                                    <button onClick={() => setShowReviewForm(false)} className="px-8 py-4 bg-muted rounded-xl font-semibold uppercase active:scale-95 transition-all text-xs"> Отмена </button>
                                 </div>
                             </div>
                         </div>
@@ -306,10 +306,10 @@ function PublicProfileContent() {
 
             {/* Tabs */}
             <div className="flex flex-wrap border-b border-border mb-8">
-                <button onClick={() => setActiveTab('ads')} className={cn("px-6 py-4 font-black flex items-center gap-2 border-b-4 transition-all text-sm md:text-base uppercase tracking-wider", activeTab === 'ads' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground")}>
+                <button onClick={() => setActiveTab('ads')} className={cn("px-6 py-4 font-semibold flex items-center gap-2 border-b-4 transition-all text-sm md:text-base uppercase tracking-wider", activeTab === 'ads' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground")}>
                     <Package className="h-5 w-5" /> Объявления <span className="opacity-50 ml-1">{ads.length}</span>
                 </button>
-                <button onClick={() => setActiveTab('reviews')} className={cn("px-6 py-4 font-black flex items-center gap-2 border-b-4 transition-all text-sm md:text-base uppercase tracking-wider", activeTab === 'reviews' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground")}>
+                <button onClick={() => setActiveTab('reviews')} className={cn("px-6 py-4 font-semibold flex items-center gap-2 border-b-4 transition-all text-sm md:text-base uppercase tracking-wider", activeTab === 'reviews' ? "border-primary text-primary" : "border-transparent text-muted hover:text-foreground")}>
                     <Star className="h-5 w-5" /> Отзывы <span className="opacity-50 ml-1">{reviews.length}</span>
                 </button>
             </div>
@@ -323,14 +323,14 @@ function PublicProfileContent() {
                                     {ad.images?.[0] ? <img src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-full flex items-center justify-center text-[10px] opacity-30">Нет фото</div>}
                                 </div>
                                 <div className="p-3 flex flex-col flex-1 gap-1">
-                                    <div className="text-lg font-black tracking-tight">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}</div>
+                                    <div className="text-lg font-semibold tracking-tight">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}</div>
                                     <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5em]">{ad.title}</h3>
-                                    <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase opacity-70">
+                                    <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase opacity-70">
                                         <MapPin className="h-3 w-3" /> <span className="truncate">{ad.city}</span>
                                     </div>
                                 </div>
                             </Link>
-                        )) : <div className="col-span-full py-20 text-center font-bold text-muted-foreground">Нет активных объявлений</div>}
+                        )) : <div className="col-span-full py-20 text-center font-semibold text-muted-foreground">Нет активных объявлений</div>}
                     </div>
                 )}
 
@@ -339,16 +339,16 @@ function PublicProfileContent() {
                         {reviews.length > 0 ? reviews.map(rev => (
                             <div key={rev.id} className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
                                 <div className="flex items-center gap-4 mb-4">
-                                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center font-black overflow-hidden">
+                                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center font-semibold overflow-hidden">
                                         {rev.reviewer?.avatar_url ? <img src={rev.reviewer.avatar_url} className="w-full h-full object-cover" /> : rev.reviewer?.full_name?.charAt(0) || '?'}
                                     </div>
                                     <div className="flex-1">
-                                        <div className="font-bold text-sm">{rev.reviewer?.full_name || 'Пользователь'}</div>
+                                        <div className="font-semibold text-sm">{rev.reviewer?.full_name || 'Пользователь'}</div>
                                         <div className="flex gap-0.5 mt-0.5">
                                             {[...Array(5)].map((_, i) => <Star key={i} className={cn("h-3 w-3", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted/30")} />)}
                                         </div>
                                     </div>
-                                    <div className="text-[10px] text-muted font-bold uppercase">{new Date(rev.created_at).toLocaleDateString()}</div>
+                                    <div className="text-[10px] text-muted font-semibold uppercase">{new Date(rev.created_at).toLocaleDateString()}</div>
                                     {isAdmin && (
                                         <button onClick={() => handleDeleteReview(rev.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all">
                                             <Trash2 className="h-4 w-4" />
@@ -367,12 +367,12 @@ function PublicProfileContent() {
                                 )}
                                 {rev.reply && (
                                     <div className="bg-muted/30 rounded-xl p-4 mt-4 border-l-4 border-primary/20 text-sm italic">
-                                        <div className="font-black text-[10px] uppercase text-primary/70 mb-1">Ответ продавца</div>
+                                        <div className="font-semibold text-[10px] uppercase text-primary/70 mb-1">Ответ продавца</div>
                                         {rev.reply}
                                     </div>
                                 )}
                             </div>
-                        )) : <div className="py-20 text-center font-bold text-muted-foreground">Отзывов пока нет</div>}
+                        )) : <div className="py-20 text-center font-semibold text-muted-foreground">Отзывов пока нет</div>}
                     </div>
                 )}
             </div>
@@ -382,7 +382,7 @@ function PublicProfileContent() {
 
 export default function UserPage() {
     return (
-        <Suspense fallback={<div className="p-20 text-center font-black uppercase tracking-widest opacity-30 text-xs">Загрузка профиля...</div>}>
+        <Suspense fallback={<div className="p-20 text-center font-semibold uppercase tracking-widest opacity-30 text-xs">Загрузка профиля...</div>}>
             <PublicProfileContent />
         </Suspense>
     );

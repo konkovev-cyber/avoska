@@ -75,7 +75,7 @@ export default function ResponsiveSelect({
 
         <div className="px-6 pt-2 pb-4 border-b border-border/50 shrink-0">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-black uppercase tracking-tight ml-1">{label || 'Выберите'}</h2>
+            <h2 className="text-lg font-semibold uppercase tracking-tight ml-1">{label || 'Выберите'}</h2>
             <button
               onClick={() => setIsOpen(false)}
               className="p-2 bg-muted/10 rounded-full text-muted-foreground hover:bg-muted/20 transition-colors"
@@ -92,7 +92,7 @@ export default function ResponsiveSelect({
                 placeholder="Поиск..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-11 pl-4 pr-10 bg-muted/5 border border-border rounded-xl shadow-inner outline-none focus:border-primary transition-all font-bold text-sm"
+                className="w-full h-11 pl-4 pr-10 bg-muted/5 border border-border rounded-xl shadow-inner outline-none focus:border-primary transition-all font-semibold text-sm"
                 autoFocus
               />
               <SearchIcon className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/30" />
@@ -115,7 +115,7 @@ export default function ResponsiveSelect({
                   setSearch('');
                 }}
                 className={cn(
-                  "flex items-center justify-between px-5 py-3.5 rounded-xl border-2 transition-all font-bold text-left",
+                  "flex items-center justify-between px-5 py-3.5 rounded-xl border-2 transition-all font-semibold text-left",
                   value === opt.value
                     ? "bg-primary/5 border-primary text-primary shadow-sm"
                     : "bg-surface border-border/40 hover:bg-muted/10 hover:border-border"
@@ -126,7 +126,7 @@ export default function ResponsiveSelect({
               </button>
             ))
           ) : (
-            <div className="py-12 text-center text-muted-foreground font-bold">Ничего не найдено</div>
+            <div className="py-12 text-center text-muted-foreground font-semibold">Ничего не найдено</div>
           )}
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function ResponsiveSelect({
               placeholder="Поиск..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-9 pl-8 pr-4 bg-background border border-border rounded-lg outline-none focus:border-primary transition-all font-bold text-xs"
+              className="w-full h-9 pl-8 pr-4 bg-background border border-border rounded-lg outline-none focus:border-primary transition-all font-semibold text-xs"
               autoFocus
             />
             <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40" />
@@ -162,7 +162,7 @@ export default function ResponsiveSelect({
                 setSearch('');
               }}
               className={cn(
-                "w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all font-bold text-left text-sm group",
+                "w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all font-semibold text-left text-sm group",
                 value === opt.value
                   ? "bg-primary text-white"
                   : "hover:bg-primary/10 hover:text-primary"
@@ -173,7 +173,7 @@ export default function ResponsiveSelect({
             </button>
           ))
         ) : (
-          <div className="py-8 text-center text-muted-foreground text-xs font-bold">Ничего не найдено</div>
+          <div className="py-8 text-center text-muted-foreground text-xs font-semibold">Ничего не найдено</div>
         )}
       </div>
     </div>
@@ -181,12 +181,12 @@ export default function ResponsiveSelect({
 
   return (
     <div className="space-y-1 relative" ref={containerRef}>
-      {label && <label className="text-[10px] font-black text-muted-foreground uppercase tracking-wider ml-1">{label}</label>}
+      {label && <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider ml-1">{label}</label>}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold flex items-center justify-between transition-all hover:border-primary group",
+          "w-full h-11 px-4 rounded-xl bg-surface border border-border outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-semibold flex items-center justify-between transition-all hover:border-primary group",
           triggerClassName
         )}
       >

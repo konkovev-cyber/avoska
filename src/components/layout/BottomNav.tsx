@@ -87,7 +87,7 @@ export default function BottomNav() {
                                 <div className="w-12 h-12 bg-primary text-white rounded-2xl flex items-center justify-center shadow-xl shadow-primary/40 border-4 border-background">
                                     <Icon className="h-6 w-6" />
                                 </div>
-                                <span className="text-[8px] font-black uppercase tracking-tighter mt-1 text-primary">{item.label}</span>
+                                <span className="text-[8px] font-semibold uppercase tracking-tighter mt-1 text-primary">{item.label}</span>
                             </Link>
                         );
                     }
@@ -103,7 +103,7 @@ export default function BottomNav() {
                         >
                             <Icon className={cn("h-6 w-6 transition-transform", isActive ? "scale-110" : "opacity-70")} />
                             {item.label === 'Избранное' && favoritesCount > 0 && (
-                                <span className="absolute top-1 right-2 w-4 h-4 bg-primary text-white text-[8px] font-black rounded-full flex items-center justify-center border-2 border-background">
+                                <span className="absolute top-1 right-2 w-4 h-4 bg-primary text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-background">
                                     {favoritesCount}
                                 </span>
                             )}
@@ -112,7 +112,7 @@ export default function BottomNav() {
                                 null
                             )}
                             <span className={cn(
-                                "text-[9px] font-black uppercase tracking-tighter transition-all",
+                                "text-[9px] font-semibold uppercase tracking-tighter transition-all",
                                 isActive ? "opacity-100" : "opacity-50"
                             )}>{item.label}</span>
                         </Link>

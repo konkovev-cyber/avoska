@@ -289,13 +289,13 @@ function ChatContent() {
                 )}>
                     <div className="p-4 border-b border-border/50 sticky top-0 bg-background/80 backdrop-blur-md z-10">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="text-xl font-black tracking-tight text-foreground">Сообщения</h2>
+                            <h2 className="text-xl font-semibold tracking-tight text-foreground">Сообщения</h2>
                         </div>
                         <div className="relative group">
                             <input
                                 type="text"
                                 placeholder="Поиск чатов..."
-                                className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface border border-border/50 focus:border-primary/50 text-sm font-bold outline-none transition-all placeholder:text-muted-foreground/40 text-foreground shadow-sm"
+                                className="w-full h-10 pl-9 pr-4 rounded-lg bg-surface border border-border/50 focus:border-primary/50 text-sm font-semibold outline-none transition-all placeholder:text-muted-foreground/40 text-foreground shadow-sm"
                             />
                             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                         </div>
@@ -322,14 +322,14 @@ function ChatContent() {
                                     </div>
                                     <div className="flex-1 text-left min-w-0">
                                         <div className="flex justify-between items-baseline mb-0.5">
-                                            <div className="font-bold truncate text-[14px] text-foreground">{conv.user.full_name}</div>
-                                            <div className="text-[10px] text-muted-foreground font-bold">
+                                            <div className="font-semibold truncate text-[14px] text-foreground">{conv.user.full_name}</div>
+                                            <div className="text-[10px] text-muted-foreground font-semibold">
                                                 {new Date(conv.lastMessage.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </div>
                                         <div className="text-xs text-muted-foreground truncate font-medium flex items-center">
                                             {conv.lastMessage?.ad && (
-                                                <span className="shrink-0 font-bold text-foreground/80 mr-1.5 uppercase tracking-wide text-[9px] bg-muted/10 px-1.5 py-0.5 rounded">
+                                                <span className="shrink-0 font-semibold text-foreground/80 mr-1.5 uppercase tracking-wide text-[9px] bg-muted/10 px-1.5 py-0.5 rounded">
                                                     {conv.lastMessage.ad.title}
                                                 </span>
                                             )}
@@ -341,7 +341,7 @@ function ChatContent() {
                         ) : (
                             <div className="flex flex-col items-center justify-center h-64 text-center p-8 opacity-40">
                                 <MessageCircle className="h-10 w-10 mb-3 text-muted-foreground" />
-                                <p className="font-bold text-muted-foreground text-sm">Нет сообщений</p>
+                                <p className="font-semibold text-muted-foreground text-sm">Нет сообщений</p>
                             </div>
                         )}
                     </div>
@@ -369,12 +369,12 @@ function ChatContent() {
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                    <div className="font-black text-lg text-foreground truncate leading-none mb-1">
+                                    <div className="font-bold text-lg text-foreground truncate leading-none mb-1">
                                         {activeChat.user.full_name}
                                     </div>
                                     <div className="flex items-center gap-2 h-4">
                                         {isOtherUserTyping ? (
-                                            <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1.5 animate-in fade-in slide-in-from-left-1 duration-300">
+                                            <div className="text-[10px] text-primary font-semibold uppercase tracking-widest flex items-center gap-1.5 animate-in fade-in slide-in-from-left-1 duration-300">
                                                 <span className="flex gap-0.5">
                                                     <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
                                                     <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
@@ -384,15 +384,15 @@ function ChatContent() {
                                             </div>
                                         ) : activeAd ? (
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-foreground/80 uppercase tracking-wide truncate max-w-[200px] bg-muted/10 px-2 py-0.5 rounded">
+                                                <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide truncate max-w-[200px] bg-muted/10 px-2 py-0.5 rounded">
                                                     {activeAd.title}
                                                 </span>
-                                                <span className="text-xs font-black text-primary whitespace-nowrap">
+                                                <span className="text-xs font-semibold text-primary whitespace-nowrap">
                                                     {activeAd.price ? `${activeAd.price.toLocaleString()} ₽` : 'Цена договорная'}
                                                 </span>
                                             </div>
                                         ) : (
-                                            <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                            <div className="text-[10px] text-primary font-semibold uppercase tracking-widest flex items-center gap-1.5">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                                                 Онлайн
                                             </div>
@@ -419,7 +419,7 @@ function ChatContent() {
                                 {(Object.entries(groupedMessages) as [string, any[]][]).map(([date, msgs]) => (
                                     <div key={date} className="space-y-4">
                                         <div className="flex justify-center sticky top-0 z-10 pt-2 pb-2">
-                                            <span className="px-3 py-1 bg-muted/10 backdrop-blur text-muted-foreground text-[10px] font-bold uppercase tracking-widest rounded-full">
+                                            <span className="px-3 py-1 bg-muted/10 backdrop-blur text-muted-foreground text-[10px] font-semibold uppercase tracking-widest rounded-full">
                                                 {date}
                                             </span>
                                         </div>
@@ -445,7 +445,7 @@ function ChatContent() {
                                                         )}
 
                                                         <div className={cn(
-                                                            "text-[9px] mt-1 flex items-center justify-end gap-1 opacity-70 font-bold tracking-wide",
+                                                            "text-[9px] mt-1 flex items-center justify-end gap-1 opacity-70 font-semibold tracking-wide",
                                                             isOurs ? "text-primary" : "text-muted-foreground"
                                                         )}>
                                                             {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -515,7 +515,7 @@ function ChatContent() {
                             <div className="w-20 h-20 bg-surface rounded-[2rem] flex items-center justify-center mb-6 border border-border/50">
                                 <MessageCircle className="h-10 w-10 text-muted-foreground/30" />
                             </div>
-                            <h3 className="font-black text-xl text-foreground mb-2">Выберите чат</h3>
+                            <h3 className="font-semibold text-xl text-foreground mb-2">Выберите чат</h3>
                             <p className="text-muted-foreground font-medium max-w-xs text-sm">Общайтесь с продавцами и покупателями в защищенном чате Авоська+</p>
                         </div>
                     )}
@@ -527,7 +527,7 @@ function ChatContent() {
 
 export default function ChatPage() {
     return (
-        <Suspense fallback={<div className="h-[60vh] flex items-center justify-center font-bold text-gray-300 uppercase tracking-widest text-xs">Загрузка чата...</div>}>
+        <Suspense fallback={<div className="h-[60vh] flex items-center justify-center font-semibold text-gray-300 uppercase tracking-widest text-xs">Загрузка чата...</div>}>
             <ChatContent />
         </Suspense>
     );

@@ -81,14 +81,14 @@ export default function GlobalMapPage() {
                 coordinates: [ad.latitude, ad.longitude]
             },
             properties: {
-                balloonContentHeader: `<div class="font-black text-sm">${ad.title}</div>`,
+                balloonContentHeader: `<div class="font-semibold text-sm">${ad.title}</div>`,
                 balloonContentBody: `
                     <div class="flex gap-2 items-start p-1 min-w-[200px]">
                         <img src="${ad.images[0]}" class="w-16 h-16 rounded object-cover" />
                         <div>
-                            <div class="font-black text-primary text-lg">${ad.price ? ad.price.toLocaleString() + ' ₽' : 'Договорная'}</div>
-                            <div class="text-[10px] text-muted-foreground font-bold uppercase">${ad.city}</div>
-                            <button onclick="window.location.href='/ad?id=${ad.id}'" class="mt-2 w-full py-1 text-[10px] font-black bg-primary text-white rounded uppercase tracking-widest">Перейти</button>
+                            <div class="font-semibold text-primary text-lg">${ad.price ? ad.price.toLocaleString() + ' ₽' : 'Договорная'}</div>
+                            <div class="text-[10px] text-muted-foreground font-semibold uppercase">${ad.city}</div>
+                            <button onclick="window.location.href='/ad?id=${ad.id}'" class="mt-2 w-full py-1 text-[10px] font-semibold bg-primary text-white rounded uppercase tracking-widest">Перейти</button>
                         </div>
                     </div>
                 `,
@@ -124,7 +124,7 @@ export default function GlobalMapPage() {
                         placeholder="Поиск по карте..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full h-10 pl-10 pr-4 bg-muted/20 border border-border/50 rounded-xl outline-none focus:border-primary/50 font-bold text-sm transition-all"
+                        className="w-full h-10 pl-10 pr-4 bg-muted/20 border border-border/50 rounded-xl outline-none focus:border-primary/50 font-semibold text-sm transition-all"
                     />
                     <Search className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 </div>
@@ -135,7 +135,7 @@ export default function GlobalMapPage() {
                 {loading && (
                     <div className="absolute inset-0 z-20 bg-background/50 backdrop-blur-sm flex flex-col items-center justify-center">
                         <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
-                        <span className="font-black text-xs uppercase tracking-widest text-muted-foreground">Загрузка объявлений...</span>
+                        <span className="font-semibold text-xs uppercase tracking-widest text-muted-foreground">Загрузка объявлений...</span>
                     </div>
                 )}
 
@@ -145,9 +145,9 @@ export default function GlobalMapPage() {
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 bg-black/80 text-white px-4 py-2 rounded-full backdrop-blur-md border border-white/10 shadow-2xl flex items-center gap-3">
                     <div className="flex items-center gap-1.5 border-r border-white/20 pr-3">
                         <MapPin className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-[10px] font-black uppercase tracking-wider">{ads.length}</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider">{ads.length}</span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">Точек на карте</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">Точек на карте</span>
                 </div>
             </div>
         </div>

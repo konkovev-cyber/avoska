@@ -35,7 +35,7 @@ export default function MapView({ pos, title, address }: MapViewProps) {
                 <Marker position={pos}>
                     {title && (
                         <Popup>
-                            <div className="font-bold">{title}</div>
+                            <div className="font-semibold">{title}</div>
                             {address && <div className="text-xs">{address}</div>}
                         </Popup>
                     )}

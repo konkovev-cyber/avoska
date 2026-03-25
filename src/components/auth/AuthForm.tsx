@@ -95,7 +95,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
             >
                 <X className="h-5 w-5" />
             </button>
-            <h2 className="text-2xl md:text-3xl font-black text-center mb-6 md:mb-8 tracking-tighter">
+            <h2 className="text-2xl md:text-3xl font-semibold text-center mb-6 md:mb-8 tracking-tighter">
                 {mode === 'login' ? 'С возвращением!' :
                     mode === 'register' ? 'Станьте своим' :
                         mode === 'forgot-password' ? 'Сброс пароля' : 'Новый пароль'}
@@ -105,9 +105,9 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl flex flex-col gap-1 animate-in slide-in-from-top-2 duration-500">
                     <div className="flex items-center gap-2 text-red-600">
                         <ShieldCheck className="h-5 w-5" />
-                        <span className="text-xs font-black uppercase tracking-widest">Доступ ограничен</span>
+                        <span className="text-xs font-semibold uppercase tracking-widest">Доступ ограничен</span>
                     </div>
-                    <p className="text-[10px] text-red-500 font-bold leading-tight">
+                    <p className="text-[10px] text-red-500 font-semibold leading-tight">
                         Пожалуйста, войдите в аккаунт или зарегистрируйтесь, чтобы продолжить.
                     </p>
                 </div>
@@ -116,12 +116,12 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
             <form onSubmit={handleAuth} className="space-y-4 md:space-y-5">
                 {mode === 'register' && (
                     <div>
-                        <label className="block text-[9px] font-black uppercase text-muted-foreground mb-1.5 tracking-[0.15em] ml-1">Как вас зовут?</label>
+                        <label className="block text-[9px] font-semibold uppercase text-muted-foreground mb-1.5 tracking-[0.15em] ml-1">Как вас зовут?</label>
                         <input
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold text-sm"
+                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-semibold text-sm"
                             placeholder="Иван Иванов"
                             required
                         />
@@ -129,12 +129,12 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 )}
                 {mode !== 'update-password' && (
                     <div>
-                        <label className="block text-[9px] font-black uppercase text-muted-foreground mb-1.5 tracking-[0.15em] ml-1">Ваша почта (Email)</label>
+                        <label className="block text-[9px] font-semibold uppercase text-muted-foreground mb-1.5 tracking-[0.15em] ml-1">Ваша почта (Email)</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold text-sm"
+                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-semibold text-sm"
                             placeholder="example@mail.com"
                             required
                         />
@@ -143,14 +143,14 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 {mode !== 'forgot-password' && (
                     <div>
                         <div className="flex justify-between items-center mb-1.5">
-                            <label className="block text-[9px] font-black uppercase text-muted-foreground tracking-[0.15em] ml-1">
+                            <label className="block text-[9px] font-semibold uppercase text-muted-foreground tracking-[0.15em] ml-1">
                                 {mode === 'update-password' ? 'Новый пароль' : 'Пароль'}
                             </label>
                             {mode === 'login' && (
                                 <button
                                     type="button"
                                     onClick={() => router.push('/forgot-password')}
-                                    className="text-[9px] font-bold uppercase tracking-wider text-primary hover:underline"
+                                    className="text-[9px] font-semibold uppercase tracking-wider text-primary hover:underline"
                                 >
                                     Забыли пароль?
                                 </button>
@@ -160,7 +160,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-bold text-sm"
+                            className="w-full h-12 md:h-14 px-4 md:px-5 rounded-xl md:rounded-2xl border border-border bg-background focus:border-primary outline-none transition-all font-semibold text-sm"
                             placeholder="••••••••"
                             required
                         />
@@ -169,7 +169,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 md:h-14 bg-primary text-white font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/30 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 mt-2"
+                    className="w-full h-12 md:h-14 bg-primary text-white font-bold uppercase tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-primary/30 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 mt-2"
                 >
                     {loading ? (
                         <div className="flex items-center justify-center gap-2">
@@ -186,7 +186,7 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 <button
                     type="button"
                     onClick={() => router.back()}
-                    className="w-full h-12 md:h-14 bg-muted/30 text-muted-foreground font-black uppercase tracking-widest rounded-xl md:rounded-2xl hover:bg-muted/50 transition-all flex items-center justify-center gap-2 mt-1"
+                    className="w-full h-12 md:h-14 bg-muted/30 text-muted-foreground font-semibold uppercase tracking-widest rounded-xl md:rounded-2xl hover:bg-muted/50 transition-all flex items-center justify-center gap-2 mt-1"
                 >
                     <ArrowLeft className="h-3 w-3" />
                     <span className="text-xs">Назад</span>
@@ -197,21 +197,21 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                 {mode === 'login' ? (
                     <p className="text-sm font-medium text-muted-foreground">
                         У вас ещё нет аккаунта?{' '}
-                        <button onClick={() => router.push('/register')} className="text-primary font-black hover:underline uppercase text-xs tracking-wider">
+                        <button onClick={() => router.push('/register')} className="text-primary font-semibold hover:underline uppercase text-xs tracking-wider">
                             Создать
                         </button>
                     </p>
                 ) : mode === 'register' ? (
                     <p className="text-sm font-medium text-muted-foreground">
                         Уже есть аккаунт?{' '}
-                        <button onClick={() => router.push('/login')} className="text-primary font-black hover:underline uppercase text-xs tracking-wider">
+                        <button onClick={() => router.push('/login')} className="text-primary font-semibold hover:underline uppercase text-xs tracking-wider">
                             Войти
                         </button>
                     </p>
                 ) : mode === 'forgot-password' ? (
                     <p className="text-sm font-medium text-muted-foreground">
                         Вспомнили пароль?{' '}
-                        <button onClick={() => router.push('/login')} className="text-primary font-black hover:underline uppercase text-xs tracking-wider">
+                        <button onClick={() => router.push('/login')} className="text-primary font-semibold hover:underline uppercase text-xs tracking-wider">
                             Войти
                         </button>
                     </p>

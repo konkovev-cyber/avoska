@@ -54,7 +54,7 @@ export default function AppUpdateCheck() {
                             <RefreshCw className="h-5 w-5 text-green-600 animate-spin-slow" />
                         </div>
                         <div>
-                            <h4 className="font-black text-sm uppercase tracking-tight">Доступно обновление!</h4>
+                            <h4 className="font-semibold text-sm uppercase tracking-tight">Доступно обновление!</h4>
                             <p className="text-xs text-muted-foreground font-medium">Версия {version} уже готова для скачивания.</p>
                         </div>
                     </div>
@@ -63,7 +63,7 @@ export default function AppUpdateCheck() {
                 <div className="flex gap-2">
                     <a
                         href={APK_DOWNLOAD_URL}
-                        className="flex-1 bg-primary text-white py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                        className="flex-1 bg-primary text-white py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20"
                         onClick={() => toast.dismiss(t)}
                     >
                         <Download className="h-3 w-3" />
@@ -71,7 +71,7 @@ export default function AppUpdateCheck() {
                     </a>
                     <button
                         onClick={() => toast.dismiss(t)}
-                        className="px-4 py-2 bg-muted/10 text-muted-foreground rounded-xl text-xs font-black uppercase tracking-widest hover:bg-muted/20 transition-all"
+                        className="px-4 py-2 bg-muted/10 text-muted-foreground rounded-xl text-xs font-semibold uppercase tracking-widest hover:bg-muted/20 transition-all"
                     >
                         Позже
                     </button>
