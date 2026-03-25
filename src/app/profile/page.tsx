@@ -479,7 +479,7 @@ function ProfilePageContent() {
                                     <div className="flex items-center gap-2 mb-0.5">
                                         <span className={cn(
                                             "text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded",
-                                            ad.status === 'active' ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"
+                                            ad.status === 'active' ? "bg-green-100 text-green-700" : "bg-muted/10 text-muted-foreground"
                                         )}>
                                             {ad.status === 'active' ? 'Активно' : 'Снято'}
                                         </span>

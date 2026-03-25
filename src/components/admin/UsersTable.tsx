@@ -93,7 +93,7 @@ export function UsersTable({ users, onUpdate, searchQuery }: UsersTableProps) {
                                         onClick={() => toggleVerify(u.id, !u.is_verified)}
                                         className={cn(
                                             "inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider transition-colors",
-                                            u.is_verified ? "bg-green-500/10 text-green-500" : "bg-muted text-muted-foreground"
+                                            u.is_verified ? "bg-green-500/10 text-green-500" : "bg-orange-500/10 text-orange-500"
                                         )}
                                     >
                                         {u.is_verified ? 'Верифицирован' : 'Не верифицирован'}

@@ -114,7 +114,7 @@ export default function PushSubscriptionManager() {
                 className={cn(
                     "px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2",
                     subscription
-                        ? "bg-muted text-muted-foreground hover:bg-red-50 hover:text-red-500"
+                        ? "bg-muted/10 text-muted-foreground hover:bg-red-50 hover:text-red-500"
                         : "bg-primary text-white shadow-lg shadow-primary/20"
                 )}
             >

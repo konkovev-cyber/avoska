@@ -193,7 +193,7 @@ export default function AdminDashboard() {
                             onClick={() => { setActiveTab(item.id as any); setIsMenuOpen(false); }}
                             className={cn(
                                 "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
-                                activeTab === item.id ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                                activeTab === item.id ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-primary/5 text-muted-foreground hover:text-primary"
                             )}
                         >
                             <div className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
                             {item.count !== undefined && item.count > 0 && (
                                 <span className={cn(
                                     "px-2 py-0.5 rounded-full text-[10px] font-semibold",
-                                    activeTab === item.id ? "bg-white text-primary" : "bg-muted text-muted-foreground"
+                                    activeTab === item.id ? "bg-white text-primary" : "bg-primary/10 text-primary"
                                 )}>{item.count}</span>
                             )}
                         </button>

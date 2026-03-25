@@ -123,7 +123,7 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
                                                 </button>
                                             )}
                                             
-                                            <button onClick={() => toggleVip(ad.id, !ad.is_vip)} className={cn("p-2 rounded-lg transition-all", ad.is_vip ? "bg-orange-500/10 text-orange-500" : "hover:bg-muted text-muted-foreground")} title="VIP">
+                                            <button onClick={() => toggleVip(ad.id, !ad.is_vip)} className={cn("p-2 rounded-lg transition-all", ad.is_vip ? "bg-orange-500/10 text-orange-500" : "hover:bg-muted/10 text-muted-foreground")} title="VIP">
                                                 <ShieldCheck className="h-4 w-4" />
                                             </button>
 
