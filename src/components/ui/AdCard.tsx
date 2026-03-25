@@ -47,6 +47,12 @@ export function AdCard({ ad, isHoverGallery = false }: AdCardProps) {
                     </div>
                 )}
 
+                {ad.status === 'pending' && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-yellow-500 text-white text-[9px] font-bold uppercase rounded shadow-sm z-20 pointer-events-none">
+                        На проверке
+                    </div>
+                )}
+
                 {/* Heart icon on category page style */}
                 {!isHoverGallery && (
                     <button className="absolute top-2 right-2 p-1.5 bg-surface/80 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface text-muted hover:text-red-500 z-10">

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { supabase } from '@/lib/supabase/client';
@@ -25,7 +26,8 @@ import {
     Check,
     CheckCheck,
     Ban,
-    Camera
+    Camera,
+    Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -473,17 +475,71 @@ function AdContent() {
 
     return (
         <div className="bg-background min-h-screen pb-40">
-            {isZoomed && (
-                <div className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-2 backdrop-blur-sm animate-in fade-in duration-200" onClick={() => setIsZoomed(false)}>
-                    <button className="absolute top-4 right-4 p-2 bg-surface/20 rounded-full text-white hover:bg-surface/40 transition-all active:scale-90">
-                        <X className="h-6 w-6" />
-                    </button>
-                    <img src={ad.images[currentImageIndex]} className="max-w-full max-h-full object-contain" alt="" />
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-xs font-bold backdrop-blur-md pointer-events-none">
-                        Нажмите, чтобы закрыть
-                    </div>
-                </div>
-            )}
+            <AnimatePresence>
+                {isZoomed && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center backdrop-blur-md"
+                        onClick={() => setIsZoomed(false)}
+                    >
+                        <button className="absolute top-4 right-4 p-2.5 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all active:scale-90 z-[110]">
+                            <X className="h-6 w-6" />
+                        </button>
+
+                        <div className="relative w-full h-full flex items-center justify-center overflow-hidden" onClick={e => e.stopPropagation()}>
+                            <AnimatePresence initial={false} mode='wait'>
+                                <motion.img
+                                    key={currentImageIndex}
+                                    src={ad.images[currentImageIndex]}
+                                    initial={{ opacity: 0, x: 100 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -100 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                    drag="x"
+                                    dragConstraints={{ left: 0, right: 0 }}
+                                    dragElastic={0.5}
+                                    onDragEnd={(e, { offset, velocity }) => {
+                                        const swipe = offset.x;
+                                        if (swipe < -50) {
+                                            setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1));
+                                        } else if (swipe > 50) {
+                                            setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1));
+                                        }
+                                    }}
+                                    className="max-w-[95vw] max-h-[85vh] object-contain select-none cursor-grab active:cursor-grabbing"
+                                    alt=""
+                                />
+                            </AnimatePresence>
+
+                            {ad.images.length > 1 && (
+                                <>
+                                    <button
+                                        onClick={() => setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1))}
+                                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/5 hover:bg-white/10 text-white rounded-full transition-all z-[110] hidden md:flex"
+                                    >
+                                        <ChevronLeft className="h-8 w-8" />
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1))}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/5 hover:bg-white/10 text-white rounded-full transition-all z-[110] hidden md:flex"
+                                    >
+                                        <ChevronRight className="h-8 w-8" />
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+                        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none">
+                            <div className="bg-white/10 px-4 py-1.5 rounded-full text-white/80 text-[10px] font-black uppercase tracking-[0.2em] backdrop-blur-md">
+                                {currentImageIndex + 1} / {ad.images.length}
+                            </div>
+                            <span className="text-white/40 text-[9px] font-bold uppercase tracking-widest">Листайте фото</span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="max-w-[1000px] mx-auto px-3 py-2">
                 {/* Header: Title + Price (Super Compact) */}
@@ -494,6 +550,12 @@ function AdContent() {
                             {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                         </div>
                         <div className="flex gap-2">
+                            {ad.status === 'pending' && (
+                                <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[10px] font-black uppercase tracking-wider h-fit mt-1.5">
+                                    <Clock className="h-3 w-3" />
+                                    На проверке
+                                </div>
+                            )}
                             {ad.status === 'rejected' && (
                                 <div className="flex items-center gap-1.5 px-3 py-1 bg-red-100 text-red-600 rounded-full text-[10px] font-black uppercase tracking-wider h-fit mt-1.5">
                                     <Ban className="h-3 w-3" />
@@ -802,12 +864,39 @@ function AdContent() {
                                         }}
                                         className={cn(
                                             "text-white text-[11px] font-black h-9 rounded-xl transition-all active:scale-95 shadow-sm",
-                                            ad.status === 'rejected' ? "bg-green-600 hover:bg-green-700" : "bg-orange-500 hover:bg-orange-600"
+                                            ad.status === 'rejected' ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
                                         )}
                                     >
                                         {ad.status === 'rejected' ? 'Разбанить' : 'Бан'}
                                     </button>
                                 </div>
+                                {ad.status === 'pending' ? (
+                                    <button
+                                        onClick={async () => {
+                                            const { error } = await supabase.from('ads').update({ status: 'active' }).eq('id', id);
+                                            if (!error) {
+                                                toast.success('Объявление опубликовано');
+                                                setAd({ ...ad, status: 'active' });
+                                            }
+                                        }}
+                                        className="w-full bg-green-600 text-white text-[11px] font-black h-9 rounded-xl hover:bg-green-700 transition-all active:scale-95 shadow-sm"
+                                    >
+                                        Опубликовать
+                                    </button>
+                                ) : ad.status === 'active' ? (
+                                    <button
+                                        onClick={async () => {
+                                            const { error } = await supabase.from('ads').update({ status: 'pending' }).eq('id', id);
+                                            if (!error) {
+                                                toast.success('Снято с публикации');
+                                                setAd({ ...ad, status: 'pending' });
+                                            }
+                                        }}
+                                        className="w-full bg-orange-500 text-white text-[11px] font-black h-9 rounded-xl hover:bg-orange-600 transition-all active:scale-95 shadow-sm"
+                                    >
+                                        Снять с публикации
+                                    </button>
+                                ) : null}
                             </div>
                         )}
 

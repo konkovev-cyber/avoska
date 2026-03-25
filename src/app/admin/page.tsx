@@ -16,7 +16,7 @@ import { compressImage } from '@/lib/image-utils';
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
-    const [activeTab, setActiveTab] = useState<'ads' | 'users' | 'cities' | 'banners' | 'reports' | 'categories' | 'reviews' | 'settings'>('ads');
+    const [activeTab, setActiveTab] = useState<'ads' | 'moderation' | 'users' | 'cities' | 'banners' | 'reports' | 'categories' | 'reviews' | 'settings'>('moderation');
     const [stats, setStats] = useState({ ads: 0, users: 0, pending: 0, cities: 0, categories: 0 });
 
     // Data states
@@ -55,7 +55,7 @@ export default function AdminDashboard() {
 
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [dataFetched, setDataFetched] = useState(false);
     const router = useRouter();
@@ -272,6 +272,21 @@ export default function AdminDashboard() {
         fetchData();
     };
 
+    const approveAd = async (adId: string) => {
+        const { error } = await supabase.from('ads').update({ status: 'active' }).eq('id', adId);
+        if (error) return toast.error('Ошибка');
+        toast.success('Опубликовано');
+        fetchData();
+    };
+
+    const toggleAdStatus = async (adId: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'rejected' ? 'active' : 'rejected';
+        const { error } = await supabase.from('ads').update({ status: newStatus }).eq('id', adId);
+        if (error) return toast.error('Ошибка');
+        toast.success(newStatus === 'rejected' ? 'Заблокировано' : 'Разблокировано');
+        fetchData();
+    };
+
     if (loading) return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -304,6 +319,7 @@ export default function AdminDashboard() {
 
                 <nav className="px-3 space-y-1 overflow-y-auto max-h-[calc(100vh-12rem)]">
                     {[
+                        { id: 'moderation', icon: ShieldCheck, label: 'Модерация', count: stats.pending },
                         { id: 'ads', icon: Package, label: 'Объявления', count: stats.ads },
                         { id: 'users', icon: Users, label: 'Пользователи', count: stats.users },
                         { id: 'cities', icon: MapPin, label: 'Города', count: stats.cities },
@@ -367,6 +383,7 @@ export default function AdminDashboard() {
             {/* Mobile Bottom Bar for Quick Actions - Higher z-index */}
             <div className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 z-[160] flex items-center justify-around px-2">
                 {[
+                    { id: 'moderation', icon: ShieldCheck, label: 'Мод.' },
                     { id: 'ads', icon: Package, label: 'Объяв.' },
                     { id: 'users', icon: Users, label: 'Польз.' },
                     { id: 'categories', icon: LayoutGrid, label: 'Кат.' },
@@ -393,6 +410,7 @@ export default function AdminDashboard() {
                     <div>
                         <h2 className="text-xl lg:text-2xl font-bold text-gray-900 tracking-tight">
                             {activeTab === 'categories' && 'Категории'}
+                            {activeTab === 'moderation' && 'Модерация'}
                             {activeTab === 'ads' && 'Объявления'}
                             {activeTab === 'users' && 'Пользователи'}
                             {activeTab === 'cities' && 'Города'}
@@ -403,9 +421,11 @@ export default function AdminDashboard() {
                         </h2>
                         <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest font-bold">
                             {activeTab === 'categories' && 'Управление категориями'}
+                            {activeTab === 'moderation' && 'Проверка новых объявлений'}
                             {activeTab === 'users' && 'Управление пользователями'}
                             {activeTab === 'cities' && 'Управление городами'}
                             {activeTab === 'settings' && 'Настройки системы'}
+                            {activeTab === 'ads' && 'Все объявления в базе'}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -913,11 +933,17 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Ads View */}
-                {activeTab === 'ads' && (
+                {/* Ads/Moderation View */}
+                {(activeTab === 'ads' || activeTab === 'moderation') && (
                     viewMode === 'grid' ? (
                         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                            {ads.map(ad => (
+                            {ads
+                                .filter(ad => activeTab === 'moderation' ? ad.status === 'pending' : true)
+                                .filter(ad => 
+                                    ad.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                    ad.description?.toLowerCase().includes(searchQuery.toLowerCase())
+                                )
+                                .map(ad => (
                                 <Link
                                     key={ad.id}
                                     href={`/ad/?id=${ad.id}`}
@@ -940,14 +966,58 @@ export default function AdminDashboard() {
                                     <div className="p-1.5">
                                         <h3 className="font-semibold text-[10px] text-gray-900 mb-0 line-clamp-1">{ad.title}</h3>
                                         <p className="text-[9px] text-gray-500 mb-1 line-clamp-1">{ad.description}</p>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-blue-600">{Number(ad.price).toLocaleString('ru-RU')} ₽</span>
-                                            <button
-                                                onClick={(e) => { e.preventDefault(); deleteAd(ad.id); }}
-                                                className="p-0.5 hover:bg-red-50 rounded transition-all"
-                                            >
-                                                <Trash2 className="h-2.5 w-2.5 text-red-600" />
-                                            </button>
+                                        <div className="flex items-center justify-between gap-1">
+                                            <span className="text-xs font-bold text-blue-600 truncate flex-1">{Number(ad.price).toLocaleString('ru-RU')} ₽</span>
+                                            <div className="flex items-center gap-0.5 flex-shrink-0">
+                                                {ad.status === 'pending' ? (
+                                                    <button
+                                                        onClick={(e) => { e.preventDefault(); approveAd(ad.id); }}
+                                                        className="p-0.5 hover:bg-green-50 rounded transition-all"
+                                                        title="Опубликовать"
+                                                    >
+                                                        <CheckCircle className="h-2.5 w-2.5 text-green-600" />
+                                                    </button>
+                                                ) : ad.status === 'active' ? (
+                                                    <button
+                                                        onClick={async (e) => { 
+                                                            e.preventDefault();
+                                                            const { error } = await supabase.from('ads').update({ status: 'pending' }).eq('id', ad.id);
+                                                            if (error) return toast.error('Ошибка');
+                                                            toast.success('Снято');
+                                                            fetchData();
+                                                        }}
+                                                        className="p-0.5 hover:bg-orange-50 rounded transition-all"
+                                                        title="Снять с публикации"
+                                                    >
+                                                        <X className="h-2.5 w-2.5 text-orange-600" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={(e) => { e.preventDefault(); approveAd(ad.id); }}
+                                                        className="p-0.5 hover:bg-green-50 rounded transition-all"
+                                                        title="Опубликовать"
+                                                    >
+                                                        <CheckCircle className="h-2.5 w-2.5 text-green-600" />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); toggleAdStatus(ad.id, ad.status); }}
+                                                    className={cn(
+                                                        "p-0.5 rounded transition-all",
+                                                        ad.status === 'rejected' ? "bg-red-500 text-white" : "hover:bg-red-50 text-red-600"
+                                                    )}
+                                                    title={ad.status === 'rejected' ? "Разблокировать" : "Заблокировать"}
+                                                >
+                                                    <Ban className="h-2.5 w-2.5" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); deleteAd(ad.id); }}
+                                                    className="p-0.5 hover:bg-red-50 rounded transition-all"
+                                                    title="Удалить"
+                                                >
+                                                    <Trash2 className="h-2.5 w-2.5 text-red-600" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>
@@ -965,7 +1035,13 @@ export default function AdminDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
-                                    {ads.map(ad => (
+                                    {ads
+                                        .filter(ad => activeTab === 'moderation' ? ad.status === 'pending' : true)
+                                        .filter(ad => 
+                                            ad.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                            ad.description?.toLowerCase().includes(searchQuery.toLowerCase())
+                                        )
+                                        .map(ad => (
                                         <tr key={ad.id} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-4">
@@ -992,20 +1068,64 @@ export default function AdminDashboard() {
                                             <td className="px-6 py-4">
                                                 {ad.status === 'pending' ? (
                                                     <span className="px-2 py-1 bg-yellow-50 text-yellow-600 rounded-lg text-[10px] font-bold uppercase tracking-tight whitespace-nowrap">Модерация</span>
+                                                ) : ad.status === 'rejected' ? (
+                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-[10px] font-bold uppercase tracking-tight whitespace-nowrap">Бан</span>
                                                 ) : (
                                                     <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-[10px] font-bold uppercase tracking-tight whitespace-nowrap">Активно</span>
                                                 )}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => deleteAd(ad.id)}
-                                                        className="p-2 hover:bg-red-50 rounded-xl text-gray-400 hover:text-red-600 transition-all"
-                                                        title="Удалить"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </button>
-                                                </div>
+                                                    <div className="flex items-center justify-end gap-1.5">
+                                                        {ad.status === 'pending' ? (
+                                                            <button
+                                                                onClick={() => approveAd(ad.id)}
+                                                                className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-tight hover:bg-green-700 transition-all shadow-sm"
+                                                                title="Опубликовать"
+                                                            >
+                                                                Опубликовать
+                                                            </button>
+                                                        ) : ad.status === 'active' ? (
+                                                            <button
+                                                                onClick={async () => {
+                                                                    const { error } = await supabase.from('ads').update({ status: 'pending' }).eq('id', ad.id);
+                                                                    if (error) return toast.error('Ошибка');
+                                                                    toast.success('Снято с публикации');
+                                                                    fetchData();
+                                                                }}
+                                                                className="px-3 py-1.5 bg-orange-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-tight hover:bg-orange-600 transition-all shadow-sm"
+                                                                title="Снять с публикации"
+                                                            >
+                                                                    Снять
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => approveAd(ad.id)}
+                                                                className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-tight hover:bg-green-600 transition-all shadow-sm"
+                                                                title="Разблокировать и опубликовать"
+                                                            >
+                                                                Разбанить
+                                                            </button>
+                                                        )}
+
+                                                        <button
+                                                            onClick={() => toggleAdStatus(ad.id, ad.status)}
+                                                            className={cn(
+                                                                "p-2 rounded-lg transition-all",
+                                                                ad.status === 'rejected' ? "bg-red-600 text-white shadow-lg shadow-red-600/20" : "bg-gray-100 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                                                            )}
+                                                            title={ad.status === 'rejected' ? "Удалить из черного списка" : "Заблокировать (Бан)"}
+                                                        >
+                                                            <Ban className="h-4 w-4" />
+                                                        </button>
+                                                        
+                                                        <button
+                                                            onClick={() => deleteAd(ad.id)}
+                                                            className="p-2 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-600 transition-all"
+                                                            title="Удалить навсегда"
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
                                             </td>
                                         </tr>
                                     ))}
