@@ -31,6 +31,7 @@ export default function CreateAdPage() {
     const [loading, setLoading] = useState(false);
     const [limitReached, setLimitReached] = useState(false);
     const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+    const [consent, setConsent] = useState(false);
 
     const router = useRouter();
 
@@ -471,10 +472,27 @@ export default function CreateAdPage() {
 
                 {/* Submit */}
                 <div className="mt-8">
+                    <div className="mb-6 flex items-start gap-2 px-1">
+                        <input
+                            type="checkbox"
+                            id="pd_consent_ad"
+                            checked={consent}
+                            onChange={(e) => setConsent(e.target.checked)}
+                            className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary"
+                        />
+                        <label htmlFor="pd_consent_ad" className="text-xs font-medium text-muted-foreground leading-tight cursor-pointer select-none">
+                            Я согласен на{' '}
+                            <a href="/privacy" target="_blank" className="text-primary hover:underline font-semibold">
+                                обработку персональных данных
+                            </a>
+                            {' '}и принимаю условия пользовательского соглашения.
+                        </label>
+                    </div>
+
                     <button
                         onClick={handleSubmit}
-                        disabled={loading}
-                        className="w-full h-16 bg-primary text-white rounded-2xl font-bold text-lg uppercase tracking-widest shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:scale-100"
+                        disabled={loading || !consent}
+                        className="w-full h-16 bg-primary text-white rounded-2xl font-bold text-lg uppercase tracking-widest shadow-2xl shadow-primary/30 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
                     >
                         {loading ? (
                             <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/20 border-t-white" />

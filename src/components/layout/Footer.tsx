@@ -56,8 +56,12 @@ export default function Footer() {
 
                 {/* Secondary Info */}
                 <div className="mt-6 pt-6 border-t border-border/50 text-center">
-                    <p className="text-[10px] text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-[10px] text-muted-foreground font-medium max-w-2xl mx-auto leading-relaxed mb-2">
                         Проект находится на стадии разработки. Мы из Горячего Ключа <Heart className="h-3 w-3 text-red-500 inline fill-current mx-1 mb-0.5" /> и делаем сервис для людей.
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/60 font-medium max-w-2xl mx-auto leading-relaxed">
+                        ИП Местный (в стадии оформления)<br />
+                        Адрес: г. Горячий Ключ. Email для запросов по ПДн: <a href="mailto:privacy@avoska.ru" className="hover:text-primary transition-colors">privacy@avoska.ru</a>
                     </p>
                 </div>
             </div>

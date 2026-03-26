@@ -166,6 +166,26 @@ export default function AuthForm({ mode }: { mode: 'login' | 'register' | 'forgo
                         />
                     </div>
                 )}
+
+                {mode === 'register' && (
+                    <div className="flex items-start gap-2 px-1 mt-4">
+                        <input
+                            type="checkbox"
+                            id="pd_consent"
+                            name="pd_consent"
+                            required
+                            className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary"
+                        />
+                        <label htmlFor="pd_consent" className="text-xs font-medium text-muted-foreground leading-tight cursor-pointer select-none">
+                            Я согласен на{' '}
+                            <a href="/privacy" target="_blank" className="text-primary hover:underline font-semibold">
+                                обработку персональных данных
+                            </a>
+                            {' '}в соответствии с политикой конфиденциальности.
+                        </label>
+                    </div>
+                )}
+
                 <button
                     type="submit"
                     disabled={loading}

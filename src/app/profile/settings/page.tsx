@@ -129,6 +129,38 @@ export default function ProfileSettingsPage() {
                         </button>
                     </div>
                 </form>
+
+                {/* Account Deletion Section */}
+                <div className="mt-12 pt-8 border-t border-border">
+                    <h3 className="text-red-600 font-bold mb-2">Опасная зона</h3>
+                    <p className="text-xs text-muted-foreground mb-4">
+                        Удаление аккаунта приведет к безвозвратному стиранию ваших данных, объявлений и переписок из нашей системы. Это действие нельзя отменить.
+                    </p>
+                    <button
+                        type="button"
+                        onClick={async () => {
+                            if (!confirm('Вы уверены, что хотите навсегда удалить свой аккаунт? Все данные будут стерты.')) return;
+
+                            setSaving(true);
+                            try {
+                                const { error } = await supabase.rpc('delete_user_account');
+                                if (error) throw error;
+
+                                await supabase.auth.signOut();
+                                toast.success('Ваш аккаунт был успешно удален.');
+                                router.push('/');
+                            } catch (e: any) {
+                                console.error('Delete account error:', e);
+                                toast.error('Для удаления аккаунта обратитесь к администратору в Телеграм: @HT_Elk');
+                                setSaving(false);
+                            }
+                        }}
+                        disabled={saving}
+                        className="w-full md:w-auto bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-6 py-3 rounded-xl font-bold text-sm transition-colors border border-red-100"
+                    >
+                        Удалить аккаунт навсегда
+                    </button>
+                </div>
             </div>
         </div>
     );

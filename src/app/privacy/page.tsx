@@ -15,47 +15,59 @@ export default function PrivacyPage() {
                     <div className="p-4 bg-primary/10 rounded-2xl text-primary">
                         <Lock className="h-8 w-8" />
                     </div>
-                    <h1 className="text-4xl font-semibold">Конфиденциальность</h1>
+                    <h1 className="text-4xl font-bold">Политика обработки персональных данных</h1>
                 </div>
 
-                <div className="space-y-8 text-muted font-medium leading-relaxed">
-                    <section>
-                        <h2 className="text-xl font-semibold text-foreground mb-4">1. Сбор информации</h2>
-                        <p>
-                            Мы собираем только те данные, которые необходимы для работы сервиса: имя (full name), адрес электронной почты, номер телефона (если указан) и данные, предоставляемые при авторизации через сторонние сервисы (Supabase Auth).
-                        </p>
-                    </section>
+                <div className="space-y-8 text-muted-foreground font-medium leading-relaxed">
+                    <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground/60">Сервис «Авоська+»</p>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-foreground mb-4">2. Использование данных</h2>
-                        <p>
-                            Ваши данные используются для:
-                        </p>
+                        <h2 className="text-xl font-bold text-foreground mb-4">1. Общие положения</h2>
                         <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>Идентификации вас как автора объявления.</li>
-                            <li>Обеспечения связи между покупателем и продавцом.</li>
-                            <li>Предотвращения мошенничества и спама.</li>
+                            <li>Оператор: ИП Местный (в стадии оформления)</li>
+                            <li>Адрес: г. Горячий Ключ</li>
+                            <li>Email: privacy@avoska.ru</li>
                         </ul>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-foreground mb-4">3. Защита данных</h2>
+                        <h2 className="text-xl font-bold text-foreground mb-4">2. Какие данные мы собираем</h2>
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li><strong>При регистрации:</strong> email, телефон, имя.</li>
+                            <li><strong>При подаче объявления:</strong> фотографии, текст описания, контактные данные.</li>
+                            <li><strong>Технические данные:</strong> IP-адрес, файлы cookies, метрики метрики посещаемости.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-bold text-foreground mb-4">3. Цели обработки данных</h2>
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li>Предоставление услуг сервиса «Авоська+».</li>
+                            <li>Модерация объявлений и предотвращение мошенничества.</li>
+                            <li>Обратная связь с пользователями, рассылка служебных уведомлений.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 className="text-xl font-bold text-foreground mb-4">4. Сроки хранения</h2>
                         <p>
-                            Все данные хранятся в защищенной облачной инфраструктуре Supabase. Мы не передаем ваши личные данные третьим лицам, за исключением случаев, прямо предусмотренных законодательством РФ.
+                            Персональные данные хранятся до момента удаления аккаунта пользователем самостоятельно через настройки профиля, либо до момента отзыва согласия на обработку персональных данных.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-foreground mb-4">4. Публичность данных</h2>
-                        <p>
-                            Размещая объявление, вы понимаете, что указанные вами контактные данные (имя, телефон) становятся доступными для просмотра неограниченному кругу лиц в целях совершения сделки.
-                        </p>
+                        <h2 className="text-xl font-bold text-foreground mb-4">5. Права пользователя</h2>
+                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li>Доступ к своим данным в личном кабинете.</li>
+                            <li>Исправление и самостоятельное удаление данных.</li>
+                            <li>Отзыв согласия на обработку ПДн (путем удаления аккаунта в настройках).</li>
+                        </ul>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-semibold text-foreground mb-4">5. Удаление данных</h2>
+                        <h2 className="text-xl font-bold text-foreground mb-4">6. Защита данных</h2>
                         <p>
-                            Вы можете в любой момент изменить или удалить свои данные через личный кабинет или обратившись в поддержку через Telegram-бота @avoskaplus_bot.
+                            Мы применяем современные стандарты безопасности: подключение по протоколу HTTPS, надежное шифрование (Supabase/PostgreSQL), разграничение прав доступа RLS (Row Level Security) и хеширование паролей для защиты вашей личной информации. Данные хранятся на серверах.
                         </p>
                     </section>
                 </div>

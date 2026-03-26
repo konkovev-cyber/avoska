@@ -7,6 +7,7 @@ import BottomNav from "@/components/layout/BottomNav";
 import PageAnimatePresence from "@/components/layout/PageAnimatePresence";
 import AppUpdateCheck from "@/components/ui/AppUpdateCheck";
 import ServiceWorkerRegistration from "@/components/notifications/ServiceWorkerRegistration";
+import CookieBanner from "@/components/ui/CookieBanner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -64,6 +65,7 @@ export default function RootLayout({
         <BottomNav />
         <AppUpdateCheck />
         <ServiceWorkerRegistration />
+        <CookieBanner />
         <Toaster />
 
         {/* Yandex Maps API */}
