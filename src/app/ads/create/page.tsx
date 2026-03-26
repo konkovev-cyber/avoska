@@ -15,7 +15,6 @@ const compressionOptions = {
 };
 import { X, PlusSquare, Rocket, CheckCircle2, AlertCircle, Camera, MapPin, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { compressImage } from '@/lib/image-utils';
 import ResponsiveSelect from '@/components/ui/ResponsiveSelect';
 import { CATEGORIES } from '@/lib/constants';
 import Link from 'next/link';
@@ -172,7 +171,7 @@ export default function CreateAdPage() {
                 <AlertCircle className="h-16 w-16 text-destructive mb-6" />
                 <h1 className="text-3xl font-semibold mb-4">Лимит достигнут</h1>
                 <p className="text-muted-foreground mb-8">Вы достигли предела бесплатных объявлений.</p>
-                <a href="https://t.me/HT_Elk" className="bg-primary text-white px-8 py-3 rounded-xl font-bold">Написать админу</a>
+                <a href="https://t.me/avoskaplus_bot" className="bg-primary text-white px-8 py-3 rounded-xl font-bold">Написать админу</a>
             </div>
         );
     }

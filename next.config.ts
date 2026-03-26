@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js', 'framer-motion'],
     webpackBuildWorker: true,
-    optimizeCss: true,
+    optimizeCss: false,
   },
   poweredByHeader: false,
   compress: true,

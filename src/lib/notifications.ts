@@ -27,6 +27,10 @@ export async function registerPushNotifications() {
 
         await PushNotifications.register();
 
+        if (!PushNotifications) {
+            throw new Error('PushNotifications plugin NOT found!');
+        }
+
         PushNotifications.addListener('registration', async (token: any) => {
             console.log('Push registration success, token: ' + token.value);
 

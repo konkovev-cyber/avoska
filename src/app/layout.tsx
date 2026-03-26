@@ -8,6 +8,7 @@ import PageAnimatePresence from "@/components/layout/PageAnimatePresence";
 import AppUpdateCheck from "@/components/ui/AppUpdateCheck";
 import ServiceWorkerRegistration from "@/components/notifications/ServiceWorkerRegistration";
 import CookieBanner from "@/components/ui/CookieBanner";
+import SupabaseStatus from "@/components/ui/SupabaseStatus";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -66,6 +67,7 @@ export default function RootLayout({
         <AppUpdateCheck />
         <ServiceWorkerRegistration />
         <CookieBanner />
+        <SupabaseStatus />
         <Toaster />
 
         {/* Yandex Maps API */}

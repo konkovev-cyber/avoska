@@ -1,7 +1,8 @@
 export const APP_VERSION = '0.2.0';
-export const APP_BUILD = '2026.0318.1825'; // Updated to current build time
+export const APP_BUILD = '2026.0326.1125'; // Updated to current implementation time
 export const GITHUB_REPO = 'konkovev-cyber/avoska';
 export const APK_DOWNLOAD_URL = 'https://avoska.353290.ru/avoska.apk';
+export const VAPID_PUBLIC_KEY = 'BEfDT_kVt5U8fMfmATdpdFKfh6upPWERCqnbPlzaAvsU2t7SzV7trBxlvvMPjp_Ja2S2JpfIUMpDqpmGLSwkzVI';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Категории — единый источник правды. Не дублировать в других файлах!

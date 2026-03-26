@@ -27,7 +27,8 @@ import {
     CheckCheck,
     Ban,
     Camera,
-    Clock
+    Clock,
+    Flag
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -442,6 +443,32 @@ function AdContent() {
         }
     };
 
+    const handleReport = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            toast.error('Войдите, чтобы отправить жалобу');
+            return router.push('/login');
+        }
+
+        const reason = prompt('Укажите причину жалобы (например: спам, мошенничество, запрещенный товар):');
+        if (!reason || !reason.trim()) return;
+
+        try {
+            const { error } = await supabase
+                .from('reports')
+                .insert({
+                    ad_id: id,
+                    reporter_id: session.user.id,
+                    reason: reason.trim()
+                });
+
+            if (error) throw error;
+            toast.success('Жалоба отправлена модератору');
+        } catch (e: any) {
+            toast.error('Ошибка: ' + e.message);
+        }
+    };
+
     if (loading) return (
         <div className="max-w-[1000px] mx-auto px-3 py-4 space-y-6">
             <div className="space-y-4">
@@ -562,11 +589,14 @@ function AdContent() {
                                     Заблокировано
                                 </div>
                             )}
-                            <button onClick={toggleFavorite} className={cn("p-2 rounded-full transition-colors", isFavorite ? "text-red-500 bg-red-50" : "text-muted hover:bg-muted/10")}>
+                            <button onClick={toggleFavorite} className={cn("p-2 rounded-full transition-colors", isFavorite ? "text-red-500 bg-red-50" : "text-muted hover:bg-muted/10")} title="В избранное">
                                 <Heart className={cn("h-6 w-6", isFavorite && "fill-current")} />
                             </button>
-                            <button onClick={handleShare} className="p-2 text-muted hover:bg-muted/10 rounded-full transition-colors">
+                            <button onClick={handleShare} className="p-2 text-muted hover:bg-muted/10 rounded-full transition-colors" title="Поделиться">
                                 <Share2 className="h-6 w-6" />
+                            </button>
+                            <button onClick={handleReport} className="p-2 text-muted hover:bg-red-50 hover:text-red-500 rounded-full transition-colors" title="Пожаловаться">
+                                <Flag className="h-6 w-6" />
                             </button>
                         </div>
                     </div>

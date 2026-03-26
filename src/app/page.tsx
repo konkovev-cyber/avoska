@@ -16,6 +16,7 @@ import { recommendationService } from '@/lib/recommendations';
 import { CATEGORIES, APK_DOWNLOAD_URL } from '@/lib/constants';
 import { AdCard } from '@/components/ui/AdCard';
 import { Ad, Banner } from '@/lib/types';
+import { supabaseKeepalive } from '@/lib/supabase-keepalive';
 
 const HoverImageGallery = dynamic(() => import('@/components/ui/HoverImageGallery'), {
   loading: () => <div className="bg-muted animate-pulse aspect-[4/3]" />
@@ -38,6 +39,9 @@ export default function HomePage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Разогрев базы данных
+    supabaseKeepalive();
+
     fetchInitialData();
     fetchFavorites();
     const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { VAPID_PUBLIC_KEY } from '@/lib/constants';
 
 export default function PushSubscriptionManager() {
     const [isSupported, setIsSupported] = useState(false);
@@ -42,13 +43,9 @@ export default function PushSubscriptionManager() {
 
             const registration = await navigator.serviceWorker.ready;
 
-            // Re-fetch to get fresh VAPID key if needed, or hardcode/env
-            const response = await fetch('/api/push/vapid-public-key');
-            const { publicKey } = await response.json();
-
             const sub = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(publicKey)
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
 
             // Save to database
@@ -64,7 +61,7 @@ export default function PushSubscriptionManager() {
 
             setSubscription(sub);
             toast.success('Уведомления включены!');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Subscription error:', error);
             toast.error('Не удалось включить уведомления');
         } finally {

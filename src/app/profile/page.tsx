@@ -414,12 +414,13 @@ function ProfilePageContent() {
                                 </Link>
                             )}
                             {isOwnProfile && (
-                                <button
-                                    onClick={() => setIsEditing(true)}
+                                <Link
+                                    href="/profile/settings"
                                     className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
+                                    title="Настройки профиля"
                                 >
                                     <Settings className="h-6 w-6" />
-                                </button>
+                                </Link>
                             )}
                         </div>
                     )}

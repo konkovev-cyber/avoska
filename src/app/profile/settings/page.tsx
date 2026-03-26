@@ -11,6 +11,7 @@ export default function ProfileSettingsPage() {
     const [profile, setProfile] = useState<any>(null);
     const [fullName, setFullName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [phone, setPhone] = useState('');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const router = useRouter();
@@ -36,6 +37,7 @@ export default function ProfileSettingsPage() {
             setProfile(data);
             setFullName(data.full_name || '');
             setAvatarUrl(data.avatar_url || '');
+            setPhone(data.phone || '');
         }
         setLoading(false);
     };
@@ -48,7 +50,8 @@ export default function ProfileSettingsPage() {
             .from('profiles')
             .update({
                 full_name: fullName,
-                avatar_url: avatarUrl
+                avatar_url: avatarUrl,
+                phone: phone
             })
             .eq('id', profile.id);
 
@@ -70,7 +73,7 @@ export default function ProfileSettingsPage() {
     );
 
     return (
-        <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <div className="container mx-auto px-4 py-8 pb-32 max-w-2xl">
             <Link href="/profile" className="inline-flex items-center gap-2 text-primary font-semibold mb-8 hover:translate-x-[-4px] transition-transform">
                 <ChevronLeft className="h-5 w-5" /> Назад в профиль
             </Link>
@@ -103,6 +106,17 @@ export default function ProfileSettingsPage() {
                             className="w-full p-4 rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors font-semibold"
                             placeholder="Ваше имя"
                             required
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-muted uppercase tracking-wider ml-1">Телефон</label>
+                        <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            className="w-full p-4 rounded-xl bg-background border border-border outline-none focus:border-primary transition-colors font-semibold"
+                            placeholder="+7 (___) ___-__-__"
                         />
                     </div>
 

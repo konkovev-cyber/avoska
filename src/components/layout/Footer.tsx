@@ -39,7 +39,7 @@ export default function Footer() {
                             </svg>
                         </a>
                         <a
-                            href="https://t.me/HT_Elk"
+                            href="https://t.me/avoskaplus_bot"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white p-2 rounded-full transition-all"

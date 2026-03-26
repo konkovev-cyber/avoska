@@ -21,9 +21,11 @@ export default function Header() {
     const [favoritesCount, setFavoritesCount] = useState(0);
     const [theme, setInternalTheme] = useState<Theme>('system');
     const [isCapacitor, setIsCapacitor] = useState(false);
+    const [mounted, setMounted] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
+        setMounted(true);
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
             if (session?.user) {
@@ -200,17 +202,21 @@ export default function Header() {
                         className="hidden md:block p-3 hover:bg-surface rounded-2xl transition-all group relative"
                         title="Сменить тему"
                     >
-                        {(() => {
-                            let effective = theme;
-                            if (effective === 'system' && typeof window !== 'undefined') {
-                                effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                            }
-                            return effective === 'light' ? (
-                                <Moon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-transform group-hover:-rotate-12" />
-                            ) : (
-                                <Sun className="h-6 w-6 text-yellow-400 group-hover:text-yellow-300 transition-transform group-hover:rotate-12" />
-                            );
-                        })()}
+                        {mounted ? (
+                            (() => {
+                                let effective = theme;
+                                if (effective === 'system' && typeof window !== 'undefined') {
+                                    effective = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                                }
+                                return effective === 'light' ? (
+                                    <Moon className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-transform group-hover:-rotate-12" />
+                                ) : (
+                                    <Sun className="h-6 w-6 text-yellow-400 group-hover:text-yellow-300 transition-transform group-hover:rotate-12" />
+                                );
+                            })()
+                        ) : (
+                            <div className="h-6 w-6" />
+                        )}
                     </button>
 
                     {
