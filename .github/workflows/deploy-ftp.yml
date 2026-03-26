@@ -1,10 +1,7 @@
 name: Deploy Site to Beget (FTP)
 
 on:
-  push:
-    branches:
-      - master # Deploy when pushing to master
-  workflow_dispatch: # Allow manual trigger
+  workflow_dispatch: # Allow only manual trigger
 
 jobs:
   deploy:
