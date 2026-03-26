@@ -151,7 +151,7 @@ export default function ProfileSettingsPage() {
                                 router.push('/');
                             } catch (e: any) {
                                 console.error('Delete account error:', e);
-                                toast.error('Для удаления аккаунта обратитесь к администратору в Телеграм: @HT_Elk');
+                                toast.error('Для удаления аккаунта обратитесь к администратору в Телеграм: @avoskaplus_bot');
                                 setSaving(false);
                             }
                         }}

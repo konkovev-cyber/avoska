@@ -31,7 +31,7 @@ export default function SupportPage() {
                     <div className="space-y-4">
                         {/* Telegram Support */}
                         <a
-                            href="https://t.me/HT_Elk"
+                            href="https://t.me/avoskaplus_bot"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-5 p-5 rounded-2xl border border-border hover:border-blue-500/30 hover:bg-blue-50/50 transition-all group"
@@ -42,13 +42,13 @@ export default function SupportPage() {
                             <div>
                                 <h3 className="font-bold text-foreground mb-1">Написать в Telegram</h3>
                                 <p className="text-sm font-medium text-muted-foreground">Быстрый ответ и решение вопросов в мессенджере</p>
-                                <p className="text-xs font-bold text-blue-500 mt-2">@HT_Elk</p>
+                                <p className="text-xs font-bold text-blue-500 mt-2">@avoskaplus_bot</p>
                             </div>
                         </a>
 
                         {/* Email Support */}
                         <a
-                            href="mailto:konkev@bk.ru"
+                            href="mailto:admin@353290.ru"
                             className="flex items-center gap-5 p-5 rounded-2xl border border-border hover:border-orange-500/30 hover:bg-orange-50/50 transition-all group"
                         >
                             <div className="w-14 h-14 bg-orange-100 text-orange-500 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -57,7 +57,7 @@ export default function SupportPage() {
                             <div>
                                 <h3 className="font-bold text-foreground mb-1">Написать на Email</h3>
                                 <p className="text-sm font-medium text-muted-foreground">Для официальных запросов и подробных писем</p>
-                                <p className="text-xs font-bold text-orange-500 mt-2">konkev@bk.ru</p>
+                                <p className="text-xs font-bold text-orange-500 mt-2">admin@353290.ru</p>
                             </div>
                         </a>
                     </div>

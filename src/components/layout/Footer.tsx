@@ -61,7 +61,7 @@ export default function Footer() {
                     </p>
                     <p className="text-[10px] text-muted-foreground/60 font-medium max-w-2xl mx-auto leading-relaxed">
                         ИП Коньков Е.В. (ИНН 862100116281)<br />
-                        Адрес: г. Горячий Ключ. Email для запросов по ПДн: <a href="mailto:konkev@bk.ru" className="hover:text-primary transition-colors">konkev@bk.ru</a>
+                        Адрес: г. Горячий Ключ. Email для запросов по ПДн: <a href="mailto:admin@353290.ru" className="hover:text-primary transition-colors">admin@353290.ru</a>
                     </p>
                 </div>
             </div>

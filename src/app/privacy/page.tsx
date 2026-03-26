@@ -20,7 +20,7 @@ export default function PrivacyPage() {
 
                 <p className="text-[10px] text-muted-foreground/60 font-medium max-w-2xl mx-auto leading-relaxed mb-8">
                     ИП Коньков Е.В. (ИНН 862100116281)<br />
-                    Адрес: г. Горячий Ключ. Email для запросов по ПДн: <a href="mailto:konkev@bk.ru" className="hover:text-primary transition-colors">konkev@bk.ru</a>
+                    Адрес: г. Горячий Ключ. Email для запросов по ПДн: <a href="mailto:admin@353290.ru" className="hover:text-primary transition-colors">admin@353290.ru</a>
                 </p>
 
                 <div className="space-y-8 text-muted-foreground font-medium leading-relaxed">
@@ -31,7 +31,7 @@ export default function PrivacyPage() {
                         <ul className="list-disc pl-5 mt-2 space-y-1">
                             <li>Оператор: ИП Коньков Е.В. (ИНН 862100116281)</li>
                             <li>Адрес: г. Горячий Ключ</li>
-                            <li>Email: konkev@bk.ru</li>
+                            <li>Email: admin@353290.ru</li>
                         </ul>
                     </section>
 
