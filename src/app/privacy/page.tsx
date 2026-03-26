@@ -18,15 +18,20 @@ export default function PrivacyPage() {
                     <h1 className="text-4xl font-bold">Политика обработки персональных данных</h1>
                 </div>
 
+                <p className="text-[10px] text-muted-foreground/60 font-medium max-w-2xl mx-auto leading-relaxed mb-8">
+                    ИП Коньков Е.В. (ИНН 862100116281)<br />
+                    Адрес: г. Горячий Ключ. Email для запросов по ПДн: <a href="mailto:konkev@bk.ru" className="hover:text-primary transition-colors">konkev@bk.ru</a>
+                </p>
+
                 <div className="space-y-8 text-muted-foreground font-medium leading-relaxed">
                     <p className="text-sm font-semibold uppercase tracking-widest text-muted-foreground/60">Сервис «Авоська+»</p>
 
                     <section>
                         <h2 className="text-xl font-bold text-foreground mb-4">1. Общие положения</h2>
                         <ul className="list-disc pl-5 mt-2 space-y-1">
-                            <li>Оператор: ИП Местный (в стадии оформления)</li>
+                            <li>Оператор: ИП Коньков Е.В. (ИНН 862100116281)</li>
                             <li>Адрес: г. Горячий Ключ</li>
-                            <li>Email: privacy@avoska.ru</li>
+                            <li>Email: konkev@bk.ru</li>
                         </ul>
                     </section>
 

@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import imageCompression from 'browser-image-compression';
+
+// Опции сжатия: макс размер 1МБ, макс ширина/высота 1200px
+const compressionOptions = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1200,
+    useWebWorker: true,
+    fileType: 'image/jpeg'
+};
 import { X, PlusSquare, Rocket, CheckCircle2, AlertCircle, Camera, MapPin, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { compressImage } from '@/lib/image-utils';
@@ -59,8 +68,8 @@ export default function CreateAdPage() {
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
-        if (images.length + files.length > 5) {
-            toast.error('Максимум 5 изображений');
+        if (images.length + files.length > 7) {
+            toast.error('Максимум 7 изображений');
             return;
         }
 
@@ -70,7 +79,8 @@ export default function CreateAdPage() {
             const processedFiles: File[] = [];
             const urls: string[] = [];
             for (const file of files) {
-                const compressed = await compressImage(file);
+                // Продвинутое сжатие: баланс качества и веса
+                const compressed = await imageCompression(file, compressionOptions);
                 processedFiles.push(compressed);
                 urls.push(URL.createObjectURL(compressed));
             }
