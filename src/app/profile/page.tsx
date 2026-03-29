@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck, Smartphone } from 'lucide-react';
+import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck, Smartphone, ChevronLeft } from 'lucide-react';
 import PromotionModal from '@/components/PromotionModal';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -291,7 +291,15 @@ function ProfilePageContent() {
     );
 
     return (
-        <div className="container mx-auto px-4 py-8 pb-32 max-w-6xl">
+        <div className="container mx-auto px-4 py-8 pb-40 max-w-6xl">
+            {/* Back Button */}
+            <button
+                onClick={() => router.back()}
+                className="flex items-center gap-1.5 text-primary font-semibold text-xs uppercase tracking-widest mb-6 hover:opacity-70 transition-all active:scale-95"
+            >
+                <ChevronLeft className="h-4 w-4" /> Назад
+            </button>
+
             <div className="bg-surface border border-border rounded-3xl p-6 md:p-8 mb-8 shadow-sm">
                 <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 text-center md:text-left">
                     <div className="relative group/avatar">

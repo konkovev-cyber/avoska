@@ -170,45 +170,45 @@ export default function AdminDashboard() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#F6F8FA] dark:bg-background flex flex-col md:flex-row">
+        <div className="min-h-screen bg-gradient-to-br from-[#f0f4f0] via-[#fafcfa] to-[#eef5ee] dark:from-background dark:via-background dark:to-background flex flex-col md:flex-row">
             {/* Sidebar */}
             <aside className={cn(
-                "w-full md:w-64 bg-surface border-b md:border-b-0 md:border-r border-border/40 flex-shrink-0 z-50 transition-all",
-                isMenuOpen ? "h-screen fixed inset-0 overflow-y-auto" : "h-auto md:h-screen sticky top-0"
+                "w-full md:w-64 bg-gradient-to-b from-[#1a3a1a] via-[#1e3e1e] to-[#243524] text-white border-b md:border-b-0 md:border-r border-white/10 flex-shrink-0 transition-all",
+                isMenuOpen ? "fixed inset-0 z-[150] overflow-y-auto" : "relative md:sticky md:top-0 z-[40]"
             )}>
-                <div className="p-6 flex items-center justify-between border-b border-border/40 bg-surface md:bg-transparent">
+                <div className="p-6 flex items-center justify-between border-b border-white/10">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-semibold group-hover:rotate-12 transition-transform shadow-lg shadow-primary/20">A+</div>
-                        <span className="font-bold text-lg tracking-tighter uppercase">Панель</span>
+                        <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex items-center justify-center text-white font-semibold group-hover:rotate-12 transition-transform shadow-lg shadow-green-500/30">A+</div>
+                        <span className="font-bold text-lg tracking-tighter uppercase text-white">Панель</span>
                     </Link>
-                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 hover:bg-muted rounded-xl">
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 hover:bg-white/10 rounded-xl text-white">
                         {isMenuOpen ? <X /> : <Menu />}
                     </button>
                 </div>
 
-                <nav className="p-4 space-y-1">
+                <nav className={cn("p-3 space-y-1", isMenuOpen && "pb-24")}>
                     {menuItems.map((item) => (
                         <button
                             key={item.id}
                             onClick={() => { setActiveTab(item.id as any); setIsMenuOpen(false); }}
                             className={cn(
                                 "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all group",
-                                activeTab === item.id ? "bg-primary text-white shadow-lg shadow-primary/20" : "hover:bg-primary/5 text-muted-foreground hover:text-primary"
+                                activeTab === item.id ? "bg-white/15 text-white shadow-lg shadow-black/10 backdrop-blur-sm border border-white/10" : "hover:bg-white/10 text-white/60 hover:text-white"
                             )}
                         >
                             <div className="flex items-center gap-3">
-                                <item.icon className={cn("h-5 w-5", activeTab === item.id ? "text-white" : (item.color || "text-muted-foreground"))} />
+                                <item.icon className={cn("h-5 w-5", activeTab === item.id ? "text-green-300" : (item.color || "text-white/50"))} />
                                 <span className="text-xs font-semibold uppercase tracking-widest">{item.label}</span>
                             </div>
                             {item.count !== undefined && item.count > 0 && (
                                 <span className={cn(
                                     "px-2 py-0.5 rounded-full text-[10px] font-semibold",
-                                    activeTab === item.id ? "bg-white text-primary" : "bg-primary/10 text-primary"
+                                    activeTab === item.id ? "bg-green-400 text-green-900" : "bg-white/15 text-green-300"
                                 )}>{item.count}</span>
                             )}
                         </button>
                     ))}
-                    <button onClick={() => router.push('/')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all mt-10">
+                    <button onClick={() => router.push('/')} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/40 hover:bg-red-500/20 hover:text-red-400 transition-all mt-10">
                         <LogOut className="h-5 w-5" />
                         <span className="text-xs font-semibold uppercase tracking-widest">Выйти</span>
                     </button>
@@ -217,7 +217,7 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col min-w-0">
-                <header className="h-16 md:h-20 bg-surface/80 backdrop-blur-xl border-b border-border/40 px-6 flex items-center justify-between sticky top-0 z-40">
+                <header className="h-16 md:h-20 bg-white/80 dark:bg-surface/80 backdrop-blur-xl border-b border-border/30 px-6 flex items-center justify-between sticky top-0 z-40">
                     <div className="flex items-center gap-4 flex-1">
                         <h2 className="font-semibold text-sm uppercase tracking-[0.2em] hidden lg:block">
                             {menuItems.find(i => i.id === activeTab)?.label}
@@ -229,16 +229,16 @@ export default function AdminDashboard() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Поиск в этом разделе..."
-                                className="w-full bg-muted/50 border border-border/40 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                                className="w-full bg-green-50/50 dark:bg-muted/50 border border-green-200/50 dark:border-border/40 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
                             />
                         </div>
                     </div>
                     <div className="flex items-center gap-2 md:gap-4 ml-4">
-                        <div className="flex items-center bg-muted/30 p-1 rounded-xl border border-border/20">
+                        <div className="flex items-center bg-green-50/50 dark:bg-muted/30 p-1 rounded-xl border border-green-200/30 dark:border-border/20">
                             <button onClick={() => setViewMode('table')} className={cn("p-1.5 rounded-lg transition-all", viewMode === 'table' ? "bg-surface text-primary shadow-sm" : "text-muted-foreground")}><List className="h-4 w-4" /></button>
                             <button onClick={() => setViewMode('grid')} className={cn("p-1.5 rounded-lg transition-all", viewMode === 'grid' ? "bg-surface text-primary shadow-sm" : "text-muted-foreground")}><Grid3x3 className="h-4 w-4" /></button>
                         </div>
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white text-xs font-semibold shadow-lg">A</div>
+                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-700 flex items-center justify-center text-white text-xs font-semibold shadow-lg shadow-green-500/20">A</div>
                     </div>
                 </header>
 
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
                         <div className="space-y-6">
                             <div className="flex items-center justify-between">
                                 <h1 className="text-2xl font-bold tracking-tight uppercase">Модерация ({ads.filter(a => a.status === 'pending').length})</h1>
-                                <button onClick={fetchData} className="p-2.5 bg-surface border border-border/40 rounded-xl hover:bg-muted transition-all">
+                                <button onClick={fetchData} className="p-2.5 bg-white dark:bg-surface border border-green-200/50 dark:border-border/40 rounded-xl hover:bg-green-50 dark:hover:bg-muted transition-all">
                                     <Clock className="h-5 w-5 text-muted-foreground" />
                                 </button>
                             </div>
@@ -281,23 +281,23 @@ export default function AdminDashboard() {
                     )}
 
                     {activeTab === 'reports' && (
-                        <div className="bg-surface rounded-2xl border border-border/40 overflow-hidden shadow-sm">
-                            <div className="p-6 border-b border-border/40 bg-muted/10">
+                        <div className="bg-white dark:bg-surface rounded-2xl border border-green-200/30 dark:border-border/40 overflow-hidden shadow-sm">
+                            <div className="p-6 border-b border-green-200/40 dark:border-border/40 bg-gradient-to-r from-green-50/80 to-emerald-50/40 dark:bg-muted/10">
                                 <h3 className="font-semibold uppercase tracking-widest text-sm">Жалобы ({reports.length})</h3>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="bg-muted/30 border-b border-border/40">
+                                        <tr className="bg-green-50/40 dark:bg-muted/30 border-b border-green-200/40 dark:border-border/40">
                                             <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Отправитель</th>
                                             <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Объявление</th>
                                             <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Причина</th>
                                             <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground text-right">Удалить жаждобу</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-border/40">
+                                    <tbody className="divide-y divide-green-100/60 dark:divide-border/40">
                                         {reports.map((r) => (
-                                            <tr key={r.id} className="hover:bg-muted/20 transition-colors">
+                                            <tr key={r.id} className="hover:bg-green-50/30 dark:hover:bg-muted/20 transition-colors">
                                                 <td className="p-4 text-sm font-semibold">{r.reporter?.full_name || 'Incognito'}</td>
                                                 <td className="p-4 text-sm">
                                                     <Link href={`/ad?id=${r.ad_id}`} className="text-primary hover:underline font-semibold transition-all">{r.ad?.title || 'Удалено'}</Link>
@@ -317,13 +317,13 @@ export default function AdminDashboard() {
                     )}
 
                     {activeTab === 'reviews' && (
-                        <div className="bg-surface rounded-2xl border border-border/40 overflow-hidden shadow-sm">
-                            <div className="p-6 border-b border-border/40 bg-muted/10">
+                        <div className="bg-white dark:bg-surface rounded-2xl border border-green-200/30 dark:border-border/40 overflow-hidden shadow-sm">
+                            <div className="p-6 border-b border-green-200/40 dark:border-border/40 bg-gradient-to-r from-green-50/80 to-emerald-50/40 dark:bg-muted/10">
                                 <h3 className="font-semibold uppercase tracking-widest text-sm">Отзывы</h3>
                             </div>
-                            <div className="divide-y divide-border/40">
+                            <div className="divide-y divide-green-100/60 dark:divide-border/40">
                                 {reviews.map(rev => (
-                                    <div key={rev.id} className="p-6 flex items-start justify-between hover:bg-muted/10 transition-all">
+                                    <div key={rev.id} className="p-6 flex items-start justify-between hover:bg-green-50/30 dark:hover:bg-muted/10 transition-all">
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="font-semibold text-sm">{rev.reviewer?.full_name}</span>

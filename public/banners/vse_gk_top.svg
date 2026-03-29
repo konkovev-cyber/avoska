@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 250" width="1200" height="250">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f9ff" />
+      <stop offset="100%" stop-color="#e0f2fe" />
+    </linearGradient>
+    <linearGradient id="btnGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="250" fill="url(#bg)" />
+  
+  <!-- Decorative background curves -->
+  <path d="M0 250 C 300 150 500 250 1200 100 L 1200 250 Z" fill="#bae6fd" opacity="0.6"/>
+  <path d="M0 250 C 400 200 800 100 1200 150 L 1200 250 Z" fill="#7dd3fc" opacity="0.4"/>
+
+  <!-- Logo imitation (blue blocks) -->
+  <g transform="translate(60, 80)">
+    <rect x="25" y="0" width="160" height="42" rx="10" fill="url(#btnGrad)" filter="url(#shadow)" />
+    <text x="105" y="28" font-family="system-ui, sans-serif" font-weight="900" font-size="22" fill="white" text-anchor="middle">Объявления</text>
+    
+    <rect x="0" y="52" width="105" height="42" rx="10" fill="url(#btnGrad)" filter="url(#shadow)" />
+    <text x="52.5" y="80" font-family="system-ui, sans-serif" font-weight="900" font-size="20" fill="white" text-anchor="middle">Горячий</text>
+    
+    <text x="120" y="80" font-size="26" text-anchor="middle">🤝</text>
+    
+    <rect x="135" y="52" width="85" height="42" rx="10" fill="url(#btnGrad)" filter="url(#shadow)" />
+    <text x="177.5" y="80" font-family="system-ui, sans-serif" font-weight="900" font-size="20" fill="white" text-anchor="middle">Ключ</text>
+  </g>
+  
+  <!-- Content -->
+  <text x="320" y="65" font-family="system-ui, sans-serif" font-weight="900" font-size="34" fill="#0f172a">Все объявления — Горячий Ключ</text>
+  
+  <!-- Categories -->
+  <text x="320" y="105" font-family="system-ui, sans-serif" font-weight="800" font-size="16" fill="#1e293b">
+    ✅ Недвижимость ✅ Авто ✅ Услуги ✅ Стройка ✅ Работа ✅ Сад-огород
+  </text>
+
+  <!-- Rules Block -->
+  <rect x="320" y="130" width="550" height="90" rx="12" fill="white" filter="url(#shadow)" />
+  <text x="345" y="160" font-family="system-ui, sans-serif" font-weight="900" font-size="14" fill="#ef4444">ВАЖНЫЕ ПРАВИЛА:</text>
+  <text x="345" y="185" font-family="system-ui, sans-serif" font-weight="600" font-size="14" fill="#334155">🔹 Повторные объявления — 1 раз через день. ПРОДУКТЫ — ежедневно.</text>
+  <text x="345" y="205" font-family="system-ui, sans-serif" font-weight="800" font-size="14" fill="#0f172a">🔹 Более трех фото делайте в виде КОЛЛАЖА ❗️</text>
+
+  <!-- CTA -->
+  <g transform="translate(930, 95)">
+      <rect x="0" y="0" width="220" height="60" rx="30" fill="url(#btnGrad)" filter="url(#shadow)" />
+      <text x="110" y="36" font-family="system-ui, sans-serif" font-weight="bold" font-size="20" fill="white" text-anchor="middle">Вступить в группу</text>
+  </g>
+</svg>

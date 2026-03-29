@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 250" width="1200" height="250">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1e3a8a" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="250" fill="url(#bg)" />
+  
+  <!-- Subtle background grid or pattern -->
+  <path d="M0 0 L1200 250 M0 50 L1200 300 M0 100 L1200 350 M0 150 L1200 400 M0 200 L1200 450" stroke="#ffffff" stroke-opacity="0.05" stroke-width="20" />
+  <path d="M1200 0 L0 250 M1200 50 L0 300 M1200 100 L0 350" stroke="#ffffff" stroke-opacity="0.05" stroke-width="20" />
+
+  <!-- Logo part (Left) -->
+  <g transform="translate(180, 110)">
+    <!-- 5 Stars -->
+    <text x="0" y="-70" font-family="Arial" font-size="24" fill="white" text-anchor="middle" letter-spacing="4">⭐⭐⭐⭐⭐</text>
+    
+    <!-- Central Icon (Simplified Lion / Shield / Crown concept) -->
+    <path d="M -25,-20 C -25,-40 -10,-50 0,-50 C 10,-50 25,-40 25,-20 C 25,-10 20,0 20,10 C 20,20 10,30 0,30 C -10,30 -20,20 -20,10 C -20,0 -25,-10 -25,-20 Z" fill="none" stroke="#60a5fa" stroke-width="4"/>
+    <path d="M -30,-20 A 40,40 0 0,0 -20,10 M 30,-20 A 40,40 0 0,1 20,10" fill="none" stroke="#60a5fa" stroke-width="3"/>
+    <path d="M -10,-20 L 0,-10 L 10,-20" fill="none" stroke="#60a5fa" stroke-width="3"/>
+    <circle cx="-10" cy="-25" r="2" fill="#60a5fa"/>
+    <circle cx="10" cy="-25" r="2" fill="#60a5fa"/>
+    <path d="M -5,0 Q 0,5 5,0" fill="none" stroke="#60a5fa" stroke-width="3"/>
+    
+    <!-- Wreaths -->
+    <path d="M -50,30 C -85,10 -85,-40 -55,-60" fill="none" stroke="white" stroke-width="4"/>
+    <path d="M 50,30 C 85,10 85,-40 55,-60" fill="none" stroke="white" stroke-width="4"/>
+    
+    <!-- Ribbon -->
+    <path d="M-120,35 Q0,15 120,35 L120,65 Q0,45 -120,65 Z" fill="white" filter="url(#shadow)" />
+    <path d="M-120,45 L-140,55 L-120,65 Z" fill="#cbd5e1" />
+    <path d="M120,45 L140,55 L120,65 Z" fill="#cbd5e1" />
+    
+    <text x="0" y="56" font-family="system-ui, sans-serif" font-weight="900" font-size="20" fill="#1e3a8a" text-anchor="middle">ГОРЯЧИЙ КЛЮЧ LIFE</text>
+  </g>
+  
+  <!-- Content -->
+  <text x="400" y="70" font-family="system-ui, sans-serif" font-weight="900" font-size="34" fill="white">Жизнь города Горячий Ключ</text>
+  
+  <!-- Categories (Bullets) -->
+  <g font-family="system-ui, sans-serif" font-weight="800" font-size="18" fill="#bfdbfe">
+    <text x="400" y="120">🔅 новости города и края</text>
+    <text x="400" y="160">🔅 товары и услуги</text>
+    
+    <text x="680" y="120">🔅 ваша реклама</text>
+    <text x="680" y="160">🔅 жизнь города Горячий Ключ</text>
+  </g>
+
+  <!-- CTA -->
+  <g transform="translate(980, 125)">
+      <rect x="-110" y="-30" width="220" height="60" rx="30" fill="url(#gold)" filter="url(#shadow)" />
+      <text x="0" y="6" font-family="system-ui, sans-serif" font-weight="900" font-size="20" fill="#78350f" text-anchor="middle">Подписаться</text>
+  </g>
+</svg>

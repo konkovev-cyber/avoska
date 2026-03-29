@@ -28,7 +28,10 @@ import {
     Ban,
     Camera,
     Clock,
-    Flag
+    Flag,
+    MessageCircle,
+    Megaphone,
+    Smartphone
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -503,8 +506,8 @@ function AdContent() {
     return (
         <div className="bg-background min-h-screen pb-40">
             <AnimatePresence>
-                {isZoomed && (
-                    <motion.div 
+                {isZoomed && (ad.images && ad.images.length > 0) && (
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -569,6 +572,15 @@ function AdContent() {
             </AnimatePresence>
 
             <div className="max-w-[1000px] mx-auto px-3 py-2">
+                {/* Back Button for mobile/desktop */}
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-1.5 text-primary font-bold text-xs uppercase tracking-widest mb-4 hover:opacity-70 transition-all active:scale-95"
+                >
+                    <ChevronLeft className="h-5 w-5" />
+                    <span>Назад</span>
+                </button>
+
                 {/* Header: Title + Price (Super Compact) */}
                 <div className="mb-3">
                     <h1 className="text-xl md:text-2xl font-bold leading-tight mb-1">{ad.title}</h1>
@@ -617,35 +629,46 @@ function AdContent() {
                     {/* Main Section */}
                     <div className="flex-1 space-y-5">
                         {/* Image - Compact Aspect with brighter frame */}
-                        <div className="relative aspect-[4/3] bg-muted/10 rounded-2xl overflow-hidden group border-2 border-primary/10 shadow-md cursor-zoom-in" onClick={() => setIsZoomed(true)}>
-                            <div className="absolute top-2 right-2 bg-black/30 backdrop-blur-md p-1.5 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                <Maximize2 className="h-4 w-4" />
-                            </div>
-                            <img
-                                src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
-                                className="w-full h-full object-contain"
-                                alt=""
-                            />
-                            {ad.images.length > 1 && (
-                                <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-                                    <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1)); }} className="p-1.5 bg-surface/80 text-foreground rounded-full pointer-events-auto shadow-lg backdrop-blur-md hover:bg-surface transition-all active:scale-90">
-                                        <ChevronLeft className="h-5 w-5" />
-                                    </button>
-                                    <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1)); }} className="p-1.5 bg-surface/80 text-foreground rounded-full pointer-events-auto shadow-lg backdrop-blur-md hover:bg-surface transition-all active:scale-90">
-                                        <ChevronRight className="h-5 w-5" />
-                                    </button>
+                        <div className="relative aspect-[4/3] bg-muted/10 rounded-2xl overflow-hidden group border-2 border-primary/10 shadow-md cursor-zoom-in" onClick={() => { if (ad.images && ad.images.length > 0) setIsZoomed(true); }}>
+                            {ad.images && ad.images.length > 0 ? (
+                                <>
+                                    <div className="absolute top-2 right-2 bg-black/30 backdrop-blur-md p-1.5 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                        <Maximize2 className="h-4 w-4" />
+                                    </div>
+                                    <img
+                                        src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
+                                        className="w-full h-full object-contain"
+                                        alt=""
+                                    />
+                                    {ad.images.length > 1 && (
+                                        <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-10">
+                                            <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1)); }} className="p-1.5 bg-surface/80 text-foreground rounded-full pointer-events-auto shadow-lg backdrop-blur-md hover:bg-surface transition-all active:scale-90">
+                                                <ChevronLeft className="h-5 w-5" />
+                                            </button>
+                                            <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1)); }} className="p-1.5 bg-surface/80 text-foreground rounded-full pointer-events-auto shadow-lg backdrop-blur-md hover:bg-surface transition-all active:scale-90">
+                                                <ChevronRight className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="w-full h-full flex flex-col items-center justify-center text-muted italic gap-2">
+                                    <ImageIcon className="h-12 w-12 opacity-20" />
+                                    <span className="text-sm font-semibold tracking-widest uppercase opacity-50">Нет фото</span>
                                 </div>
                             )}
                         </div>
 
                         {/* Thumbnails - Grid/Wrap for no side scrolling */}
-                        <div className="flex flex-wrap gap-2">
-                            {ad.images.map((img: string, i: number) => (
-                                <button key={i} onClick={() => setCurrentImageIndex(i)} className={cn("w-12 h-12 rounded-lg border-2 shrink-0 overflow-hidden transition-all", currentImageIndex === i ? "border-primary" : "border-transparent opacity-60 hover:opacity-100")}>
-                                    <img src={getOptimizedImageUrl(img, { width: 100, quality: 60 })} className="w-full h-full object-cover" />
-                                </button>
-                            ))}
-                        </div>
+                        {ad.images && ad.images.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {ad.images.map((img: string, i: number) => (
+                                    <button key={i} onClick={() => setCurrentImageIndex(i)} className={cn("w-12 h-12 rounded-lg border-2 shrink-0 overflow-hidden transition-all", currentImageIndex === i ? "border-primary" : "border-transparent opacity-60 hover:opacity-100")}>
+                                        <img src={getOptimizedImageUrl(img, { width: 100, quality: 60 })} className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Description - Compact */}
                         <div className="space-y-2">
@@ -1086,8 +1109,11 @@ function AdPageSidebar() {
                 .eq('is_active', true);
 
             if (data) {
+                // Filter for sidebar orientation and only take active ones
+                const sidebarAds = data.filter((b: any) => b.position === 'sidebar' && b.is_active);
+
                 // Shuffle and limit to 2 for ad page sidebar
-                const shuffled = data.sort(() => Math.random() - 0.5).slice(0, 2);
+                const shuffled = sidebarAds.sort(() => Math.random() - 0.5).slice(0, 2);
                 setBanners(shuffled);
 
                 // Track impressions
@@ -1111,9 +1137,17 @@ function AdPageSidebar() {
         return null;
     }
 
+    const ICON_MAP: Record<string, any> = {
+        MessageCircle,
+        Megaphone,
+        Smartphone,
+        Star,
+        ImageIcon
+    };
+
     if (loading) return (
         <div className="space-y-3">
-            <div className="w-full aspect-video bg-muted/20 animate-pulse rounded-2xl" />
+            <div className="w-full aspect-[1/1.5] bg-muted/20 animate-pulse rounded-2xl" />
         </div>
     );
 
@@ -1121,28 +1155,77 @@ function AdPageSidebar() {
         <div className="hidden lg:block space-y-4 pt-4 border-t border-border/50">
             <div className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase mb-2 px-1">Реклама</div>
             <div className="space-y-3">
-                {banners.filter(b => b.image_url).map(banner => (
-                    <a
-                        key={banner.id}
-                        href={banner.link_url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => {
-                            supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
-                                if (error) {
-                                    supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
-                                }
-                            });
-                        }}
-                        className="group relative w-full aspect-video rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/50 bg-surface block"
-                    >
-                        <img
-                            src={banner.image_url}
-                            alt={banner.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                    </a>
-                ))}
+                {banners.map(banner => {
+                    if (banner.type === 'text') {
+                        const Icon = ICON_MAP[banner.icon_name || 'Megaphone'] || Megaphone;
+                        return (
+                            <a
+                                key={banner.id}
+                                href={banner.link_url || '#'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => {
+                                    supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
+                                        if (error) {
+                                            supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
+                                        }
+                                    });
+                                }}
+                                className={cn(
+                                    "group relative w-full aspect-[1/1.5] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-white/10 flex flex-col p-5 text-white",
+                                    banner.background_color || 'bg-gradient-to-br from-primary to-emerald-700'
+                                )}
+                            >
+                                <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
+                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
+                                        <Icon className="h-8 w-8 text-white" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-base leading-tight mb-2">{banner.title}</h4>
+                                        <p className="text-white/80 text-xs font-medium line-clamp-4">{banner.content}</p>
+                                    </div>
+                                </div>
+                                {banner.button_text && (
+                                    <div className="mt-4 w-full py-3 bg-white text-primary rounded-xl font-bold text-xs uppercase text-center shadow-lg shadow-black/10 group-hover:scale-[1.02] transition-transform">
+                                        {banner.button_text}
+                                    </div>
+                                )}
+                            </a>
+                        );
+                    }
+
+                    return (
+                        <a
+                            key={banner.id}
+                            href={banner.link_url || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => {
+                                supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
+                                    if (error) {
+                                        supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
+                                    }
+                                });
+                            }}
+                            className="group relative w-full aspect-[1/1.5] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/50 bg-surface block"
+                        >
+                            {banner.image_url && (
+                                <img
+                                    src={getOptimizedImageUrl(banner.image_url, { width: 400, quality: 80 })}
+                                    alt={banner.title}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-5 flex flex-col justify-end">
+                                <h4 className="text-white font-bold text-sm line-clamp-2 leading-tight">{banner.title}</h4>
+                                {banner.content && <p className="text-white/70 text-[10px] mt-1 line-clamp-1">{banner.content}</p>}
+                            </div>
+                            <div className="absolute top-3 right-3 px-2 py-0.5 bg-black/40 backdrop-blur-md rounded-lg text-[8px] font-bold text-white/90 uppercase tracking-widest border border-white/10">
+                                Реклама
+                            </div>
+                        </a>
+                    );
+                })}
             </div>
             <div className="pt-6 text-[10px] text-muted-foreground font-medium text-center opacity-60">
                 © 2026 Авоська+ <br />

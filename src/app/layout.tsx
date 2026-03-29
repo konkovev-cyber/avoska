@@ -46,29 +46,224 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru" suppressHydrationWarning>
-      <head />
+      <head>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+          #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #F5F5F5;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .dark #splash { background: #020617; }
+          #splash.fade-out { opacity: 0; pointer-events: none; }
+          
+          .splash-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: splashEnter 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          }
+
+          .splash-logo-box {
+            position: relative;
+            width: 300px;
+            max-width: 85vw;
+            border-radius: 2.5rem;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.12);
+            background: white;
+            border: 1px solid rgba(0,0,0,0.05);
+          }
+          .dark .splash-logo-box { 
+            background: #1e293b;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.05);
+          }
+
+          .splash-logo { 
+            display: block; 
+            width: 100%; 
+            height: auto;
+            transform: scale(1.05);
+            transition: transform 3s ease-out;
+          }
+          #splash:not(.fade-out) .splash-logo {
+            transform: scale(1);
+          }
+
+          .splash-glow {
+            position: absolute;
+            inset: -40px;
+            background: radial-gradient(circle, rgba(46, 125, 50, 0.25) 0%, transparent 70%);
+            filter: blur(20px);
+            z-index: -1;
+            animation: pulseGlow 4s infinite ease-in-out;
+          }
+
+          .splash-bar {
+            width: 220px;
+            max-width: 65vw;
+            height: 4px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+            margin-top: 48px;
+            overflow: hidden;
+            position: relative;
+          }
+          .dark .splash-bar { background: rgba(255,255,255,0.05); }
+          
+          .splash-bar-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #2E7D32, #FF6D00, #2E7D32);
+            background-size: 200% 100%;
+            animation: barGrow 2.8s cubic-bezier(0.65, 0, 0.35, 1) forwards, gradientShift 2s infinite linear;
+          }
+
+          @keyframes splashEnter {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+
+          @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.15); }
+          }
+
+          @keyframes barGrow {
+            0% { width: 0; }
+            40% { width: 35%; }
+            70% { width: 85%; }
+            100% { width: 100%; }
+          }
+
+          @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+          }
+        `}} />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+          (function() {
+            // Splash skip logic
+            if (sessionStorage.getItem('splash_shown')) {
+              window.__skipSplash = true;
+              var s = document.createElement('style');
+              s.textContent = '#splash { display: none !important; } #root-content { visibility: visible !important; }';
+              document.head.appendChild(s);
+            }
+
+            // Scroll restore
+            if (sessionStorage.getItem('home_restore')) {
+              var y = parseInt(sessionStorage.getItem('home_scrollY') || '0', 10);
+              if (y > 0) {
+                window.__scrollRestore = y;
+                var s = document.createElement('style');
+                s.id = 'scroll-restore-style';
+                s.textContent = '#root-content { visibility: hidden !important }';
+                document.head.appendChild(s);
+              }
+            }
+
+            // PWA Cache Versioning
+            if ('serviceWorker' in navigator) {
+              var APP_V = '2026.03.28d';
+              if (localStorage.getItem('app_v') !== APP_V) {
+                caches.keys().then(function(names) {
+                  names.forEach(function(name) { caches.delete(name); });
+                });
+                localStorage.setItem('app_v', APP_V);
+              }
+            }
+          })();
+        `}} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Авоська+",
+              "url": "https://avoska.ru",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://avoska.ru/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+      </head>
       <body
         className="antialiased flex flex-col min-h-screen"
         suppressHydrationWarning
       >
-        <Header />
-
-        {/* Main Layout Container */}
-        <div className="flex-1 max-w-[1500px] mx-auto w-full">
-          <main className="flex-1 min-w-0 pb-34 lg:pb-0 pt-safe">
-            <PageAnimatePresence>
-              {children}
-            </PageAnimatePresence>
-          </main>
+        <div id="splash">
+          <div className="splash-container">
+            <div className="splash-logo-box">
+              <img src="/splash_logo.png" className="splash-logo" alt="Авоська+" />
+              <div className="splash-glow"></div>
+            </div>
+            <div className="splash-bar">
+              <div className="splash-bar-fill"></div>
+            </div>
+          </div>
         </div>
 
-        <ConditionalFooter />
-        <BottomNav />
+        <div id="root-content" className="flex-1 flex flex-col min-h-screen" style={{ visibility: 'hidden' }}>
+          <Header />
+
+          {/* Main Layout Container */}
+          <div className="flex-1 max-w-[1500px] mx-auto w-full">
+            <main className="flex-1 min-w-0 pb-40 lg:pb-0 pt-safe">
+              <PageAnimatePresence>
+                {children}
+              </PageAnimatePresence>
+            </main>
+          </div>
+
+          <ConditionalFooter />
+          <BottomNav />
+        </div>
+
         <AppUpdateCheck />
         <ServiceWorkerRegistration />
         <CookieBanner />
         <SupabaseStatus />
         <Toaster />
+
+        {/* Improved Splash Hiding Logic */}
+        <script dangerouslySetInnerHTML={{
+          __html: `
+          (function() {
+            if (window.__skipSplash) return;
+            
+            function hideSplash() {
+              var splash = document.getElementById('splash');
+              var root = document.getElementById('root-content');
+              if (splash && !splash.classList.contains('fade-out')) {
+                sessionStorage.setItem('splash_shown', 'true');
+                splash.classList.add('fade-out');
+                if (root) root.style.visibility = 'visible';
+                setTimeout(function() { splash.remove(); }, 800);
+              }
+            }
+
+            // Hide after load or 3s timeout
+            window.addEventListener('load', function() {
+              setTimeout(hideSplash, 1200);
+            });
+            setTimeout(hideSplash, 3000); 
+          })();
+        `}} />
 
         {/* Yandex Maps API */}
         <Script

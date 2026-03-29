@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { Package, Star, Share2, MapPin, User as UserIcon, Calendar, MessageCircle, Camera, X, Trash2 } from 'lucide-react';
+import { Package, Star, Share2, MapPin, User as UserIcon, Calendar, MessageCircle, Camera, X, Trash2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -208,6 +208,14 @@ function PublicProfileContent() {
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
+            {/* Back Button */}
+            <button
+                onClick={() => router.back()}
+                className="flex items-center gap-1.5 text-primary font-semibold text-xs uppercase tracking-widest mb-6 hover:opacity-70 transition-all active:scale-95"
+            >
+                <ChevronLeft className="h-4 w-4" /> Назад
+            </button>
+
             {/* Header Card */}
             <div className="bg-surface border border-border rounded-3xl p-6 md:p-8 mb-8 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4 opacity-50">

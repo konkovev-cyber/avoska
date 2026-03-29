@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 250" width="1200" height="250">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff8f0" />
+      <stop offset="100%" stop-color="#ffe0b2" />
+    </linearGradient>
+    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffb74d" />
+      <stop offset="50%" stop-color="#ff9800" />
+      <stop offset="100%" stop-color="#e65100" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="250" fill="url(#bg)" />
+  
+  <!-- Logo Circle -->
+  <g transform="translate(140, 125)">
+      <circle cx="0" cy="0" r="85" fill="url(#logoGrad)" filter="url(#shadow)" />
+      <ellipse cx="0" cy="-45" rx="55" ry="25" fill="white" opacity="0.25" />
+      <text x="0" y="-35" font-family="Arial, sans-serif" font-weight="bold" font-size="22" fill="white" text-anchor="middle">мой</text>
+      <text x="0" y="30" font-family="Arial, sans-serif" font-weight="900" font-size="76" fill="#111" text-anchor="middle" letter-spacing="-2">ГК</text>
+  </g>
+  
+  <!-- Main Text -->
+  <text x="280" y="75" font-family="Arial, sans-serif" font-weight="900" font-size="38" fill="#111">Мой Горячий Ключ</text>
+  <text x="1150" y="45" font-family="Arial, sans-serif" font-weight="bold" font-size="22" fill="#ff6d00" text-anchor="end">@goryachy_klyuch</text>
+  
+  <!-- Bullets -->
+  <g font-family="Arial, sans-serif" font-size="18" fill="#333" font-weight="600">
+    <text x="280" y="125">🔶 Новости, события, происшествия Горячего Ключа</text>
+    <text x="280" y="165">🔶 Пишите вопросы в директ! Обсудим всем городом</text>
+    <text x="280" y="205">🔶 Реклама Ваших товаров и услуг</text>
+  </g>
+  
+  <!-- CTA / Admin -->
+  <rect x="850" y="90" width="300" height="55" rx="27.5" fill="#22c55e" filter="url(#shadow)" />
+  <text x="1000" y="123" font-family="Arial, sans-serif" font-weight="bold" font-size="18" fill="white" text-anchor="middle">Связаться с админом</text>
+  
+  <rect x="875" y="165" width="250" height="36" rx="18" fill="#f1f5f9" />
+  <text x="1000" y="189" font-family="Arial, sans-serif" font-weight="bold" font-size="15" fill="#475569" text-anchor="middle">По всем вопросам: Михаил</text>
+</svg>

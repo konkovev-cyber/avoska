@@ -231,7 +231,7 @@ function EditAdContent() {
     );
 
     return (
-        <div className="container mx-auto px-2 md:px-4 py-2 max-w-3xl pb-32">
+        <div className="container mx-auto px-2 md:px-4 py-2 max-w-3xl pb-40">
 
             <div className="bg-surface border border-border rounded-[2rem] p-4 md:p-6 shadow-2xl shadow-black/5">
                 <div className="flex items-center justify-between mb-4">

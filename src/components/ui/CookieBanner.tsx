@@ -25,8 +25,8 @@ export default function CookieBanner() {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 md:bottom-4 md:left-4 md:right-auto z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
-            <div className="bg-surface border border-border shadow-2xl md:rounded-[2rem] rounded-t-[2rem] p-5 md:p-6 md:max-w-sm flex gap-4 items-start relative pb-8 md:pb-6">
+        <div className="fixed bottom-20 left-4 right-4 md:bottom-4 md:left-4 md:right-auto z-[150] animate-in slide-in-from-bottom-10 fade-in duration-500">
+            <div className="bg-surface border border-border shadow-2xl rounded-[2rem] p-5 md:p-6 md:max-w-sm flex gap-4 items-start relative">
                 <button
                     onClick={() => setIsVisible(false)}
                     className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-1"

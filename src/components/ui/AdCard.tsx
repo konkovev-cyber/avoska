@@ -58,9 +58,15 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
     return (
         <Link
             href={`/ad/?id=${ad.id}`}
-            className="group relative flex flex-col h-full bg-surface rounded-2xl overflow-hidden hover:shadow-xl transition-all border border-border/40 active:scale-[0.98]"
+            onClick={() => {
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem('home_scrollY', window.scrollY.toString());
+                    sessionStorage.setItem('home_restore', 'true');
+                }
+            }}
+            className="group relative flex flex-col h-full gap-2 outline-none"
         >
-            <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+            <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[1.25rem] bg-muted border border-border/20 group-hover:shadow-lg transition-all active:scale-[0.98]">
                 {isHoverGallery ? (
                     <HoverImageGallery
                         images={ad.images}
@@ -74,7 +80,7 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
                             src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
                             alt={ad.title}
                             loading="lazy"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted italic text-[10px]">Нет фото</div>
@@ -101,7 +107,7 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
                         "opacity-0 group-hover:opacity-100",
                         isFavorite
                             ? "bg-red-500 text-white !opacity-100"
-                            : "bg-surface/80 text-muted hover:bg-surface hover:text-red-500"
+                            : "bg-surface/90 text-muted hover:bg-surface hover:text-red-500"
                     )}
                     aria-label={isFavorite ? "Убрать из избранного" : "Добавить в избранное"}
                 >
@@ -109,22 +115,19 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
                 </button>
             </div>
 
-            <div className="p-2.5 md:p-3 flex flex-col flex-1 gap-1">
-                <div className="text-[15px] md:text-base font-semibold text-foreground tracking-tight leading-none">
+            <div className="flex flex-col flex-1 gap-1 px-1">
+                <div className="text-base font-bold text-foreground tracking-tight leading-none mb-0.5">
                     {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
                 </div>
 
-                <h3 className="text-[13px] font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em] group-hover:text-primary transition-colors">
+                <h3 className="text-sm font-medium leading-snug line-clamp-2 text-foreground/90 group-hover:text-primary transition-colors">
                     {ad.title}
                 </h3>
 
                 {!isHoverGallery && ad.profiles && (
-                    <div className="mt-auto pt-2 space-y-2">
-                        <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground uppercase tracking-wide opacity-70">
-                            <div className="flex items-center gap-1 truncate">
-                                <MapPin className="h-3 w-3 shrink-0" />
-                                <span className="truncate">{ad.city || 'Город'}</span>
-                            </div>
+                    <div className="mt-auto pt-1 space-y-2">
+                        <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground opacity-80">
+                            <span className="truncate">{ad.city || 'Город'}</span>
                             <span className="shrink-0">{new Date(ad.created_at).toLocaleDateString("ru-RU")}</span>
                         </div>
 
@@ -149,8 +152,7 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
 
                 {/* Minimal footer for standard layout without profile data */}
                 {(isHoverGallery || !ad.profiles) && (
-                    <div className="mt-auto pt-1.5 flex items-center gap-1 text-[9px] font-semibold text-muted-foreground uppercase tracking-wide opacity-70">
-                        <MapPin className="h-2.5 w-2.5 shrink-0" />
+                    <div className="mt-auto pt-1 flex items-center gap-1 text-[11px] font-medium text-muted-foreground opacity-80">
                         <span className="truncate">{ad.city || 'Город'}</span>
                     </div>
                 )}

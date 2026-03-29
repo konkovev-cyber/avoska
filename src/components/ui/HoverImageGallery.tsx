@@ -69,35 +69,20 @@ export default function HoverImageGallery({ images, alt, href, imageClass, layou
         return (
             <div
                 ref={containerRef}
-                className="relative w-full h-full overflow-hidden group bg-gray-50"
+                className="relative w-full h-full overflow-hidden group bg-surface dark:bg-muted/20"
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
             >
-                <Link href={href} className="block w-full h-full">
-                    {/* Instagram-style: blurred background + centered image */}
+                <Link href={href} className="block w-full h-full bg-muted">
                     <div className="w-full h-full relative flex items-center justify-center">
                         {displayImages.length > 0 ? (
-                            <>
-                                {/* Blurred background fill */}
-                                <img
-                                    src={getOptimizedImageUrl(displayImages[activeIndex], { width: 400, quality: 85 })}
-                                    alt={alt}
-                                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
-                                    loading="lazy"
-                                    style={{ objectPosition: 'center' }}
-                                />
-                                {/* Dark overlay for better contrast */}
-                                <div className="absolute inset-0 bg-black/10" />
-                                
-                                {/* Sharp main image - contain to show full image */}
-                                <img
-                                    src={getOptimizedImageUrl(displayImages[activeIndex], { width: 400, quality: 85 })}
-                                    alt={alt}
-                                    className="relative z-10 w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                                    loading="lazy"
-                                    style={{ objectPosition: 'center' }}
-                                />
-                            </>
+                            <img
+                                src={getOptimizedImageUrl(displayImages[activeIndex], { width: 400, quality: 85 })}
+                                alt={alt}
+                                className="relative z-10 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                                style={{ objectPosition: 'center' }}
+                            />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
                                 <span className="text-[9px] uppercase font-semibold tracking-widest">Нет фото</span>

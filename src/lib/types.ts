@@ -52,10 +52,15 @@ export interface Banner {
     image_url: string;
     link_url: string | null;
     is_active: boolean;
+    position: 'top' | 'sidebar';
     sort_order: number;
     impressions_count?: number;
     clicks_count?: number;
     content?: string;
+    type?: 'image' | 'text';
+    button_text?: string;
+    background_color?: string;
+    icon_name?: string;
 }
 export interface City {
     id: string;

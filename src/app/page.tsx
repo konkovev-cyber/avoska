@@ -17,6 +17,7 @@ import { CATEGORIES, APK_DOWNLOAD_URL } from '@/lib/constants';
 import { AdCard } from '@/components/ui/AdCard';
 import { Ad, Banner } from '@/lib/types';
 import { supabaseKeepalive } from '@/lib/supabase-keepalive';
+import RotatingFeedBanners from '@/components/ui/RotatingFeedBanners';
 
 const HoverImageGallery = dynamic(() => import('@/components/ui/HoverImageGallery'), {
   loading: () => <div className="bg-muted animate-pulse aspect-[4/3]" />
@@ -74,6 +75,11 @@ export default function HomePage() {
         });
       }
       setBanners(bannersEnabled ? fetchedBanners : []);
+
+      const topBanners = bannersEnabled ? fetchedBanners.filter(b => b.position === 'top' || !b.position) : [];
+      const sidebarBanners = bannersEnabled ? fetchedBanners.filter(b => b.position === 'sidebar') : [];
+
+      setBanners(fetchedBanners); // Keep all for state if needed, but we'll use filters in render
 
       const lastCatId = recommendationService.getLastCategory();
       let pCat = null;
@@ -138,6 +144,23 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    if (!loading && !loadingMore) {
+      const y = sessionStorage.getItem('home_scrollY');
+      const restore = sessionStorage.getItem('home_restore');
+      if (restore && y) {
+        window.scrollTo(0, parseInt(y, 10));
+        sessionStorage.removeItem('home_restore');
+        // Small delay to ensure everything is rendered
+        setTimeout(() => {
+          window.scrollTo(0, parseInt(y, 10));
+          const style = document.getElementById('scroll-restore-style');
+          if (style) style.remove();
+        }, 100);
+      }
+    }
+  }, [loading, loadingMore]);
+
+  useEffect(() => {
     if (!hasMore || loading || loadingMore) return;
 
     const observer = new IntersectionObserver(
@@ -166,54 +189,12 @@ export default function HomePage() {
     if (data) setFavorites(new Set(data.map(f => f.ad_id)));
   };
 
+  const topBanners = banners.filter(b => b.is_active && (b.position === 'top' || !b.position));
+  const sidebarBanners = banners.filter(b => b.is_active && b.position === 'sidebar');
+
   return (
     <div className="max-w-[1400px] mx-auto px-2 md:px-8 py-1 md:py-6 pb-20">
       <div className="w-full">
-        {/* Banners Section - Desktop Only */}
-        {banners.length > 0 && (
-          <section className="mb-6 px-1 hidden md:block">
-            <div className="grid grid-cols-4 gap-3">
-              {banners.map(banner => (
-                <a
-                  key={banner.id}
-                  href={banner.link_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => {
-                    supabase.rpc('increment_banner_click', { banner_id: banner.id }).then(({ error }) => {
-                      if (error) {
-                        supabase.from('banners').update({ clicks_count: (banner.clicks_count || 0) + 1 }).eq('id', banner.id);
-                      }
-                    });
-                  }}
-                  className="relative aspect-[2.4/1] rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/10 border border-border/40 group shadow-sm hover:shadow-xl transition-all duration-300"
-                >
-                  {banner.image_url ? (
-                    <img
-                      src={banner.image_url}
-                      alt={banner.title || 'Баннер'}
-                      className="w-full h-full object-cover transition-opacity duration-500"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.opacity = '0';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent/5" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-3 flex flex-col justify-end">
-                    <h3 className="text-white font-semibold text-xs md:text-sm line-clamp-2 leading-tight drop-shadow-md">{banner.title}</h3>
-                    {banner.content && (
-                      <p className="text-white/80 text-[10px] line-clamp-1 mt-0.5 hidden md:block">{banner.content}</p>
-                    )}
-                  </div>
-                  <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-black/40 backdrop-blur-md rounded-[3px] text-[8px] font-semibold text-white/80 uppercase tracking-widest border border-white/10">
-                    Реклама
-                  </div>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
 
         <section className="mb-2 hidden md:block">
           <h1 className="text-xl md:text-5xl font-semibold text-foreground mb-0.5 tracking-tighter">Все категории</h1>
@@ -304,32 +285,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* App Download Section - Slim Version */}
-        {!isMobileApp && (
-          <section className="mb-12 px-1">
-            <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-2xl p-4 md:p-6 text-white relative overflow-hidden shadow-xl shadow-green-900/5">
-              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center shrink-0">
-                    <Smartphone className="h-7 w-7 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg md:text-xl font-semibold tracking-tight">Установите Авоську+</h3>
-                    <p className="text-green-50/70 text-[10px] md:text-xs font-semibold uppercase tracking-wider">Приложение для Android стало быстрее и удобнее</p>
-                  </div>
-                </div>
-
-                <a
-                  href={APK_DOWNLOAD_URL}
-                  className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-white text-green-700 px-6 py-3 rounded-xl font-semibold text-sm shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                >
-                  <span>Скачать .apk</span>
-                  <ChevronRight className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
-          </section>
-        )}
+        <div className="my-8 space-y-6 px-1">
+          <RotatingFeedBanners topBanners={topBanners} isMobileApp={isMobileApp} />
+        </div>
 
         {/* Recommendations Section */}
         <section className="mb-4">

@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Package, MapPin, Search } from 'lucide-react';
+import { Package, MapPin, Search, ChevronLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function AllAdsPage() {
+    const router = useRouter();
     const [ads, setAds] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -33,6 +35,12 @@ export default function AllAdsPage() {
 
     return (
         <div className="container mx-auto px-4 py-8">
+            <button
+                onClick={() => router.back()}
+                className="flex items-center gap-1.5 text-primary font-semibold text-xs uppercase tracking-widest mb-6 hover:opacity-70 transition-all active:scale-95"
+            >
+                <ChevronLeft className="h-4 w-4" /> Назад
+            </button>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <h1 className="text-4xl font-semibold">Все объявления</h1>
                 <div className="relative w-full md:w-96">
