@@ -25,6 +25,7 @@ const HoverImageGallery = dynamic(() => import('@/components/ui/HoverImageGaller
 
 export default function HomePage() {
   const [ads, setAds] = useState<Ad[]>([]);
+  const [popularAds, setPopularAds] = useState<Ad[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -91,7 +92,10 @@ export default function HomePage() {
         }
       }
 
-      await fetchAds(0, true, currentCity, pCat);
+      await Promise.all([
+        fetchAds(0, true, currentCity, pCat),
+        fetchPopularAds(currentCity)
+      ]);
     } catch (error) {
       console.error('Initial fetch error:', error);
     } finally {
@@ -140,6 +144,27 @@ export default function HomePage() {
       setHasMore(typedData.length === PAGE_SIZE);
     } catch (error) {
       console.error('Fetch ads error:', error);
+    }
+  };
+
+  const fetchPopularAds = async (cityContext?: string | null) => {
+    try {
+      let q = supabase
+        .from('ads')
+        .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
+        .eq('status', 'active')
+        .gt('views_count', 0)
+        .order('views_count', { ascending: false })
+        .limit(6);
+
+      if (cityContext && cityContext !== 'Все города') {
+        q = q.eq('city', cityContext);
+      }
+
+      const { data } = await q;
+      if (data) setPopularAds(data as Ad[]);
+    } catch (error) {
+      console.error('Fetch popular ads error:', error);
     }
   };
 
@@ -205,7 +230,7 @@ export default function HomePage() {
           {/* Desktop Categories Grid */}
           <div className="hidden md:grid grid-cols-4 lg:grid-cols-10 gap-2 md:gap-4">
             {CATEGORIES.slice(0, 10).map((cat) => (
-              <Link
+              <Link prefetch={false}
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}
                 className="flex flex-col items-center gap-2 group transition-all"
@@ -228,7 +253,7 @@ export default function HomePage() {
           {/* Mobile Categories - Responsive Grid */}
           <div className="md:hidden grid grid-cols-4 gap-2 px-1">
             {CATEGORIES.slice(0, 8).map((cat) => (
-              <Link
+              <Link prefetch={false}
                 key={cat.slug}
                 href={`/category?slug=${cat.slug}`}
                 className="flex flex-col gap-1 items-center"
@@ -244,7 +269,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-4 flex justify-start md:justify-center px-1">
-            <Link
+            <Link prefetch={false}
               href="/categories"
               className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-semibold uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
@@ -275,7 +300,7 @@ export default function HomePage() {
           )}
 
           <div className="mt-2 flex justify-start md:justify-center px-1">
-            <Link
+            <Link prefetch={false}
               href="/search?sort=newest"
               className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-semibold uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >
@@ -283,6 +308,31 @@ export default function HomePage() {
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
+        </section>
+
+        {/* Popular Ads Section */}
+        <section className="mb-4">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">Популярное</h2>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="bg-surface rounded-2xl overflow-hidden shadow-sm border border-border/40 h-72 animate-pulse" />
+              ))}
+            </div>
+          ) : popularAds.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 px-1">
+              {popularAds.map((ad) => (
+                <AdCard key={ad.id} ad={ad} isHoverGallery={true} initialFavorite={favorites.has(ad.id)} showViews={true} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-surface p-8 rounded-2xl border-2 border-dashed border-border/50 text-center mx-1">
+              <p className="text-muted-foreground text-sm">Здесь появятся самые просматриваемые объявления</p>
+            </div>
+          )}
         </section>
 
         <div className="my-8 space-y-6 px-1">
@@ -313,7 +363,7 @@ export default function HomePage() {
             </div>
           )}
           <div className="mt-2 flex justify-start md:justify-center px-1">
-            <Link
+            <Link prefetch={false}
               href="/search"
               className="flex items-center gap-2 px-6 py-2 bg-background border-2 border-primary/20 rounded-xl text-[10px] font-semibold uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all shadow-lg shadow-primary/5 active:scale-95"
             >

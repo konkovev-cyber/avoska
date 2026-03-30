@@ -177,7 +177,7 @@ export default function AdminDashboard() {
                 isMenuOpen ? "fixed inset-0 z-[150] overflow-y-auto" : "relative md:sticky md:top-0 z-[40]"
             )}>
                 <div className="p-6 flex items-center justify-between border-b border-white/10">
-                    <Link href="/" className="flex items-center gap-2 group">
+                    <Link prefetch={false} href="/" className="flex items-center gap-2 group">
                         <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg flex items-center justify-center text-white font-semibold group-hover:rotate-12 transition-transform shadow-lg shadow-green-500/30">A+</div>
                         <span className="font-bold text-lg tracking-tighter uppercase text-white">Панель</span>
                     </Link>
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
                                             <tr key={r.id} className="hover:bg-green-50/30 dark:hover:bg-muted/20 transition-colors">
                                                 <td className="p-4 text-sm font-semibold">{r.reporter?.full_name || 'Incognito'}</td>
                                                 <td className="p-4 text-sm">
-                                                    <Link href={`/ad?id=${r.ad_id}`} className="text-primary hover:underline font-semibold transition-all">{r.ad?.title || 'Удалено'}</Link>
+                                                    <Link prefetch={false} href={`/ad?id=${r.ad_id}`} className="text-primary hover:underline font-semibold transition-all">{r.ad?.title || 'Удалено'}</Link>
                                                 </td>
                                                 <td className="p-4 text-xs font-medium text-muted-foreground">{r.reason}</td>
                                                 <td className="p-4 text-right">

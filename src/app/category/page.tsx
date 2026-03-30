@@ -326,7 +326,7 @@ function CategoryContent() {
 
     return (
         <div className="container mx-auto px-2 md:px-4 py-6 max-w-[1200px]">
-            <Link href="/categories" className="inline-flex items-center gap-2 text-primary font-semibold mb-6 hover:translate-x-[-4px] transition-transform text-xs uppercase tracking-widest">
+            <Link prefetch={false} href="/categories" className="inline-flex items-center gap-2 text-primary font-semibold mb-6 hover:translate-x-[-4px] transition-transform text-xs uppercase tracking-widest">
                 <ChevronLeft className="h-4 w-4" /> Ко всем категориям
             </Link>
             <div className="flex flex-col items-center justify-center text-center mb-10 gap-4">

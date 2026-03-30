@@ -31,7 +31,9 @@ import {
     Flag,
     MessageCircle,
     Megaphone,
-    Smartphone
+    Smartphone,
+    Eye,
+    Phone
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -207,19 +209,70 @@ function AdContent() {
 
     const fetchAd = async () => {
         if (!id) return;
-        const { data, error } = await supabase
-            .from('ads')
-            .select(`*, user_id, profiles:user_id (*), category:category_id (*)`)
-            .eq('id', id)
-            .single();
 
-        if (error) {
-            toast.error('Объявление не найдено');
-            router.push('/');
-            return;
+        try {
+            const { data, error } = await supabase
+                .from('ads')
+                .select(`*, user_id, profiles:user_id (*), category:category_id (*)`)
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching ad:', error);
+                if (error.code === 'PGRST116') {
+                    toast.error('Объявление не найдено');
+                    router.push('/');
+                } else {
+                    toast.error('Ошибка загрузки. Попробуйте войти снова.');
+                    // If it's an auth-related error, redirect to login
+                    if (error.message?.includes('JWT') || error.message?.includes('token')) {
+                        router.push('/login');
+                    }
+                }
+                return;
+            }
+
+            setAd(data);
+            setLoading(false);
+
+            // Increment view count if not already viewed in this session
+            const viewedAds = JSON.parse(sessionStorage.getItem('viewed_ads') || '[]');
+            if (!viewedAds.includes(id)) {
+                try {
+                    // Update UI immediately (optimistic but for views usually we wait or do it sync)
+                    // Let's do it after RPC success for accuracy
+                    const { error: rpcError } = await supabase.rpc('increment_ad_view', { ad_id: id });
+                    if (!rpcError) {
+                        viewedAds.push(id);
+                        sessionStorage.setItem('viewed_ads', JSON.stringify(viewedAds));
+                        // After successful increment, update local state to show +1 immediately
+                        setAd((prev: any) => prev ? { ...prev, views_count: (prev.views_count || 0) + 1 } : null);
+                    }
+                } catch (e) {
+                    console.error('Error incrementing view:', e);
+                }
+            }
+        } catch (err: any) {
+            console.error('Unexpected fetchAd error:', err);
+            toast.error('Произошла ошибка при загрузке');
+            setLoading(false);
         }
-        setAd(data);
-        setLoading(false);
+    };
+
+    const handleContactClick = async (type: 'call' | 'chat') => {
+        if (!ad) return;
+
+        // Visual feedback based on type
+        if (type === 'chat') {
+            setShowChat(true);
+        }
+
+        // Increment contact counter
+        try {
+            await supabase.rpc('increment_ad_contact', { ad_id: ad.id });
+        } catch (e) {
+            console.error('Error incrementing contact:', e);
+        }
     };
 
     const toggleFavorite = async () => {
@@ -427,8 +480,15 @@ function AdContent() {
 
     const handleShare = async () => {
         const url = window.location.href;
+        const title = ad?.title || 'Объявление на Авоська+';
+
         try {
-            if (navigator.clipboard) {
+            if (navigator.share) {
+                await navigator.share({
+                    title: title,
+                    url: url
+                });
+            } else if (navigator.clipboard) {
                 await navigator.clipboard.writeText(url);
                 toast.success('Ссылка скопирована в буфер обмена');
             } else {
@@ -442,7 +502,9 @@ function AdContent() {
                 toast.success('Ссылка скопирована');
             }
         } catch (err) {
-            toast.error('Не удалось скопировать ссылку');
+            if ((err as Error).name !== 'AbortError') {
+                toast.error('Не удалось поделиться ссылкой');
+            }
         }
     };
 
@@ -583,7 +645,13 @@ function AdContent() {
 
                 {/* Header: Title + Price (Super Compact) */}
                 <div className="mb-3">
-                    <h1 className="text-xl md:text-2xl font-bold leading-tight mb-1">{ad.title}</h1>
+                    <div className="flex items-center gap-2 mb-1">
+                        <h1 className="text-xl md:text-2xl font-bold leading-tight flex-1">{ad.title}</h1>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-surface border border-border/50 rounded-full text-[10px] font-bold text-muted-foreground shadow-sm">
+                            <Eye className="h-3 w-3" />
+                            <span>{ad.views_count || 0}</span>
+                        </div>
+                    </div>
                     <div className="flex items-center justify-between">
                         <div className="text-2xl font-bold text-primary">
                             {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
@@ -629,19 +697,41 @@ function AdContent() {
                     {/* Main Section */}
                     <div className="flex-1 space-y-5">
                         {/* Image - Compact Aspect with brighter frame */}
-                        <div className="relative aspect-[4/3] bg-muted/10 rounded-2xl overflow-hidden group border-2 border-primary/10 shadow-md cursor-zoom-in" onClick={() => { if (ad.images && ad.images.length > 0) setIsZoomed(true); }}>
+                        <div className="relative aspect-[4/3] bg-muted/10 rounded-2xl overflow-hidden group border-2 border-primary/10 shadow-md cursor-zoom-in">
                             {ad.images && ad.images.length > 0 ? (
                                 <>
-                                    <div className="absolute top-2 right-2 bg-black/30 backdrop-blur-md p-1.5 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                    <div className="absolute top-2 right-2 bg-black/30 backdrop-blur-md p-1.5 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                                         <Maximize2 className="h-4 w-4" />
                                     </div>
-                                    <img
-                                        src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
-                                        className="w-full h-full object-contain"
-                                        alt=""
-                                    />
+
+                                    <div className="w-full h-full relative" onClick={() => setIsZoomed(true)}>
+                                        <AnimatePresence mode="wait" initial={false}>
+                                            <motion.img
+                                                key={currentImageIndex}
+                                                src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="w-full h-full object-contain absolute inset-0 z-10"
+                                                alt=""
+                                                drag="x"
+                                                dragConstraints={{ left: 0, right: 0 }}
+                                                dragElastic={0.4}
+                                                onDragEnd={(e, { offset }) => {
+                                                    const swipe = offset.x;
+                                                    if (swipe < -40) {
+                                                        setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1));
+                                                    } else if (swipe > 40) {
+                                                        setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1));
+                                                    }
+                                                }}
+                                            />
+                                        </AnimatePresence>
+                                    </div>
+
                                     {ad.images.length > 1 && (
-                                        <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-10">
+                                        <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-30">
                                             <button onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1)); }} className="p-1.5 bg-surface/80 text-foreground rounded-full pointer-events-auto shadow-lg backdrop-blur-md hover:bg-surface transition-all active:scale-90">
                                                 <ChevronLeft className="h-5 w-5" />
                                             </button>
@@ -761,7 +851,7 @@ function AdContent() {
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Отзывы о продавце</h2>
                                 <div className="flex items-center gap-3">
-                                    <Link href={`/user?id=${ad.user_id}&tab=reviews`} className="text-[10px] font-semibold uppercase text-primary hover:underline">Все отзывы</Link>
+                                    <Link prefetch={false} href={`/user?id=${ad.user_id}&tab=reviews`} className="text-[10px] font-semibold uppercase text-primary hover:underline">Все отзывы</Link>
                                     {currentUser && currentUser.id !== ad.user_id && !showReviewForm && (
                                         <button
                                             onClick={() => setShowReviewForm(true)}
@@ -954,7 +1044,7 @@ function AdContent() {
                         )}
 
                         {/* Seller Card - Compact */}
-                        <Link href={`/user?id=${ad.user_id}`} className="bg-white/40 p-4 rounded-2xl border border-white/60 backdrop-blur-xl flex items-center gap-3 hover:bg-white/60 transition-all active:scale-98 shadow-sm">
+                        <Link prefetch={false} href={`/user?id=${ad.user_id}`} className="bg-white/40 p-4 rounded-2xl border border-white/60 backdrop-blur-xl flex items-center gap-3 hover:bg-white/60 transition-all active:scale-98 shadow-sm">
                             <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0">
                                 {ad.profiles?.avatar_url ? (
                                     <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" alt={ad.profiles.full_name} />
@@ -1060,10 +1150,17 @@ function AdContent() {
                                         <span>Связаться с продавцом:</span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                        <a href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'} className="h-11 bg-green-600 text-white text-[13px] font-semibold rounded-xl flex items-center justify-center hover:bg-green-700 transition-all shadow-lg shadow-green-600/10 active:scale-95">
+                                        <a
+                                            href={ad.profiles?.phone ? `tel:${ad.profiles.phone}` : '#'}
+                                            onClick={() => handleContactClick('call')}
+                                            className="h-11 bg-green-600 text-white text-[13px] font-semibold rounded-xl flex items-center justify-center hover:bg-green-700 transition-all shadow-lg shadow-green-600/10 active:scale-95"
+                                        >
                                             Позвонить
                                         </a>
-                                        <button onClick={() => setShowChat(true)} className="h-11 bg-primary text-white text-[13px] font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 active:scale-95">
+                                        <button
+                                            onClick={() => handleContactClick('chat')}
+                                            className="h-11 bg-primary text-white text-[13px] font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 active:scale-95"
+                                        >
                                             Написать
                                         </button>
                                     </div>
@@ -1229,7 +1326,7 @@ function AdPageSidebar() {
             </div>
             <div className="pt-6 text-[10px] text-muted-foreground font-medium text-center opacity-60">
                 © 2026 Авоська+ <br />
-                <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
+                <Link prefetch={false} href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link prefetch={false} href="/terms" className="hover:underline">Оферта</Link>
             </div>
         </div>
     );

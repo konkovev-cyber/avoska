@@ -68,11 +68,11 @@ export function CategoriesSection({ categories, onUpdate }: CategoriesSectionPro
                     <input value={name} onChange={e => setName(e.target.value)} placeholder="Название..." className="w-full bg-muted/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm" />
                     <input value={slug} onChange={e => setSlug(e.target.value)} placeholder="Slug (опционально)..." className="w-full bg-muted/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm" />
                     <label className="block aspect-square relative rounded-2xl border-2 border-dashed border-border/60 overflow-hidden cursor-pointer hover:border-primary/40 transition-all">
-                         {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover" alt="" /> : <div className="flex flex-col items-center justify-center h-full text-muted-foreground"><Upload className="h-6 w-6 mb-1"/> <span className="text-[10px] font-semibold uppercase">Иконка</span></div>}
-                         <input type="file" className="hidden" onChange={e => {
-                             const f = e.target.files?.[0];
-                             if (f) { setImageFile(f); const r = new FileReader(); r.onloadend = () => setImagePreview(r.result as string); r.readAsDataURL(f); }
-                         }} />
+                        {imagePreview ? <img src={imagePreview} className="w-full h-full object-cover" alt="" /> : <div className="flex flex-col items-center justify-center h-full text-muted-foreground"><Upload className="h-6 w-6 mb-1" /> <span className="text-[10px] font-semibold uppercase">Иконка</span></div>}
+                        <input type="file" className="hidden" onChange={e => {
+                            const f = e.target.files?.[0];
+                            if (f) { setImageFile(f); const r = new FileReader(); r.onloadend = () => setImagePreview(r.result as string); r.readAsDataURL(f); }
+                        }} />
                     </label>
                     <button type="submit" disabled={loading} className="w-full py-3 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
                         {loading ? '...' : (editingCategory ? 'Сохранить' : 'Добавить')}
@@ -85,9 +85,9 @@ export function CategoriesSection({ categories, onUpdate }: CategoriesSectionPro
                     <div key={cat.id} className="bg-surface rounded-2xl border border-border/40 p-3 group hover:shadow-lg transition-all text-center">
                         <img src={(cat as any).image} className="w-12 h-12 mx-auto rounded-xl object-cover mb-2" alt="" />
                         <p className="text-xs font-semibold uppercase tracking-tight truncate">{cat.name}</p>
-                        <div className="flex justify-center gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => { setEditingCategory(cat); setName(cat.name); setSlug(cat.slug); setImagePreview((cat as any).image); }} className="p-1.5 hover:bg-primary/10 text-primary rounded-lg"><Pencil className="h-3.5 w-3.5"/></button>
-                            <button onClick={async () => { if(confirm('Удалить?')) { await supabase.from('categories').delete().eq('id', cat.id); onUpdate(); } }} className="p-1.5 hover:bg-red-500/10 text-red-500 rounded-lg"><Trash2 className="h-3.5 w-3.5"/></button>
+                        <div className="flex justify-center gap-1 mt-2">
+                            <button onClick={() => { setEditingCategory(cat); setName(cat.name); setSlug(cat.slug); setImagePreview((cat as any).image); }} className="p-1.5 hover:bg-primary/10 text-primary rounded-lg"><Pencil className="h-3.5 w-3.5" /></button>
+                            <button onClick={async () => { if (confirm('Удалить?')) { await supabase.from('categories').delete().eq('id', cat.id); onUpdate(); } }} className="p-1.5 hover:bg-red-500/10 text-red-500 rounded-lg"><Trash2 className="h-3.5 w-3.5" /></button>
                         </div>
                     </div>
                 ))}

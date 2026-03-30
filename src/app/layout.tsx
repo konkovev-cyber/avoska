@@ -153,14 +153,6 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `
           (function() {
-            // Splash skip logic
-            if (sessionStorage.getItem('splash_shown')) {
-              window.__skipSplash = true;
-              var s = document.createElement('style');
-              s.textContent = '#splash { display: none !important; } #root-content { visibility: visible !important; }';
-              document.head.appendChild(s);
-            }
-
             // Scroll restore
             if (sessionStorage.getItem('home_restore')) {
               var y = parseInt(sessionStorage.getItem('home_scrollY') || '0', 10);
@@ -173,14 +165,27 @@ export default function RootLayout({
               }
             }
 
-            // PWA Cache Versioning
-            if ('serviceWorker' in navigator) {
-              var APP_V = '2026.03.28d';
-              if (localStorage.getItem('app_v') !== APP_V) {
-                caches.keys().then(function(names) {
-                  names.forEach(function(name) { caches.delete(name); });
-                });
-                localStorage.setItem('app_v', APP_V);
+            // PWA & APK Versioning (Hard Reset on Update)
+            if (typeof window !== 'undefined') {
+              try {
+                // Robust Splash Hide Logic
+                var splashHidden = false;
+                function hideSplash() {
+                  if (splashHidden) return;
+                  splashHidden = true;
+                  var splash = document.getElementById('splash');
+                  if (splash) {
+                    splash.classList.add('fade-out');
+                    setTimeout(function() { splash.style.display = 'none'; }, 1000);
+                  }
+                }
+
+                window.addEventListener('load', hideSplash);
+                setTimeout(hideSplash, 3500); // Fail-safe
+                window.__hideSplash = hideSplash;
+
+              } catch (e) {
+                console.error('Core script error:', e);
               }
             }
           })();
@@ -208,9 +213,9 @@ export default function RootLayout({
       >
         <div id="splash">
           <div className="splash-container">
+            <div className="splash-glow"></div>
             <div className="splash-logo-box">
-              <img src="/splash_logo.png" className="splash-logo" alt="Авоська+" />
-              <div className="splash-glow"></div>
+              <img src="/splash_logo.png" alt="Авоська+" className="splash-logo" />
             </div>
             <div className="splash-bar">
               <div className="splash-bar-fill"></div>
@@ -218,7 +223,7 @@ export default function RootLayout({
           </div>
         </div>
 
-        <div id="root-content" className="flex-1 flex flex-col min-h-screen" style={{ visibility: 'hidden' }}>
+        <div id="root-content" className="flex-1 flex flex-col min-h-screen">
           <Header />
 
           {/* Main Layout Container */}
@@ -234,36 +239,11 @@ export default function RootLayout({
           <BottomNav />
         </div>
 
-        <AppUpdateCheck />
+        {/* <AppUpdateCheck /> */}
         <ServiceWorkerRegistration />
         <CookieBanner />
         <SupabaseStatus />
         <Toaster />
-
-        {/* Improved Splash Hiding Logic */}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-          (function() {
-            if (window.__skipSplash) return;
-            
-            function hideSplash() {
-              var splash = document.getElementById('splash');
-              var root = document.getElementById('root-content');
-              if (splash && !splash.classList.contains('fade-out')) {
-                sessionStorage.setItem('splash_shown', 'true');
-                splash.classList.add('fade-out');
-                if (root) root.style.visibility = 'visible';
-                setTimeout(function() { splash.remove(); }, 800);
-              }
-            }
-
-            // Hide after load or 3s timeout
-            window.addEventListener('load', function() {
-              setTimeout(hideSplash, 1200);
-            });
-            setTimeout(hideSplash, 3000); 
-          })();
-        `}} />
 
         {/* Yandex Maps API */}
         <Script

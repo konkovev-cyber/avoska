@@ -65,7 +65,7 @@ export default function FavoritesPage() {
                 {favorites.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                         {favorites.map(({ ads: ad }) => (
-                            <Link
+                            <Link prefetch={false}
                                 key={ad.id}
                                 href={`/ad/?id=${ad.id}`}
                                 className="bg-surface border border-border rounded-3xl overflow-hidden hover:shadow-lg transition-all flex flex-col group"
@@ -100,7 +100,7 @@ export default function FavoritesPage() {
                         <Heart className="h-16 w-16 text-muted/20 mx-auto mb-6" />
                         <h2 className="text-2xl font-bold mb-2">В избранном пусто</h2>
                         <p className="text-muted mb-8 max-w-xs mx-auto">Добавляйте объявления в избранное, чтобы не потерять их</p>
-                        <Link href="/" className="inline-flex bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
+                        <Link prefetch={false} href="/" className="inline-flex bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform active:scale-95">
                             Найти что-нибудь
                         </Link>
                     </div>

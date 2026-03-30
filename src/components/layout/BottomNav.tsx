@@ -79,7 +79,7 @@ export default function BottomNav() {
 
                     if (isCreate) {
                         return (
-                            <Link
+                            <Link prefetch={false}
                                 key={item.href}
                                 href={item.href}
                                 className="relative -top-4 flex flex-col items-center group active:scale-90 transition-all"
@@ -93,7 +93,7 @@ export default function BottomNav() {
                     }
 
                     return (
-                        <Link
+                        <Link prefetch={false}
                             key={item.href}
                             href={item.href}
                             className={cn(

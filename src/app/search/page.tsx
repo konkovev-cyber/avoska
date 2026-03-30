@@ -403,7 +403,7 @@ function SearchContent() {
                     ) : ads.length > 0 ? (
                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                             {ads.map((ad) => (
-                                <Link
+                                <Link prefetch={false}
                                     key={ad.id}
                                     href={`/ad/?id=${ad.id}`}
                                     className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200"

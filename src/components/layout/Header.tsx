@@ -61,6 +61,11 @@ export default function Header() {
         // Detect Capacitor (Android APK)
         setIsCapacitor(typeof window !== 'undefined' && (window as any).Capacitor !== undefined);
 
+        // Hide splash screen if global helper exists
+        if (typeof window !== 'undefined' && (window as any).__hideSplash) {
+            (window as any).__hideSplash();
+        }
+
         return () => {
             subscription.unsubscribe();
             supabase.removeChannel(favChannel);
@@ -119,7 +124,7 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center gap-3 lg:gap-8">
                 {!isCapacitor && (
                     <>
-                        <Link href="/" className="hidden lg:flex shrink-0 items-center group gap-2">
+                        <Link prefetch={false} href="/" className="hidden lg:flex shrink-0 items-center group gap-2">
                             <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20 group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
                                 <span className="text-white font-bold text-xl tracking-tighter">А+</span>
                             </div>
@@ -129,7 +134,7 @@ export default function Header() {
                             </div>
                         </Link>
 
-                        <Link href="/" className="lg:hidden shrink-0 flex items-center group">
+                        <Link prefetch={false} href="/" className="lg:hidden shrink-0 flex items-center group">
                             <div className="flex items-center gap-1.5 active:scale-95 transition-transform">
                                 <div className="w-9 h-9 bg-primary flex items-center justify-center rounded-xl shadow-lg shadow-primary/20">
                                     <span className="text-white font-bold text-lg tracking-tighter">А+</span>
@@ -185,7 +190,7 @@ export default function Header() {
 
                 {/* Desktop Actions */}
                 <div className="hidden lg:flex items-center gap-2">
-                    <Link href="/favorites" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Избранное">
+                    <Link prefetch={false} href="/favorites" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Избранное">
                         <Heart className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
                         {favoritesCount > 0 && (
                             <span className="absolute top-2.5 right-2.5 w-4 h-4 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-background">
@@ -193,7 +198,7 @@ export default function Header() {
                             </span>
                         )}
                     </Link>
-                    <Link href="/chat" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Сообщения">
+                    <Link prefetch={false} href="/chat" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Сообщения">
                         <MessageSquare className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
                     </Link>
                     {/* Theme Toggle - Hidden on mobile to save space */}
@@ -221,7 +226,7 @@ export default function Header() {
 
                     {
                         user && !isCapacitor && (
-                            <Link href="/notifications" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Уведомления">
+                            <Link prefetch={false} href="/notifications" className="p-3 hover:bg-surface rounded-2xl transition-all group relative" title="Уведомления">
                                 <Bell className="h-6 w-6 text-muted-foreground group-hover:text-foreground" />
                             </Link>
                         )
@@ -229,7 +234,7 @@ export default function Header() {
 
                     <div className="mx-2 w-px h-8 bg-border/50" />
 
-                    <Link
+                    <Link prefetch={false}
                         href="/ads/create"
                         className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm hover:opacity-90 shadow-xl shadow-primary/20 transition-all hover:-translate-y-0.5"
                     >
@@ -239,7 +244,7 @@ export default function Header() {
                     {
                         user ? (
                             <div className="flex items-center gap-2 ml-2">
-                                <Link href="/profile" className="p-1 rounded-2xl overflow-hidden border-2 border-primary/20 hover:border-primary transition-all shadow-sm">
+                                <Link prefetch={false} href="/profile" className="p-1 rounded-2xl overflow-hidden border-2 border-primary/20 hover:border-primary transition-all shadow-sm">
                                     <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center overflow-hidden">
                                         {user.user_metadata?.avatar_url ? (
                                             <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" />
@@ -253,7 +258,7 @@ export default function Header() {
                                 </button>
                             </div>
                         ) : (
-                            <Link href="/login" className="text-sm font-semibold uppercase tracking-widest hover:text-primary px-4 py-2 border-2 border-transparent hover:border-primary/20 rounded-2xl transition-all ml-2">Войти</Link>
+                            <Link prefetch={false} href="/login" className="text-sm font-semibold uppercase tracking-widest hover:text-primary px-4 py-2 border-2 border-transparent hover:border-primary/20 rounded-2xl transition-all ml-2">Войти</Link>
                         )
                     }
                 </div >
@@ -262,7 +267,7 @@ export default function Header() {
                 <div className="lg:hidden flex items-center gap-1">
                     {
                         user && !isCapacitor && (
-                            <Link href="/notifications" className="p-2.5 hover:bg-surface rounded-xl block relative">
+                            <Link prefetch={false} href="/notifications" className="p-2.5 hover:bg-surface rounded-xl block relative">
                                 <Bell className="h-6 w-6 text-muted-foreground" />
                             </Link>
                         )

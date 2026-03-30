@@ -1,4 +1,26 @@
-const SERVICE_WORKER_VERSION = '1.0.1';
+const SERVICE_WORKER_VERSION = '1.0.3';
+const CACHE_NAME = `avoska-v${SERVICE_WORKER_VERSION}`;
+
+// При установке — пропускаем ожидание, сразу активируемся
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+// При активации — удаляем ВСЕ старые кэши (главное исправление)
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames
+                    .filter((name) => name !== CACHE_NAME)
+                    .map((name) => {
+                        console.log('[SW] Deleting old cache:', name);
+                        return caches.delete(name);
+                    })
+            );
+        }).then(() => clients.claim())
+    );
+});
 
 self.addEventListener('push', function (event) {
     if (event.data) {
@@ -7,8 +29,8 @@ self.addEventListener('push', function (event) {
             body: data.body,
             icon: '/logo.png',
             badge: '/logo.png',
-            tag: 'new-message', // Group notifications
-            renotify: true, // Vibrate on new notification with same tag
+            tag: 'new-message',
+            renotify: true,
             data: {
                 url: data.url
             },
@@ -35,12 +57,4 @@ self.addEventListener('notificationclick', function (event) {
             clients.openWindow(event.notification.data.url)
         );
     }
-});
-
-self.addEventListener('install', (event) => {
-    self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-    event.waitUntil(clients.claim());
 });

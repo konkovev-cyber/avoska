@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, MapPin, Star } from 'lucide-react';
+import { Heart, MapPin, Star, Eye } from 'lucide-react';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { Ad } from '@/lib/types';
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -19,10 +19,17 @@ interface AdCardProps {
     ad: Ad;
     isHoverGallery?: boolean;
     initialFavorite?: boolean;
+    showViews?: boolean;
 }
 
-export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: AdCardProps) {
+export function AdCard({ ad, isHoverGallery = false, initialFavorite = false, showViews = false }: AdCardProps) {
     const [isFavorite, setIsFavorite] = useState(initialFavorite);
+    const [isTouch, setIsTouch] = useState(true); // default to true (safe for SSR/mobile)
+
+    useEffect(() => {
+        // Detect touch-only devices: skip HoverImageGallery (hover = mouse only)
+        setIsTouch(window.matchMedia('(hover: none)').matches);
+    }, []);
 
     const toggleFavorite = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -56,7 +63,7 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
     };
 
     return (
-        <Link
+        <Link prefetch={false}
             href={`/ad/?id=${ad.id}`}
             onClick={() => {
                 if (typeof window !== 'undefined') {
@@ -67,7 +74,7 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
             className="group relative flex flex-col h-full gap-2 outline-none"
         >
             <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[1.25rem] bg-muted border border-border/20 group-hover:shadow-lg transition-all active:scale-[0.98]">
-                {isHoverGallery ? (
+                {isHoverGallery && !isTouch ? (
                     <HoverImageGallery
                         images={ad.images}
                         alt={ad.title}
@@ -116,8 +123,16 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
             </div>
 
             <div className="flex flex-col flex-1 gap-1 px-1">
-                <div className="text-base font-bold text-foreground tracking-tight leading-none mb-0.5">
-                    {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
+                <div className="flex items-center justify-between gap-1 mb-0.5">
+                    <div className="text-base font-bold text-foreground tracking-tight leading-none">
+                        {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
+                    </div>
+                    {showViews && (
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground bg-secondary/10 px-1.5 py-0.5 rounded-full">
+                            <Eye className="h-3 w-3" />
+                            <span>{ad.views_count || 0}</span>
+                        </div>
+                    )}
                 </div>
 
                 <h3 className="text-sm font-medium leading-snug line-clamp-2 text-foreground/90 group-hover:text-primary transition-colors">
@@ -133,9 +148,9 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false }: 
 
                         <div className="pt-2 border-t border-border/40 flex items-center justify-between">
                             <div className="flex items-center gap-1.5 min-w-0">
-                                <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-[7px] font-semibold shrink-0">
+                                <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center text-[7px] font-semibold shrink-0 overflow-hidden">
                                     {ad.profiles.avatar_url ? (
-                                        <img src={ad.profiles.avatar_url} className="w-full h-full object-cover rounded-full" alt="avatar" />
+                                        <img src={ad.profiles.avatar_url} className="w-full h-full object-cover" alt="avatar" />
                                     ) : (
                                         ad.profiles.full_name?.charAt(0) || '?'
                                     )}

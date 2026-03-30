@@ -23,3 +23,6 @@ begin
 
 end;
 $$;
+
+-- Grant execution permissions
+GRANT EXECUTE ON FUNCTION public.delete_user_account() TO authenticated;

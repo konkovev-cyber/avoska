@@ -45,7 +45,7 @@ export default function CookieBanner() {
                     </div>
                     <p className="text-xs font-medium text-muted-foreground leading-relaxed mb-4">
                         Мы используем файлы cookie для обеспечения безопасности, авторизации и улучшения работы сервиса.
-                        Продолжая работу с сайтом, вы принимаете условия <Link href="/privacy" className="text-primary font-semibold hover:underline">Политики обработки ПДн</Link>.
+                        Продолжая работу с сайтом, вы принимаете условия <Link prefetch={false} href="/privacy" className="text-primary font-semibold hover:underline">Политики обработки ПДн</Link>.
                     </p>
                     <button
                         onClick={acceptCookies}

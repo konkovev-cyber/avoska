@@ -32,7 +32,7 @@ function VerifyEmailContent() {
                     Перейти к логину
                 </button>
 
-                <Link
+                <Link prefetch={false}
                     href="/"
                     className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors"
                 >

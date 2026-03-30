@@ -458,7 +458,7 @@ export function BannersSection({ banners, onUpdate, bannersEnabled, setBannersEn
                                         )}
                                     </div>
 
-                                    <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="absolute top-2 right-2 flex gap-1">
                                         <button onClick={() => editBanner(banner)} className="p-2 bg-white/40 hover:bg-white/90 backdrop-blur-md text-primary rounded-xl transition-all shadow-sm">
                                             <Pencil className="h-3.5 w-3.5" />
                                         </button>

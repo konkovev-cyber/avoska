@@ -14,10 +14,39 @@ import { AdCard } from '@/components/ui/AdCard';
 import { Ad, Profile } from '@/lib/types';
 import PushSubscriptionManager from '@/components/notifications/PushSubscriptionManager';
 
+import React from 'react';
+
+class LocalErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; error: any }> {
+    constructor(props: { children: React.ReactNode }) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+    static getDerivedStateFromError(error: any) {
+        return { hasError: true, error };
+    }
+    componentDidCatch(error: any, errorInfo: any) {
+        console.error("ErrorBoundary caught:", error, errorInfo);
+    }
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div style={{ padding: 20, color: 'red', wordBreak: 'break-word', background: 'var(--background)', minHeight: '100vh' }}>
+                    <h2>Profile Component Error</h2>
+                    <p style={{ fontWeight: 'bold' }}>{this.state.error?.name}: {this.state.error?.message}</p>
+                    <pre style={{ fontSize: '10px', marginTop: '10px' }}>{this.state.error?.stack}</pre>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 export default function ProfilePage() {
     return (
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>}>
-            <ProfilePageContent />
+            <LocalErrorBoundary>
+                <ProfilePageContent />
+            </LocalErrorBoundary>
         </Suspense>
     );
 }
@@ -75,73 +104,82 @@ function ProfilePageContent() {
     };
 
     const fetchProfileData = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            router.push('/login');
-            return;
-        }
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                router.push('/login');
+                return;
+            }
 
-        // Check if admin
-        const { data: currentUserProfile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
+            // Check if admin
+            const { data: currentUserProfile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', session.user.id)
+                .single();
 
-        const isAdminUser = currentUserProfile?.role === 'admin';
-        setIsAdmin(isAdminUser);
+            const isAdminUser = currentUserProfile?.role === 'admin';
+            setIsAdmin(isAdminUser);
 
-        // Determine which user to fetch
-        const targetUserId = viewingUserId || session.user.id;
-        const isOwn = targetUserId === session.user.id;
-        setIsOwnProfile(isOwn);
+            // Determine which user to fetch
+            const targetUserId = viewingUserId || session.user.id;
+            const isOwn = targetUserId === session.user.id;
+            setIsOwnProfile(isOwn);
 
-        // Fetch Profile
-        const { data: profileData } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', targetUserId)
-            .single();
+            // Fetch Profile
+            const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', targetUserId)
+                .single();
 
-        setProfile(profileData);
-        setFullName(profileData?.full_name || '');
-        setPhone(profileData?.phone || '');
+            setProfile(profileData);
+            setFullName(profileData?.full_name || '');
+            setPhone(profileData?.phone || '');
 
-        // Fetch My Ads
-        const { data: adsData } = await supabase
-            .from('ads')
-            .select('*, categories:category_id(name), is_vip, is_turbo, pinned_until')
-            .eq('user_id', targetUserId)
-            .order('created_at', { ascending: false });
+            // Fetch My Ads
+            const { data: adsData } = await supabase
+                .from('ads')
+                .select('*, categories:category_id(name), is_vip, is_turbo, pinned_until')
+                .eq('user_id', targetUserId)
+                .order('created_at', { ascending: false });
 
-        setMyAds(adsData || []);
+            setMyAds(adsData || []);
 
-        // Fetch Favorites (only for own profile)
-        if (isOwn) {
-            const { data: favsData, error: favsError } = await supabase
-                .from('favorites')
-                .select(`
-                    *,
-                    ads:ad_id (
+            // Fetch Favorites (only for own profile)
+            if (isOwn) {
+                const { data: favsData, error: favsError } = await supabase
+                    .from('favorites')
+                    .select(`
                         *,
-                        categories:category_id (name)
-                    )
-                `)
-                .eq('user_id', targetUserId);
+                        ads:ad_id (
+                            *,
+                            categories:category_id (name)
+                        )
+                    `)
+                    .eq('user_id', targetUserId);
 
-            if (favsError) console.error('Favorites fetch error:', favsError);
-            setFavorites(favsData || []);
+                if (favsError) console.error('Favorites fetch error:', favsError);
+                setFavorites(favsData || []);
+            }
+
+            // Fetch Reviews
+            const { data: reviewsData } = await supabase
+                .from('reviews')
+                .select('*, reviewer:profiles(full_name, avatar_url)')
+                .eq('user_id', targetUserId)
+                .order('created_at', { ascending: false });
+
+            setReviews(reviewsData || []);
+        } catch (err: any) {
+            console.error('fetchProfileData error:', err);
+            // Show error in APK for diagnostics
+            if (typeof window !== 'undefined' && (window as any).Capacitor) {
+                alert('Data Error: ' + (err.message || JSON.stringify(err)));
+            }
+        } finally {
+            setLoading(false);
         }
-
-        // Fetch Reviews
-        const { data: reviewsData } = await supabase
-            .from('reviews')
-            .select('*, reviewer:profiles!reviewer_id(full_name, avatar_url)')
-            .eq('target_user_id', targetUserId)
-            .order('created_at', { ascending: false });
-
-        setReviews(reviewsData || []);
-        setLoading(false);
     };
 
     const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -242,19 +280,23 @@ function ProfilePageContent() {
     };
 
     const deleteAd = async (adId: string) => {
-        if (!confirm('Вы уверены, что хотите удалить объявление?')) return;
-
-        const { error } = await supabase
-            .from('ads')
-            .delete()
-            .eq('id', adId);
-
-        if (error) {
-            toast.error('Ошибка при удалении');
-        } else {
-            toast.success('Удалено');
-            fetchProfileData();
-        }
+        // Native confirm() is broken in Android WebView — use toast instead
+        toast('Вы уверены, что хотите удалить объявление?', {
+            action: {
+                label: 'Удалить',
+                onClick: async () => {
+                    const { error } = await supabase.from('ads').delete().eq('id', adId);
+                    if (error) {
+                        toast.error('Ошибка при удалении');
+                    } else {
+                        toast.success('Удалено');
+                        fetchProfileData();
+                    }
+                }
+            },
+            cancel: { label: 'Отмена', onClick: () => { } },
+            duration: 8000,
+        });
     };
 
     const handleSendReply = async (reviewId: string) => {
@@ -307,7 +349,14 @@ function ProfilePageContent() {
                             {uploadingAvatar ? (
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                             ) : profile?.avatar_url ? (
-                                <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                                <img
+                                    src={profile.avatar_url}
+                                    alt={profile.full_name || 'User'}
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                />
                             ) : (
                                 profile?.full_name?.charAt(0) || '?'
                             )}
@@ -413,7 +462,7 @@ function ProfilePageContent() {
                     {!isEditing && (
                         <div className="flex gap-2">
                             {profile?.role === 'admin' && isOwnProfile && (
-                                <Link
+                                <Link prefetch={false}
                                     href="/admin"
                                     className="p-4 bg-primary/10 border border-primary/20 text-primary rounded-2xl hover:bg-primary/20 transition-all shrink-0 active:scale-90 flex items-center gap-2"
                                 >
@@ -422,7 +471,7 @@ function ProfilePageContent() {
                                 </Link>
                             )}
                             {isOwnProfile && (
-                                <Link
+                                <Link prefetch={false}
                                     href="/profile/settings"
                                     className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
                                     title="Настройки профиля"
@@ -477,9 +526,9 @@ function ProfilePageContent() {
                     myAds.length > 0 ? (
                         myAds.map(ad => (
                             <div key={ad.id} className="bg-surface border border-border rounded-2xl p-3 md:p-4 flex gap-3 md:gap-6 items-center hover:shadow-md transition-all overflow-hidden">
-                                <Link href={`/ad/?id=${ad.id}`} className="w-16 h-16 md:w-32 md:h-32 bg-muted rounded-xl overflow-hidden shrink-0 border border-border">
-                                    {ad.images?.[0] ? (
-                                        <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover" />
+                                <Link prefetch={false} href={`/ad/?id=${ad.id}`} className="w-16 h-16 md:w-32 md:h-32 bg-muted rounded-xl overflow-hidden shrink-0 border border-border">
+                                    {ad?.images?.[0] ? (
+                                        <img src={ad.images[0]} alt={ad.title || 'Ad'} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-[8px] text-muted uppercase">Нет фото</div>
                                     )}
@@ -494,7 +543,7 @@ function ProfilePageContent() {
                                         </span>
                                         <span className="text-[8px] text-muted font-semibold uppercase truncate">{ad.categories?.name}</span>
                                     </div>
-                                    <Link href={`/ad/?id=${ad.id}`} className="block text-sm md:text-lg font-semibold truncate hover:text-primary transition-colors">
+                                    <Link prefetch={false} href={`/ad/?id=${ad.id}`} className="block text-sm md:text-lg font-semibold truncate hover:text-primary transition-colors">
                                         {ad.title}
                                     </Link>
                                     <div className="text-base md:text-xl font-semibold mt-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
@@ -512,7 +561,7 @@ function ProfilePageContent() {
                                         >
                                             <Rocket className="h-4 w-4 md:h-5 md:w-5" />
                                         </button>
-                                        <Link
+                                        <Link prefetch={false}
                                             href={`/ads/edit?id=${ad.id}`}
                                             className="p-2 md:p-3 rounded-lg md:rounded-xl border border-blue-500/20 text-blue-500 hover:bg-blue-500/10 transition-all"
                                             title="Редактировать"
@@ -548,7 +597,7 @@ function ProfilePageContent() {
                         <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-border">
                             <Package className="h-12 w-12 text-muted mx-auto mb-4" />
                             <div className="font-bold text-lg">У вас пока нет объявлений</div>
-                            <Link href="/ads/create" className="text-primary font-semibold hover:underline mt-2 inline-block">Опубликовать первое</Link>
+                            <Link prefetch={false} href="/ads/create" className="text-primary font-semibold hover:underline mt-2 inline-block">Опубликовать первое</Link>
                         </div>
                     )
                 )}
@@ -564,7 +613,7 @@ function ProfilePageContent() {
                         <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-border col-span-full">
                             <Heart className="h-12 w-12 text-muted mx-auto mb-4" />
                             <div className="font-bold text-lg">Вы пока ничего не добавили в избранное</div>
-                            <Link href="/" className="text-primary font-semibold hover:underline mt-2 inline-block">Перейти к покупкам</Link>
+                            <Link prefetch={false} href="/" className="text-primary font-semibold hover:underline mt-2 inline-block">Перейти к покупкам</Link>
                         </div>
                     )
                 )}
@@ -574,15 +623,15 @@ function ProfilePageContent() {
                             reviews.map(rev => (
                                 <div key={rev.id} className="bg-surface border border-border rounded-2xl p-6 shadow-sm">
                                     <div className="flex items-center gap-4 mb-4">
-                                        <Link href={`/user?id=${rev.reviewer_id}`} className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-semibold text-accent overflow-hidden shrink-0 hover:opacity-80 transition-opacity">
+                                        <Link prefetch={false} href={`/user?id=${rev.reviewer_id}`} className="w-12 h-12 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center font-semibold text-accent overflow-hidden shrink-0 hover:opacity-80 transition-opacity">
                                             {rev.reviewer?.avatar_url ? (
-                                                <img src={rev.reviewer.avatar_url} alt={rev.reviewer.full_name} className="w-full h-full object-cover" />
+                                                <img src={rev.reviewer.avatar_url} alt={rev.reviewer?.full_name || 'Reviewer'} className="w-full h-full object-cover" />
                                             ) : (
                                                 rev.reviewer?.full_name?.charAt(0) || '?'
                                             )}
                                         </Link>
                                         <div className="flex-1">
-                                            <Link href={`/user?id=${rev.reviewer_id}`} className="font-semibold hover:underline">{rev.reviewer?.full_name}</Link>
+                                            <Link prefetch={false} href={`/user?id=${rev.reviewer_id}`} className="font-semibold hover:underline">{rev.reviewer?.full_name || 'Аноним'}</Link>
                                             <div className="flex gap-0.5">
                                                 {[...Array(5)].map((_, i) => (
                                                     <Star key={i} className={cn("h-3 w-3", i < rev.rating ? "fill-orange-500 text-orange-500" : "text-muted opacity-30")} />
@@ -590,7 +639,7 @@ function ProfilePageContent() {
                                             </div>
                                         </div>
                                         <div className="text-[10px] text-muted font-semibold uppercase">
-                                            {new Date(rev.created_at).toLocaleDateString()}
+                                            {new Date(rev.created_at).toLocaleDateString("ru-RU")}
                                         </div>
                                     </div>
                                     <p className="text-sm text-foreground/80 leading-relaxed italic border-l-2 border-border pl-4 mb-4">
@@ -612,7 +661,7 @@ function ProfilePageContent() {
                                             <div className="flex items-center justify-between mb-2">
                                                 <div className="text-[10px] font-semibold uppercase text-primary">Ваш ответ</div>
                                                 <div className="text-[10px] text-muted font-semibold uppercase">
-                                                    {new Date(rev.reply_date).toLocaleDateString()}
+                                                    {new Date(rev.reply_date).toLocaleDateString("ru-RU")}
                                                 </div>
                                             </div>
                                             <p className="text-sm text-foreground/70 leading-relaxed">

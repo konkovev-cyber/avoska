@@ -1,7 +1,7 @@
 'use client';
 
 import { Ad } from '@/lib/types';
-import { Package, MapPin, Clock, Search, List, Grid3x3, CheckCircle, Ban, Trash2, ShieldCheck, MoreHorizontal } from 'lucide-react';
+import { Package, MapPin, Clock, Search, List, Grid3x3, CheckCircle, Ban, Trash2, ShieldCheck, MoreHorizontal, Eye, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase/client';
@@ -63,6 +63,7 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
                                 <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Объявление</th>
                                 <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Цена</th>
                                 <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground hidden md:table-cell">Город</th>
+                                <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Статистика</th>
                                 <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Статус</th>
                                 <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground text-right">Действия</th>
                             </tr>
@@ -95,6 +96,18 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
                                         <div className="flex items-center gap-1">
                                             <MapPin className="h-3 w-3" />
                                             {ad.city}
+                                        </div>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground">
+                                                <Eye className="h-3 w-3 text-primary/60" />
+                                                <span>{ad.views_count || 0}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground">
+                                                <Phone className="h-3 w-3 text-green-500/60" />
+                                                <span>{ad.contacts_count || 0}</span>
+                                            </div>
                                         </div>
                                     </td>
                                     <td className="p-4">

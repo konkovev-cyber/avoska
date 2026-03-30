@@ -6,7 +6,7 @@ import { ChevronLeft, Scale, ShieldCheck, FileText } from 'lucide-react';
 export default function TermsPage() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-4xl">
-            <Link href="/" className="inline-flex items-center gap-2 text-primary font-semibold mb-8 hover:translate-x-[-4px] transition-transform">
+            <Link prefetch={false} href="/" className="inline-flex items-center gap-2 text-primary font-semibold mb-8 hover:translate-x-[-4px] transition-transform">
                 <ChevronLeft className="h-5 w-5" /> На главную
             </Link>
 
@@ -49,7 +49,7 @@ export default function TermsPage() {
                     <section>
                         <h2 className="text-xl font-bold text-foreground mb-4">4. Персональные данные</h2>
                         <p>
-                            Используя Сервис, Пользователь дает согласие на обработку своих персональных данных в соответствии с <Link href="/privacy" className="text-primary hover:underline">Политикой конфиденциальности</Link>.
+                            Используя Сервис, Пользователь дает согласие на обработку своих персональных данных в соответствии с <Link prefetch={false} href="/privacy" className="text-primary hover:underline">Политикой конфиденциальности</Link>.
                         </p>
                     </section>
 

@@ -25,7 +25,7 @@ export function SettingsSection({
     onSaveTg, onTestTg, tgSaving, cities, onUpdateCities
 }: SettingsSectionProps) {
     const [newCityName, setNewCityName] = useState('');
-    const [editingCity, setEditingCity] = useState<{id: string, name: string} | null>(null);
+    const [editingCity, setEditingCity] = useState<{ id: string, name: string } | null>(null);
 
     const handleAddCity = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -151,7 +151,7 @@ export function SettingsSection({
                     {cities.map(city => (
                         <div key={city.id} className="flex items-center justify-between p-3 bg-muted/20 border border-border/40 rounded-xl group hover:bg-muted/40 transition-all">
                             <span className="text-sm font-semibold group-hover:text-primary transition-colors">{city.name}</span>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1">
                                 <button onClick={() => { setEditingCity(city); setNewCityName(city.name); }} className="p-1.5 hover:bg-primary/10 text-primary rounded-lg">
                                     <Pencil className="h-3.5 w-3.5" />
                                 </button>

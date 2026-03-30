@@ -64,7 +64,7 @@ export default function NotificationsPage() {
             ) : notifications.length > 0 ? (
                 <div className="space-y-3">
                     {notifications.map((n) => (
-                        <Link
+                        <Link prefetch={false}
                             key={n.id}
                             href={n.link}
                             className="block p-4 rounded-2xl border border-border bg-surface transition-all hover:shadow-md active:scale-[0.99]"

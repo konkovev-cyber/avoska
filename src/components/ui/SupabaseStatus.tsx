@@ -8,9 +8,13 @@ import { toast } from 'sonner';
 export default function SupabaseStatus() {
     const [status, setStatus] = useState<'checking' | 'awake' | 'sleeping' | 'error'>('checking');
     const [retryCount, setRetryCount] = useState(0);
+    const [showSkip, setShowSkip] = useState(false);
 
     useEffect(() => {
         checkConnection();
+        // Show skip button after 10 seconds of trying
+        const timer = setTimeout(() => setShowSkip(true), 10000);
+        return () => clearTimeout(timer);
     }, [retryCount]);
 
     const checkConnection = async () => {
@@ -53,9 +57,29 @@ export default function SupabaseStatus() {
                     </p>
                 </div>
 
-                <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/5 py-2 px-4 rounded-full w-fit mx-auto">
-                    <RefreshCw className="h-3 w-3 animate-spin" />
-                    <span>Попытка соединения...</span>
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/5 py-2 px-4 rounded-full w-fit mx-auto">
+                        <RefreshCw className="h-3 w-3 animate-spin" />
+                        <span>Попытка соединения...</span>
+                    </div>
+
+                    {showSkip && (
+                        <div className="flex flex-col gap-2 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                            <button
+                                onClick={() => setRetryCount(prev => prev + 1)}
+                                className="text-[10px] font-bold uppercase tracking-widest text-foreground hover:text-primary transition-colors flex items-center justify-center gap-1.5"
+                            >
+                                <RefreshCw className="h-3 w-3" />
+                                Повторить сейчас
+                            </button>
+                            <button
+                                onClick={() => setStatus('awake')}
+                                className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground underline decoration-primary/30"
+                            >
+                                Продолжить всё равно
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

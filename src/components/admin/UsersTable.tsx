@@ -100,7 +100,7 @@ export function UsersTable({ users, onUpdate, searchQuery }: UsersTableProps) {
                                     </button>
                                 </td>
                                 <td className="p-4 text-right">
-                                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center justify-end gap-1">
                                         <button className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-all" title="Забанить">
                                             <Ban className="h-4 w-4" />
                                         </button>

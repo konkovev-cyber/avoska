@@ -123,7 +123,7 @@ export default function HelpPage() {
             </div>
 
             <div className="mt-16 text-center">
-                <Link href="/" className="inline-flex items-center gap-2 text-muted font-semibold hover:text-primary transition-colors uppercase tracking-widest text-xs">
+                <Link prefetch={false} href="/" className="inline-flex items-center gap-2 text-muted font-semibold hover:text-primary transition-colors uppercase tracking-widest text-xs">
                     <Heart className="h-3 w-3 fill-current" /> Вернуться на главную
                 </Link>
             </div>

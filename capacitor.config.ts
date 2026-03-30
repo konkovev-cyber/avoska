@@ -18,6 +18,11 @@ const config: CapacitorConfig = {
       splashFullScreen: true,
       splashImmersive: true,
     }
+  },
+  android: {
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: false,
   }
 };
 

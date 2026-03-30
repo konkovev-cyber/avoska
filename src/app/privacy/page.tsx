@@ -6,7 +6,7 @@ import { ChevronLeft, ShieldCheck, Lock, EyeOff } from 'lucide-react';
 export default function PrivacyPage() {
     return (
         <div className="container mx-auto px-4 py-12 max-w-4xl">
-            <Link href="/" className="inline-flex items-center gap-2 text-primary font-semibold mb-8 hover:translate-x-[-4px] transition-transform">
+            <Link prefetch={false} href="/" className="inline-flex items-center gap-2 text-primary font-semibold mb-8 hover:translate-x-[-4px] transition-transform">
                 <ChevronLeft className="h-5 w-5" /> На главную
             </Link>
 

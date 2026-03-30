@@ -39,6 +39,8 @@ export interface Ad {
     is_vip?: boolean;
     is_turbo?: boolean;
     pinned_until?: string | null;
+    views_count?: number;
+    contacts_count?: number;
 
     // Joined relations
     profiles?: Partial<Profile>;

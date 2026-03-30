@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client';
 import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { VAPID_PUBLIC_KEY } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 
 export default function PushSubscriptionManager() {
     const [isSupported, setIsSupported] = useState(false);
@@ -12,6 +13,14 @@ export default function PushSubscriptionManager() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Capacitor (Android APK) WebView does NOT support Web Push / serviceWorker.ready.
+        // Calling navigator.serviceWorker.ready in Capacitor WebView hangs indefinitely → crashes the app.
+        const isCapacitor = typeof window !== 'undefined' && (window as any).Capacitor !== undefined;
+        if (isCapacitor) {
+            setLoading(false);
+            return; // Do not initialize push in APK — must use FCM plugin instead
+        }
+
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window) {
             setIsSupported(true);
             checkSubscription();
@@ -42,13 +51,11 @@ export default function PushSubscriptionManager() {
             }
 
             const registration = await navigator.serviceWorker.ready;
-
             const sub = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
 
-            // Save to database
             const { error } = await supabase
                 .from('push_subscriptions')
                 .upsert({
@@ -74,15 +81,10 @@ export default function PushSubscriptionManager() {
         try {
             if (subscription) {
                 await subscription.unsubscribe();
-
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session) {
-                    await supabase
-                        .from('push_subscriptions')
-                        .delete()
-                        .eq('user_id', session.user.id);
+                    await supabase.from('push_subscriptions').delete().eq('user_id', session.user.id);
                 }
-
                 setSubscription(null);
                 toast.success('Уведомления отключены');
             }
@@ -94,6 +96,7 @@ export default function PushSubscriptionManager() {
         }
     };
 
+    // Not supported (includes Capacitor where isSupported stays false) → don't render anything
     if (!isSupported) return null;
 
     return (
@@ -118,15 +121,9 @@ export default function PushSubscriptionManager() {
                 {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                 ) : subscription ? (
-                    <>
-                        <BellOff className="h-4 w-4" />
-                        Выключить
-                    </>
+                    <><BellOff className="h-4 w-4" />Выключить</>
                 ) : (
-                    <>
-                        <Bell className="h-4 w-4" />
-                        Включить
-                    </>
+                    <><Bell className="h-4 w-4" />Включить</>
                 )}
             </button>
         </div>
@@ -135,17 +132,11 @@ export default function PushSubscriptionManager() {
 
 function urlBase64ToUint8Array(base64String: string) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-        .replace(/\-/g, '+')
-        .replace(/_/g, '/');
-
+    const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
     const rawData = window.atob(base64);
     const outputArray = new Uint8Array(rawData.length);
-
     for (let i = 0; i < rawData.length; ++i) {
         outputArray[i] = rawData.charCodeAt(i);
     }
     return outputArray;
 }
-
-import { cn } from '@/lib/utils';

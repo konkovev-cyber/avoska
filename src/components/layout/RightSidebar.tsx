@@ -110,7 +110,7 @@ export default function RightSidebar() {
                 </div>
                 © 2026 Авоська+ <br />
                 <div className="mt-1">
-                    <Link href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link href="/terms" className="hover:underline">Оферта</Link>
+                    <Link prefetch={false} href="/privacy" className="hover:underline">Конфиденциальность</Link> • <Link prefetch={false} href="/terms" className="hover:underline">Оферта</Link>
                 </div>
             </div>
         </aside>
