@@ -91,13 +91,13 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
         const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes, reviewsRes, settingsRes] = await Promise.all([
-            supabase.from('ads').select('*').order('created_at', { ascending: false }),
-            supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+            supabase.from('ads').select('*').order('created_at', { ascending: false }).limit(500),
+            supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500),
             supabase.from('cities').select('*').order('name'),
-            supabase.from('reports').select('*, ad:ads(title), reporter:profiles!reporter_id(full_name)').order('created_at', { ascending: false }),
+            supabase.from('reports').select('*, ad:ads(title), reporter:profiles!reporter_id(full_name)').order('created_at', { ascending: false }).limit(200),
             supabase.from('banners').select('*').order('created_at', { ascending: false }),
             supabase.from('categories').select('*').order('name'),
-            supabase.from('reviews').select('*, reviewer:profiles!reviewer_id(full_name)').order('created_at', { ascending: false }),
+            supabase.from('reviews').select('*, reviewer:profiles!reviewer_id(full_name)').order('created_at', { ascending: false }).limit(200),
             supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
         ]);
 

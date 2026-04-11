@@ -39,6 +39,11 @@ dev-output.log
 # vercel
 .vercel
 
+# binaries
+*.apk
+*.rar
+*.zip
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

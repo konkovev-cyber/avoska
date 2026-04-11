@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Zap, Crown, Timer, Check } from 'lucide-react';
+import { X, Zap, Crown, Timer, ExternalLink, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase/client';
 
 interface PromotionModalProps {
     adId: string;
@@ -15,31 +15,20 @@ interface PromotionModalProps {
 
 const SERVICES = [
     {
-        id: 'turbo',
+        id: 'highlight_3_days',
         name: 'Турбо-продажа',
-        description: 'Выделение цветом и приоритет в поиске',
-        price: 199,
+        description: 'Выделение цветом на 3 дня',
+        price: 49,
         icon: Zap,
         color: 'bg-orange-500',
-        field: 'is_turbo'
     },
     {
-        id: 'vip',
+        id: 'vip_7_days',
         name: 'VIP-статус',
-        description: 'Ваше объявление всегда в топе категории',
-        price: 499,
+        description: 'Всегда в топе категории на 7 дней',
+        price: 149,
         icon: Crown,
         color: 'bg-purple-500',
-        field: 'is_vip'
-    },
-    {
-        id: 'pin',
-        name: 'Закрепить',
-        description: 'Объявление не будет опускаться в ленте 7 дней',
-        price: 299,
-        icon: Timer,
-        color: 'bg-blue-500',
-        field: 'pinned_until'
     }
 ];
 
@@ -49,28 +38,41 @@ export default function PromotionModal({ adId, adTitle, onClose, onUpdate }: Pro
     const handlePromote = async (service: typeof SERVICES[0]) => {
         setLoading(service.id);
         try {
-            const updateData: any = {};
-            if (service.field === 'pinned_until') {
-                const date = new Date();
-                date.setDate(date.getDate() + 7);
-                updateData[service.field] = date.toISOString();
-            } else {
-                updateData[service.field] = true;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                toast.error('Войдите в аккаунт');
+                return;
             }
 
-            const { error } = await supabase
-                .from('ads')
-                .update(updateData)
-                .eq('id', adId);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/payments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                    'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+                },
+                body: JSON.stringify({
+                    adId,
+                    packageType: service.id
+                })
+            });
 
-            if (error) throw error;
+            const data = await response.json();
 
-            toast.success(`${service.name} активирована!`);
-            onUpdate();
-            onClose();
-        } catch (error) {
-            console.error(error);
-            toast.error('Ошибка при активации услуги');
+            if (!response.ok) {
+                throw new Error(data.error || 'Ошибка при создании платежа');
+            }
+
+            // Перенаправляем на страницу оплаты (ЮKassa)
+            if (data.confirmationUrl) {
+                window.location.href = data.confirmationUrl;
+            } else {
+                throw new Error('Ссылка на оплату не получена');
+            }
+
+        } catch (error: any) {
+            console.error('Promotion error:', error);
+            toast.error(error.message || 'Сбой соединения. Попробуйте позже.');
         } finally {
             setLoading(null);
         }
@@ -78,47 +80,49 @@ export default function PromotionModal({ adId, adTitle, onClose, onUpdate }: Pro
 
     return (
         <div className="fixed inset-0 z-[1001] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-            <div className="bg-background w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 border border-border">
-                <div className="p-6 border-b border-border flex items-center justify-between">
+            <div className="bg-background w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 border border-border flex flex-col max-h-[90vh]">
+                <div className="p-6 border-b border-border flex items-center justify-between shrink-0">
                     <div>
-                        <h2 className="text-xl font-semibold">Продвижение</h2>
+                        <h2 className="text-xl font-bold flex items-center gap-2">Продвижение <Crown className="h-5 w-5 text-purple-500" /></h2>
                         <p className="text-xs text-muted-foreground font-semibold mt-1 line-clamp-1">{adTitle}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-surface rounded-full transition-colors">
+                    <button onClick={onClose} className="p-2 hover:bg-surface rounded-full transition-colors active:scale-90">
                         <X className="h-6 w-6" />
                     </button>
                 </div>
 
-                <div className="p-4 space-y-2">
+                <div className="p-4 space-y-3 overflow-y-auto">
                     {SERVICES.map((service) => (
                         <button
                             key={service.id}
                             disabled={!!loading}
                             onClick={() => handlePromote(service)}
-                            className="w-full p-2.5 rounded-2xl border border-border bg-surface hover:border-primary transition-all group flex items-center gap-3 text-left active:scale-[0.98]"
+                            className="w-full p-4 rounded-2xl border border-border bg-surface hover:border-primary transition-all group flex items-center gap-4 text-left active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <div className={cn(
-                                "w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md shrink-0 transition-transform group-hover:rotate-6",
+                                "w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md shrink-0 transition-transform group-hover:rotate-6",
                                 service.color
                             )}>
-                                <service.icon className="h-5 w-5" />
+                                {loading === service.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <service.icon className="h-6 w-6" />}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-[11px] uppercase tracking-wider">{service.name}</div>
-                                <div className="text-[10px] text-muted-foreground font-semibold truncate">{service.description}</div>
+                                <div className="font-bold uppercase tracking-wider">{service.name}</div>
+                                <div className="text-xs text-muted-foreground font-semibold mt-0.5">{service.description}</div>
                             </div>
                             <div className="text-right shrink-0">
-                                <div className="text-[11px] font-semibold text-primary">{service.price} ₽</div>
-                                <div className="text-[8px] font-semibold uppercase tracking-widest text-muted-foreground">Выбрать</div>
+                                <div className="text-lg font-bold text-primary">{service.price} ₽</div>
+                                <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground flex items-center justify-end gap-1 mt-1 group-hover:text-primary">
+                                    Оплатить <ExternalLink className="h-3 w-3" />
+                                </div>
                             </div>
                         </button>
                     ))}
                 </div>
 
-                <div className="p-6 bg-muted/30 border-t border-border mt-2">
+                <div className="p-4 md:p-6 bg-muted/30 border-t border-border shrink-0">
                     <p className="text-[10px] text-muted-foreground text-center font-semibold uppercase tracking-widest leading-relaxed">
-                        При активации услуги она вступит в силу мгновенно.<br />
-                        Это демонстрационный режим. Оплата не требуется.
+                        Оплата производится через защищенный шлюз ЮKassa.<br />
+                        Услуга применится к вашему объявлению сразу после оплаты.
                     </p>
                 </div>
             </div>

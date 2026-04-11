@@ -35,6 +35,7 @@ export default function HomePage() {
   const [city, setCity] = useState<string | null>(null);
   const [personalCategory, setPersonalCategory] = useState<any>(null);
   const [isMobileApp, setIsMobileApp] = useState(false);
+  const [totalStats, setTotalStats] = useState({ users: 0, ads: 0 });
   const PAGE_SIZE = 14;
 
   const router = useRouter();
@@ -76,6 +77,16 @@ export default function HomePage() {
         });
       }
       setBanners(bannersEnabled ? fetchedBanners : []);
+
+      // Fetch global stats
+      const [usersCount, adsCount] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('ads').select('*', { count: 'exact', head: true }).eq('status', 'active')
+      ]);
+      setTotalStats({
+        users: usersCount.count || 0,
+        ads: adsCount.count || 0
+      });
 
       const topBanners = bannersEnabled ? fetchedBanners.filter(b => b.position === 'top' || !b.position) : [];
       const sidebarBanners = bannersEnabled ? fetchedBanners.filter(b => b.position === 'sidebar') : [];
@@ -124,6 +135,7 @@ export default function HomePage() {
       }
 
       const { data, error } = await q
+        .order('is_vip', { ascending: false, nullsFirst: false })
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -221,12 +233,24 @@ export default function HomePage() {
     <div className="max-w-[1400px] mx-auto px-2 md:px-8 py-1 md:py-6 pb-20">
       <div className="w-full">
 
-        <section className="mb-2 hidden md:block">
-          <h1 className="text-xl md:text-5xl font-semibold text-foreground mb-0.5 tracking-tighter">Все категории</h1>
-          <p className="text-[11px] md:text-lg text-muted-foreground font-medium max-w-2xl">Найдите то, что нужно именно вам</p>
-        </section>
-
         <section className="mb-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 px-1">
+            <div>
+              <h1 className="text-2xl md:text-5xl font-semibold text-foreground mb-1 tracking-tighter">Все категории</h1>
+              <p className="text-xs md:text-lg text-muted-foreground font-medium">Найдите то, что нужно именно вам</p>
+            </div>
+            <div className="flex gap-3 md:gap-6">
+              <div className="flex flex-col items-start md:items-end bg-surface/50 backdrop-blur-sm border border-border px-4 py-2 rounded-2xl shadow-sm">
+                <div className="text-xl md:text-2xl font-bold text-primary leading-tight">{totalStats.users}</div>
+                <div className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-muted-foreground/80">Пользователей</div>
+              </div>
+              <div className="flex flex-col items-start md:items-end bg-surface/50 backdrop-blur-sm border border-border px-4 py-2 rounded-2xl shadow-sm">
+                <div className="text-xl md:text-2xl font-bold text-primary leading-tight">{totalStats.ads}</div>
+                <div className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-muted-foreground/80">Объявлений</div>
+              </div>
+            </div>
+          </div>
+
           {/* Desktop Categories Grid */}
           <div className="hidden md:grid grid-cols-4 lg:grid-cols-10 gap-2 md:gap-4">
             {CATEGORIES.slice(0, 10).map((cat) => (

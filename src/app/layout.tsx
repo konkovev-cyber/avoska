@@ -12,13 +12,12 @@ import SupabaseStatus from "@/components/ui/SupabaseStatus";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Авоська+ | Доска объявлений",
-  description: "Покупай и продавай легко с Авоська+",
+  title: "Авоська+ — Доска объявлений в Горячем Ключе",
+  description: "Бесплатные объявления Горячего Ключа и Краснодарского края. Покупай и продавай легко с Авоська+",
   manifest: "/manifest.json",
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: '48x48' },
     ],
     apple: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -197,10 +196,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "Авоська+",
-              "url": "https://avoska.ru",
+              "url": process.env.NEXT_PUBLIC_SITE_URL || "https://avoska.353290.ru",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://avoska.ru/search?q={search_term_string}",
+                "target": `${process.env.NEXT_PUBLIC_SITE_URL || "https://avoska.353290.ru"}/search?q={search_term_string}`,
                 "query-input": "required name=search_term_string"
               }
             })
@@ -247,7 +246,7 @@ export default function RootLayout({
 
         {/* Yandex Maps API */}
         <Script
-          src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=d446ac2a-b5c1-4b45-86de-d25432622c8a"
+          src={`https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=${process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY}`}
           strategy="afterInteractive"
         />
       </body>

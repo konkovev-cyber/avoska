@@ -375,32 +375,32 @@ export default function CreateAdPage() {
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Площадь (м²)</label>
-                                                <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
+                                                <input type="number" step="0.1" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                             </div>
                                         </div>
                                     )}
                                     {(specifications.type === 'commercial' || category === 'rent-commercial') && (
                                         <div className="space-y-1">
                                             <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Площадь (м²)</label>
-                                            <input type="number" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
+                                            <input type="number" step="0.1" min="0" value={specifications.area || ''} onChange={(e) => setSpecifications({ ...specifications, area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                         </div>
                                     )}
                                     {specifications.type === 'house' && (
                                         <div className="grid grid-cols-2 gap-3">
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Дом (м²)</label>
-                                                <input type="number" min="0" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
+                                                <input type="number" step="0.1" min="0" value={specifications.house_area || ''} onChange={(e) => setSpecifications({ ...specifications, house_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                             </div>
                                             <div className="space-y-1">
                                                 <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Участок (сот)</label>
-                                                <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
+                                                <input type="number" step="0.1" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                             </div>
                                         </div>
                                     )}
                                     {specifications.type === 'plot' && (
                                         <div className="space-y-1">
                                             <label className="text-[9px] uppercase font-semibold text-muted-foreground ml-1">Участок (сот)</label>
-                                            <input type="number" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
+                                            <input type="number" step="0.1" min="0" value={specifications.plot_area || ''} onChange={(e) => setSpecifications({ ...specifications, plot_area: Math.max(0, parseFloat(e.target.value) || 0).toString() })} className="w-full h-10 px-3 rounded-lg bg-white border border-border outline-none focus:border-primary font-semibold text-sm" />
                                         </div>
                                     )}
                                 </div>

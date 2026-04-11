@@ -68,7 +68,9 @@ function CategoryContent() {
                 if (selectedCity && selectedCity !== 'Все города') query = query.eq('city', selectedCity);
                 if (searchQuery) query = query.ilike('title', `%${searchQuery}%`);
 
-                const { data, error } = await query.order('created_at', { ascending: false });
+                const { data, error } = await query
+                    .order('is_vip', { ascending: false, nullsFirst: false })
+                    .order('created_at', { ascending: false });
                 if (error) throw error;
 
                 let filteredData = data || [];

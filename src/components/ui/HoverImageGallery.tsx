@@ -63,22 +63,32 @@ export default function HoverImageGallery({ images, alt, href, imageClass, layou
                     {displayImages.length > 0 ? (
                         <div className="w-full h-full relative overflow-hidden">
                             <AnimatePresence mode="wait" initial={false}>
-                                <motion.img
-                                    key={activeIndex}
-                                    src={getOptimizedImageUrl(displayImages[activeIndex], { width: 500, quality: 85 })}
-                                    alt={alt}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className={cn(
-                                        "w-full h-full absolute inset-0",
-                                        layout === 'horizontal' ? "object-cover" : "object-contain p-2"
-                                    )}
-                                    drag="x"
-                                    dragConstraints={{ left: 0, right: 0 }}
-                                    onDragEnd={handleDragEnd}
-                                />
+                                <div key={activeIndex} className="w-full h-full relative">
+                                    <motion.img
+                                        src={getOptimizedImageUrl(displayImages[activeIndex], { width: 100, quality: 30 })}
+                                        alt=""
+                                        aria-hidden="true"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 0.6 }}
+                                        exit={{ opacity: 0 }}
+                                        className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 pointer-events-none select-none"
+                                    />
+                                    <motion.img
+                                        src={getOptimizedImageUrl(displayImages[activeIndex], { width: 500, quality: 85 })}
+                                        alt={alt}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
+                                        className={cn(
+                                            "relative w-full h-full",
+                                            layout === 'horizontal' ? "object-contain" : "object-contain p-2"
+                                        )}
+                                        drag="x"
+                                        dragConstraints={{ left: 0, right: 0 }}
+                                        onDragEnd={handleDragEnd}
+                                    />
+                                </div>
                             </AnimatePresence>
                         </div>
                     ) : (

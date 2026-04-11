@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, MapPin, Star, Eye } from 'lucide-react';
+import { Heart, MapPin, Star, Eye, Crown } from 'lucide-react';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { Ad } from '@/lib/types';
 import dynamic from 'next/dynamic';
@@ -71,9 +71,16 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false, sh
                     sessionStorage.setItem('home_restore', 'true');
                 }
             }}
-            className="group relative flex flex-col h-full gap-2 outline-none"
+            className={cn(
+                "group relative flex flex-col h-full gap-2 outline-none rounded-[1.5rem] transition-all p-1",
+                ad.is_vip && "bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 shadow-lg shadow-purple-500/5",
+                ad.is_color_highlight && !ad.is_vip && "bg-primary/5 border border-primary/20"
+            )}
         >
-            <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[1.25rem] bg-muted border border-border/20 group-hover:shadow-lg transition-all active:scale-[0.98]">
+            <div className={cn(
+                "aspect-[4/3] w-full relative overflow-hidden rounded-[1.25rem] bg-muted border border-border/20 group-hover:shadow-lg transition-all active:scale-[0.98]",
+                ad.is_vip && "ring-2 ring-purple-500 ring-offset-2 ring-offset-background"
+            )}>
                 {isHoverGallery && !isTouch ? (
                     <HoverImageGallery
                         images={ad.images}
@@ -83,15 +90,32 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false, sh
                     />
                 ) : (
                     ad.images && ad.images.length > 0 ? (
-                        <img
-                            src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
-                            alt={ad.title}
-                            loading="lazy"
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
+                        <div className="w-full h-full relative">
+                            {/* Blurred background for portrait images */}
+                            <img
+                                src={getOptimizedImageUrl(ad.images[0], { width: 100, quality: 30 })}
+                                alt=""
+                                aria-hidden="true"
+                                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60 pointer-events-none select-none"
+                            />
+                            {/* Main image — contain so portrait photos are never cropped */}
+                            <img
+                                src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
+                                alt={ad.title}
+                                loading="lazy"
+                                className="relative w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
+                            />
+                        </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted italic text-[10px]">Нет фото</div>
                     )
+                )}
+
+                {ad.is_vip && (
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-bold uppercase rounded-lg shadow-lg z-20 pointer-events-none flex items-center gap-1 border border-white/20">
+                        <Crown className="h-3 w-3 fill-current" />
+                        VIP
+                    </div>
                 )}
 
                 {ad.condition === 'new' && (

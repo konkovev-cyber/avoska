@@ -29,6 +29,7 @@
     "basic-ftp": "^5.1.0",
     "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
+    "fast-xml-parser": "^5.5.11",
     "framer-motion": "^12.34.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.563.0",

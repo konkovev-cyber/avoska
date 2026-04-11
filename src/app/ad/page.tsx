@@ -706,27 +706,37 @@ function AdContent() {
 
                                     <div className="w-full h-full relative" onClick={() => setIsZoomed(true)}>
                                         <AnimatePresence mode="wait" initial={false}>
-                                            <motion.img
-                                                key={currentImageIndex}
-                                                src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.2 }}
-                                                className="w-full h-full object-contain absolute inset-0 z-10"
-                                                alt=""
-                                                drag="x"
-                                                dragConstraints={{ left: 0, right: 0 }}
-                                                dragElastic={0.4}
-                                                onDragEnd={(e, { offset }) => {
-                                                    const swipe = offset.x;
-                                                    if (swipe < -40) {
-                                                        setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1));
-                                                    } else if (swipe > 40) {
-                                                        setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1));
-                                                    }
-                                                }}
-                                            />
+                                            <div key={currentImageIndex} className="w-full h-full relative">
+                                                <motion.img
+                                                    src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 100, quality: 30 })}
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 0.6 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 pointer-events-none select-none"
+                                                />
+                                                <motion.img
+                                                    src={getOptimizedImageUrl(ad.images[currentImageIndex], { width: 1000, quality: 80 })}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className="relative w-full h-full object-contain z-10"
+                                                    alt=""
+                                                    drag="x"
+                                                    dragConstraints={{ left: 0, right: 0 }}
+                                                    dragElastic={0.4}
+                                                    onDragEnd={(e, { offset }) => {
+                                                        const swipe = offset.x;
+                                                        if (swipe < -40) {
+                                                            setCurrentImageIndex(prev => (prev === ad.images.length - 1 ? 0 : prev + 1));
+                                                        } else if (swipe > 40) {
+                                                            setCurrentImageIndex(prev => (prev === 0 ? ad.images.length - 1 : prev - 1));
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
                                         </AnimatePresence>
                                     </div>
 

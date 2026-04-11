@@ -101,9 +101,9 @@ function SearchContent() {
                 }
             }
 
-            // Primary sorting by VIP and Turbo status
+            // Primary sorting by VIP and Color Highlight status
             q = q.order('is_vip', { ascending: false });
-            q = q.order('is_turbo', { ascending: false });
+            q = q.order('is_color_highlight', { ascending: false });
 
             // Apply secondary sorting
             if (sortBy === 'newest') {

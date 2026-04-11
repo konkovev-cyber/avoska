@@ -1,10 +1,11 @@
 'use client';
 
 import { Ad } from '@/lib/types';
-import { Package, MapPin, Clock, Search, List, Grid3x3, CheckCircle, Ban, Trash2, ShieldCheck, MoreHorizontal, Eye, Phone } from 'lucide-react';
+import { Package, MapPin, Clock, Search, List, Grid3x3, CheckCircle, Ban, Trash2, ShieldCheck, MoreHorizontal, Eye, Phone, Pencil, Zap, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase/client';
+import Link from 'next/link';
 
 interface AdsTableProps {
     ads: Ad[];
@@ -32,9 +33,28 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
 
     const toggleVip = async (id: string, isVip: boolean) => {
         try {
-            const { error } = await supabase.from('ads').update({ is_vip: isVip }).eq('id', id);
+            const promotedUntil = isVip ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null;
+            const { error } = await supabase.from('ads').update({
+                is_vip: isVip,
+                promoted_until: promotedUntil
+            }).eq('id', id);
             if (error) throw error;
-            toast.success(isVip ? 'VIP статус присвоен' : 'VIP статус снят');
+            toast.success(isVip ? 'VIP статус присвоен на 7 дней' : 'VIP статус снят');
+            await onUpdate();
+        } catch (e: any) {
+            toast.error('Ошибка: ' + e.message);
+        }
+    };
+
+    const toggleHighlight = async (id: string, isHighlight: boolean) => {
+        try {
+            const promotedUntil = isHighlight ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() : null;
+            const { error } = await supabase.from('ads').update({
+                is_color_highlight: isHighlight,
+                promoted_until: promotedUntil
+            }).eq('id', id);
+            if (error) throw error;
+            toast.success(isHighlight ? 'Подсветка включена на 3 дня' : 'Подсветка выключена');
             await onUpdate();
         } catch (e: any) {
             toast.error('Ошибка: ' + e.message);
@@ -73,15 +93,15 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
                                 <tr key={ad.id} className="hover:bg-green-50/40 dark:hover:bg-muted/20 transition-colors group">
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border/40">
+                                            <Link prefetch={false} href={`/ad?id=${ad.id}`} target="_blank" className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border/40 hover:opacity-80 transition-opacity">
                                                 {ad.images?.[0] ? (
                                                     <img src={ad.images[0]} className="w-full h-full object-cover" alt="" />
                                                 ) : (
                                                     <Package className="w-full h-full p-3 text-muted-foreground/30" />
                                                 )}
-                                            </div>
+                                            </Link>
                                             <div className="min-w-0">
-                                                <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">{ad.title}</p>
+                                                <Link prefetch={false} href={`/ad?id=${ad.id}`} target="_blank" className="text-sm font-semibold truncate hover:text-primary hover:underline transition-colors block">{ad.title}</Link>
                                                 <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
                                                     {new Date(ad.created_at).toLocaleDateString()}
@@ -136,9 +156,17 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
                                                 </button>
                                             )}
 
-                                            <button onClick={() => toggleVip(ad.id, !ad.is_vip)} className={cn("p-2 rounded-lg transition-all", ad.is_vip ? "bg-orange-500/10 text-orange-500" : "hover:bg-muted/10 text-muted-foreground")} title="VIP">
-                                                <ShieldCheck className="h-4 w-4" />
+                                            <button onClick={() => toggleVip(ad.id, !ad.is_vip)} className={cn("p-2 rounded-lg transition-all", ad.is_vip ? "bg-amber-500/10 text-amber-500 shadow-sm" : "hover:bg-muted/10 text-muted-foreground")} title="VIP (7 дней)">
+                                                <Crown className="h-4 w-4" />
                                             </button>
+
+                                            <button onClick={() => toggleHighlight(ad.id, !ad.is_color_highlight)} className={cn("p-2 rounded-lg transition-all", ad.is_color_highlight ? "bg-orange-500/10 text-orange-500 shadow-sm" : "hover:bg-muted/10 text-muted-foreground")} title="Подсветка (3 дня)">
+                                                <Zap className="h-4 w-4" />
+                                            </button>
+
+                                            <Link href={`/ads/edit?id=${ad.id}`} target="_blank" className="p-2 hover:bg-blue-500/10 text-blue-500 rounded-lg transition-all" title="Редактировать">
+                                                <Pencil className="h-4 w-4" />
+                                            </Link>
 
                                             {ad.status !== 'rejected' && (
                                                 <button onClick={() => updateAdStatus(ad.id, 'rejected')} className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-all" title="Бан">
@@ -164,9 +192,11 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredAds.map((ad) => (
                 <div key={ad.id} className="bg-white dark:bg-surface rounded-2xl border border-green-200/30 dark:border-border/40 overflow-hidden group hover:shadow-xl hover:border-green-300/50 transition-all">
-                    <div className="aspect-video relative">
+                    <Link prefetch={false} href={`/ad?id=${ad.id}`} target="_blank" className="aspect-video relative block hover:opacity-90 transition-opacity">
                         <img src={ad.images?.[0] || ''} className="w-full h-full object-cover" alt="" />
                         <div className="absolute top-2 right-2 flex gap-1">
+                            {ad.is_vip && <div className="bg-amber-500 text-white p-1 rounded-md shadow-lg" title="VIP"><Crown className="h-3 w-3" /></div>}
+                            {ad.is_color_highlight && <div className="bg-orange-500 text-white p-1 rounded-md shadow-lg" title="Подсветка"><Zap className="h-3 w-3" /></div>}
                             <div className={cn(
                                 "px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wider backdrop-blur-md",
                                 ad.status === 'active' ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
@@ -174,14 +204,26 @@ export function AdsTable({ ads, viewMode, onUpdate, searchQuery }: AdsTableProps
                                 {ad.status}
                             </div>
                         </div>
-                    </div>
+                    </Link>
                     <div className="p-4">
-                        <h4 className="font-semibold text-sm truncate mb-1">{ad.title}</h4>
+                        <Link prefetch={false} href={`/ad?id=${ad.id}`} target="_blank" className="font-semibold text-sm truncate mb-1 hover:text-primary hover:underline block">{ad.title}</Link>
                         <p className="text-primary font-bold text-lg mb-3">{ad.price?.toLocaleString()} ₽</p>
                         <div className="flex gap-2">
                             <button onClick={() => updateAdStatus(ad.id, 'active')} className="flex-1 py-2 bg-green-50 dark:bg-muted hover:bg-primary hover:text-white rounded-xl text-xs font-semibold transition-all text-green-700 dark:text-foreground">Одобрить</button>
+                            <Link href={`/ads/edit?id=${ad.id}`} target="_blank" className="p-2 bg-blue-50 dark:bg-muted hover:bg-blue-500 text-blue-500 hover:text-white rounded-xl transition-all flex items-center justify-center">
+                                <Pencil className="h-4 w-4" />
+                            </Link>
                             <button onClick={() => deleteAd(ad.id)} className="p-2 bg-red-50 dark:bg-muted hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all">
                                 <Trash2 className="h-4 w-4" />
+                            </button>
+                        </div>
+                        {/* Admin Action Bar */}
+                        <div className="flex gap-1 mt-3 pt-3 border-t border-border/20">
+                            <button onClick={() => toggleVip(ad.id, !ad.is_vip)} className={cn("flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center justify-center gap-1", ad.is_vip ? "bg-amber-500/20 text-amber-600" : "bg-muted text-muted-foreground")}>
+                                <Crown className="h-3 w-3" /> VIP
+                            </button>
+                            <button onClick={() => toggleHighlight(ad.id, !ad.is_color_highlight)} className={cn("flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-all flex items-center justify-center gap-1", ad.is_color_highlight ? "bg-orange-500/20 text-orange-600" : "bg-muted text-muted-foreground")}>
+                                <Zap className="h-3 w-3" /> Турбо
                             </button>
                         </div>
                     </div>

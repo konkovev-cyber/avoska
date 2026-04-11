@@ -36,9 +36,9 @@ export interface Ad {
     specifications: Record<string, string>;
     created_at: string;
     updated_at: string;
+    promoted_until?: string | null;
     is_vip?: boolean;
-    is_turbo?: boolean;
-    pinned_until?: string | null;
+    is_color_highlight?: boolean;
     views_count?: number;
     contacts_count?: number;
 

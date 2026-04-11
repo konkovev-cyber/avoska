@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck, Smartphone, ChevronLeft } from 'lucide-react';
+import { User, Package, Heart, Star, Settings, ExternalLink, Trash2, PowerOff, Camera, MapPin, Rocket, Zap, Crown, X, ShieldCheck, Smartphone, ChevronLeft, Upload } from 'lucide-react';
 import PromotionModal from '@/components/PromotionModal';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -472,6 +472,15 @@ function ProfilePageContent() {
                             )}
                             {isOwnProfile && (
                                 <Link prefetch={false}
+                                    href="/profile/autoload"
+                                    className="p-4 bg-primary/5 border border-primary/20 rounded-2xl hover:bg-primary/10 transition-all shrink-0 active:scale-90 text-primary"
+                                    title="Автозагрузка (XML)"
+                                >
+                                    <Upload className="h-6 w-6" />
+                                </Link>
+                            )}
+                            {isOwnProfile && (
+                                <Link prefetch={false}
                                     href="/profile/settings"
                                     className="p-4 bg-background border border-border rounded-2xl hover:bg-muted transition-all shrink-0 active:scale-90"
                                     title="Настройки профиля"
@@ -549,7 +558,7 @@ function ProfilePageContent() {
                                     <div className="text-base md:text-xl font-semibold mt-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Цена не указана'}</div>
                                     <div className="flex gap-1 mt-1 flex-wrap">
                                         {ad.is_vip && <span className="bg-purple-100 text-purple-600 text-[7px] font-semibold uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Crown className="h-2 w-2" /> VIP</span>}
-                                        {ad.is_turbo && <span className="bg-orange-100 text-orange-600 text-[7px] font-semibold uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2 w-2" /> Turbo</span>}
+                                        {ad.is_color_highlight && <span className="bg-orange-100 text-orange-600 text-[7px] font-semibold uppercase px-1.5 py-0.5 rounded-full flex items-center gap-1"><Zap className="h-2 w-2" /> Подсветка</span>}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1.5 md:flex-row md:gap-2 shrink-0">

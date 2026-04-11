@@ -5,10 +5,12 @@ import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { Package, MapPin, Search, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { AdCard } from '@/components/ui/AdCard';
+import { Ad } from '@/lib/types';
 
 export default function AllAdsPage() {
     const router = useRouter();
-    const [ads, setAds] = useState<any[]>([]);
+    const [ads, setAds] = useState<Ad[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
 
@@ -20,11 +22,13 @@ export default function AllAdsPage() {
         setLoading(true);
         const { data } = await supabase
             .from('ads')
-            .select('*, categories(name)')
+            .select('*, profiles!user_id(full_name, avatar_url, is_verified, rating)')
             .eq('status', 'active')
-            .order('created_at', { ascending: false });
+            .order('is_vip', { ascending: false, nullsFirst: false })
+            .order('created_at', { ascending: false })
+            .limit(400);
 
-        setAds(data || []);
+        setAds((data || []) as Ad[]);
         setLoading(false);
     };
 
@@ -62,29 +66,9 @@ export default function AllAdsPage() {
                     ))}
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {filteredAds.map(ad => (
-                        <Link prefetch={false} href={`/ad/?id=${ad.id}`} key={ad.id} className="group">
-                            <div className="bg-surface rounded-2xl border border-border overflow-hidden hover:shadow-xl transition-all hover:border-primary h-full flex flex-col">
-                                <div className="aspect-square relative overflow-hidden bg-muted">
-                                    {ad.images?.[0] ? (
-                                        <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-muted">
-                                            <Package className="h-10 w-10" />
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="p-3 flex-1 flex flex-col">
-                                    <div className="text-lg font-semibold mb-0.5">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}</div>
-                                    <h3 className="font-semibold text-xs line-clamp-2 mb-2 flex-1">{ad.title}</h3>
-                                    <div className="flex items-center gap-1 text-[10px] text-muted mt-auto">
-                                        <MapPin className="h-3 w-3" />
-                                        {ad.city || 'Город не указан'}
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
+                        <AdCard key={ad.id} ad={ad} />
                     ))}
                 </div>
             )}
