@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Smartphone, ChevronRight, MessageCircle, Megaphone, Star, ImageIcon } from 'lucide-react';
+import { Smartphone, ChevronRight, MessageCircle, Megaphone, Star, ImageIcon, Sparkles } from 'lucide-react';
+import BannerCheckoutModal from '@/components/UserBannerCheckoutModal';
 import { APK_DOWNLOAD_URL } from '@/lib/constants';
 import { supabase } from '@/lib/supabase/client';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
@@ -23,6 +24,7 @@ const ICON_MAP: Record<string, any> = {
 
 export default function RotatingFeedBanners({ topBanners, isMobileApp }: RotatingFeedBannersProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
 
     // Build the dynamic list of banners
     const allBanners: { id: string; content: React.ReactNode }[] = [];
@@ -130,6 +132,36 @@ export default function RotatingFeedBanners({ topBanners, isMobileApp }: Rotatin
         }
     });
 
+    // 3. Dedicated "Your Ad Here" Slide at the end
+    allBanners.push({
+        id: 'buy-ad-slide',
+        content: (
+            <div className="w-full h-full bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-4 md:p-6 flex items-center justify-between gap-4 relative overflow-hidden shadow-lg group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/10 rounded-full -ml-12 -mb-12 blur-xl" />
+
+                <div className="relative z-10 flex items-center gap-3 md:gap-5 flex-1 min-w-0">
+                    <div className="w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                        <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-white" />
+                    </div>
+                    <div className="overflow-hidden">
+                        <h3 className="text-white text-sm md:text-xl font-bold tracking-tight leading-tight truncate">Ваша реклама здесь</h3>
+                        <p className="text-white/80 text-[10px] md:text-sm font-medium mt-0.5 line-clamp-1">Охватите тысячи пользователей за 1000 ₽</p>
+                    </div>
+                </div>
+
+                <div className="relative z-10 shrink-0">
+                    <button
+                        onClick={() => setIsBannerModalOpen(true)}
+                        className="bg-white text-orange-600 px-5 md:px-8 py-2 md:py-3 rounded-xl font-bold text-[10px] md:text-sm shadow-xl hover:scale-[1.05] active:scale-95 transition-all uppercase tracking-widest"
+                    >
+                        Разместить
+                    </button>
+                </div>
+            </div>
+        )
+    });
+
     useEffect(() => {
         if (allBanners.length <= 1) return;
         const interval = setInterval(() => {
@@ -138,7 +170,17 @@ export default function RotatingFeedBanners({ topBanners, isMobileApp }: Rotatin
         return () => clearInterval(interval);
     }, [allBanners.length]);
 
-    if (allBanners.length === 0) return null;
+    if (allBanners.length === 0) {
+        return (
+            <div className="relative w-full h-[180px] md:h-[130px] rounded-2xl overflow-hidden shadow-sm bg-surface border border-dashed border-border/50 flex flex-col items-center justify-center gap-3">
+                <p className="text-sm font-semibold text-muted uppercase tracking-widest text-center px-4">Здесь могла быть ваша реклама</p>
+                <button onClick={() => setIsBannerModalOpen(true)} className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl font-bold uppercase text-[10px] md:text-xs tracking-widest shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" /> Разместить за 1000 ₽
+                </button>
+                {isBannerModalOpen && <BannerCheckoutModal position="top" onClose={() => setIsBannerModalOpen(false)} />}
+            </div>
+        );
+    }
 
     return (
         <section className="relative w-full h-[180px] md:h-[130px] rounded-2xl overflow-hidden shadow-sm">
@@ -168,6 +210,8 @@ export default function RotatingFeedBanners({ topBanners, isMobileApp }: Rotatin
                     ))}
                 </div>
             )}
+
+            {isBannerModalOpen && <BannerCheckoutModal position="top" onClose={() => setIsBannerModalOpen(false)} />}
         </section>
     );
 }

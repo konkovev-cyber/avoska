@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss" source('../..');
 
+
+
 :root {
   --background: #F5F5F5;
   --foreground: #171717;
@@ -180,5 +182,36 @@ main {
 
   .dark .splash-logo-gray {
     filter: grayscale(1) brightness(0.4);
+  }
+
+  /* Shimmer effect for premium cards */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
   }
 }

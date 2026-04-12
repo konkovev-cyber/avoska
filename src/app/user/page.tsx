@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
+import { AdCard } from '@/components/ui/AdCard';
 
 function PublicProfileContent() {
     const searchParams = useSearchParams();
@@ -326,18 +327,7 @@ function PublicProfileContent() {
                 {activeTab === 'ads' && (
                     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {ads.length > 0 ? ads.map(ad => (
-                            <Link prefetch={false} key={ad.id} href={`/ad/?id=${ad.id}`} className="group relative flex flex-col bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98]">
-                                <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                                    {ad.images?.[0] ? <img src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-full flex items-center justify-center text-[10px] opacity-30">Нет фото</div>}
-                                </div>
-                                <div className="p-3 flex flex-col flex-1 gap-1">
-                                    <div className="text-lg font-semibold tracking-tight">{ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}</div>
-                                    <h3 className="text-sm font-medium line-clamp-2 min-h-[2.5em]">{ad.title}</h3>
-                                    <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase opacity-70">
-                                        <MapPin className="h-3 w-3" /> <span className="truncate">{ad.city}</span>
-                                    </div>
-                                </div>
-                            </Link>
+                            <AdCard key={ad.id} ad={ad} />
                         )) : <div className="col-span-full py-20 text-center font-semibold text-muted-foreground">Нет активных объявлений</div>}
                     </div>
                 )}

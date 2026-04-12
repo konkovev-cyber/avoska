@@ -1,12 +1,13 @@
 'use client';
 
 import { Banner } from '@/lib/types';
-import { ImageIcon, Trash2, Upload, MessageCircle, Megaphone, Smartphone, Star, Pencil, List, Layout, Type, Palette } from 'lucide-react';
+import { ImageIcon, Trash2, Upload, MessageCircle, Megaphone, Smartphone, Star, Pencil, List, Layout, Type, Palette, Briefcase, Gift, ShoppingBag, Zap, Award, Info, ShieldCheck, TrendingUp, Heart, MapPin, Flame, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase/client';
 import { useState } from 'react';
 import { compressImage } from '@/lib/image-utils';
+import ImageCropperModal from '@/components/ui/ImageCropperModal';
 
 interface BannersSectionProps {
     banners: Banner[];
@@ -17,9 +18,15 @@ interface BannersSectionProps {
 
 const PRESET_GRADIENTS = [
     { id: 'blue', label: 'Синий', value: 'bg-gradient-to-r from-blue-600 to-blue-800' },
+    { id: 'cyan', label: 'Голубой', value: 'bg-gradient-to-r from-cyan-500 to-blue-500' },
     { id: 'green', label: 'Зеленый', value: 'bg-gradient-to-r from-green-600 to-green-700' },
+    { id: 'emerald', label: 'Изумрудный', value: 'bg-gradient-to-r from-emerald-500 to-teal-600' },
     { id: 'orange', label: 'Оранжевый', value: 'bg-gradient-to-r from-orange-500 to-orange-600' },
+    { id: 'yellow', label: 'Желтый', value: 'bg-gradient-to-r from-yellow-400 to-orange-500' },
     { id: 'purple', label: 'Фиолетовый', value: 'bg-gradient-to-r from-purple-600 to-indigo-700' },
+    { id: 'indigo', label: 'Индиго', value: 'bg-gradient-to-r from-indigo-500 to-purple-600' },
+    { id: 'pink', label: 'Розовый', value: 'bg-gradient-to-r from-pink-500 to-rose-500' },
+    { id: 'fuchsia', label: 'Фуксия', value: 'bg-gradient-to-r from-fuchsia-600 to-pink-600' },
     { id: 'red', label: 'Красный', value: 'bg-gradient-to-r from-red-500 to-rose-600' },
     { id: 'dark', label: 'Темный', value: 'bg-gradient-to-r from-zinc-800 to-black' },
 ];
@@ -30,6 +37,17 @@ const PRESET_ICONS = [
     { id: 'Smartphone', icon: Smartphone },
     { id: 'Star', icon: Star },
     { id: 'ImageIcon', icon: ImageIcon },
+    { id: 'Briefcase', icon: Briefcase },
+    { id: 'Gift', icon: Gift },
+    { id: 'ShoppingBag', icon: ShoppingBag },
+    { id: 'Zap', icon: Zap },
+    { id: 'Award', icon: Award },
+    { id: 'Info', icon: Info },
+    { id: 'ShieldCheck', icon: ShieldCheck },
+    { id: 'TrendingUp', icon: TrendingUp },
+    { id: 'Heart', icon: Heart },
+    { id: 'MapPin', icon: MapPin },
+    { id: 'Flame', icon: Flame },
 ];
 
 export function BannersSection({ banners, onUpdate, bannersEnabled, setBannersEnabled }: BannersSectionProps) {
@@ -46,15 +64,23 @@ export function BannersSection({ banners, onUpdate, bannersEnabled, setBannersEn
     const [linkUrl, setLinkUrl] = useState('');
     const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
     const [loading, setLoading] = useState(false);
+    const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setImageFile(file);
             const reader = new FileReader();
-            reader.onloadend = () => setImagePreview(reader.result as string);
+            reader.onloadend = () => setCropImageSrc(reader.result as string);
             reader.readAsDataURL(file);
         }
+        e.target.value = '';
+    };
+
+    const handleCropComplete = (croppedBlob: Blob) => {
+        const file = new File([croppedBlob], `cropped-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(croppedBlob));
+        setCropImageSrc(null);
     };
 
     const saveBanner = async (e: React.FormEvent) => {
@@ -197,6 +223,58 @@ export function BannersSection({ banners, onUpdate, bannersEnabled, setBannersEn
                             bannersEnabled ? "left-7" : "left-1"
                         )} />
                     </button>
+                </div>
+            </div>
+
+            <div className="bg-white/40 backdrop-blur-sm p-4 rounded-[2rem] border border-primary/5">
+                <div className="text-[10px] font-bold tracking-widest text-primary/50 uppercase mb-3 ml-2 flex items-center gap-2">
+                    <Eye className="h-3 w-3" /> Предпросмотр (в реальном времени)
+                </div>
+                <div className="max-w-4xl mx-auto">
+                    <div className={cn(
+                        "relative overflow-hidden transition-all duration-500 shadow-2xl",
+                        position === 'top' ? "w-full aspect-[21/9] md:aspect-[12/3] rounded-[2rem]" : "w-full max-w-[280px] aspect-[4/5] rounded-[2.5rem] mx-auto"
+                    )}>
+                        {type === 'text' ? (
+                            <div className={cn("w-full h-full flex flex-col justify-center p-6 md:p-8 text-white relative", backgroundColor)}>
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
+                                <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full -ml-24 -mb-24 blur-2xl opacity-30" />
+
+                                <div className="relative z-10 flex items-center gap-4 md:gap-6 h-full">
+                                    <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                                        {(() => {
+                                            const Icon = PRESET_ICONS.find(i => i.id === iconName)?.icon || Megaphone;
+                                            return <Icon className="h-7 w-7 md:h-9 md:w-9 text-white" />;
+                                        })()}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="text-lg md:text-2xl font-bold tracking-tight leading-tight line-clamp-1">{title || 'Ваш заголовок'}</h3>
+                                        <p className="text-white/80 text-[10px] md:text-sm font-medium mt-1 line-clamp-2">{content || 'Здесь будет текст описания вашего рекламного предложения...'}</p>
+                                        {(buttonText || linkUrl) && (
+                                            <div className="mt-3 md:mt-4 px-5 md:px-7 py-2 md:py-2.5 bg-white text-primary text-[10px] md:text-xs font-bold w-fit rounded-xl shadow-lg uppercase tracking-widest active:scale-95 transition-transform">
+                                                {buttonText || 'Подробнее'}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="w-full h-full bg-primary/5 flex items-center justify-center relative group">
+                                {imagePreview || imageUrl ? (
+                                    <img src={imagePreview || imageUrl} className="w-full h-full object-cover" alt="Preview" />
+                                ) : (
+                                    <ImageIcon className="h-12 w-12 text-primary/10" />
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 md:p-8 flex flex-col justify-end">
+                                    <h4 className="text-white font-bold text-lg md:text-2xl line-clamp-2 leading-tight drop-shadow-md">{title || 'Ваш заголовок'}</h4>
+                                    {content && <p className="text-white/70 text-[10px] md:text-xs mt-2 line-clamp-2">{content}</p>}
+                                </div>
+                                <div className="absolute top-4 right-4 px-2.5 py-1 bg-black/50 backdrop-blur-md rounded-lg text-[9px] font-bold text-white uppercase tracking-widest border border-white/20">
+                                    Реклама
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -382,11 +460,11 @@ export function BannersSection({ banners, onUpdate, bannersEnabled, setBannersEn
                                             </>
                                         ) : (
                                             <div className="flex flex-col items-center text-primary/60">
-                                                <Upload className="h-7 w-7 mb-2 opacity-60" />
-                                                <span className="text-[9px] font-bold uppercase tracking-widest">Выбрать файл</span>
+                                                <Upload className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                                                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mt-2 group-hover:text-primary transition-colors">Загрузить с пк</span>
                                             </div>
                                         )}
-                                        <input type="file" onChange={handleFileChange} className="hidden" accept="image/*" />
+                                        <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
                                     </label>
                                 </div>
                             </>
@@ -495,7 +573,15 @@ export function BannersSection({ banners, onUpdate, bannersEnabled, setBannersEn
                     </div>
                 </div>
             </div>
+
+            {cropImageSrc && (
+                <ImageCropperModal
+                    imageSrc={cropImageSrc}
+                    aspectRatio={position === 'top' ? 21 / 9 : 0.8} // 0.8 is roughly vertical for sidebar
+                    onClose={() => setCropImageSrc(null)}
+                    onCropComplete={handleCropComplete}
+                />
+            )}
         </div>
     );
 }
-

@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, MapPin, Star, Eye, Crown } from 'lucide-react';
+import { Heart, MapPin, Star, Eye, Crown, Zap, Flame, Sparkles } from 'lucide-react';
 import { getOptimizedImageUrl } from '@/lib/image-utils';
+import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { Ad } from '@/lib/types';
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
@@ -72,14 +73,16 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false, sh
                 }
             }}
             className={cn(
-                "group relative flex flex-col h-full gap-2 outline-none rounded-[1.5rem] transition-all p-1",
-                ad.is_vip && "bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 shadow-lg shadow-purple-500/5",
-                ad.is_color_highlight && !ad.is_vip && "bg-primary/5 border border-primary/20"
+                "group relative flex flex-col h-full gap-1 outline-none rounded-[1.8rem] transition-all p-1.5",
+                "bg-white/40 border border-white/60 backdrop-blur-xl hover:bg-white/60 shadow-sm",
+                ad.is_vip && "bg-gradient-to-br from-amber-500/5 to-purple-600/5 border-amber-500/30 shadow-xl shadow-amber-500/10",
+                ad.is_color_highlight && !ad.is_vip && "bg-orange-50/50 dark:bg-orange-950/20 border-orange-400/40 shadow-md shadow-orange-500/5",
+                ad.is_urgent && !ad.is_vip && !ad.is_color_highlight && "border-red-400/40 shadow-sm shadow-red-500/5 bg-red-50/50"
             )}
         >
             <div className={cn(
-                "aspect-[4/3] w-full relative overflow-hidden rounded-[1.25rem] bg-muted border border-border/20 group-hover:shadow-lg transition-all active:scale-[0.98]",
-                ad.is_vip && "ring-2 ring-purple-500 ring-offset-2 ring-offset-background"
+                "aspect-[4/3] w-full relative overflow-hidden rounded-[1.4rem] bg-muted border border-border/10 group-hover:shadow-lg transition-all active:scale-[0.98]",
+                ad.is_vip && "ring-2 ring-amber-500 ring-offset-1 ring-offset-background/50"
             )}>
                 {isHoverGallery && !isTouch ? (
                     <HoverImageGallery
@@ -90,20 +93,18 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false, sh
                     />
                 ) : (
                     ad.images && ad.images.length > 0 ? (
-                        <div className="w-full h-full relative">
-                            {/* Blurred background for portrait images */}
-                            <img
-                                src={getOptimizedImageUrl(ad.images[0], { width: 100, quality: 30 })}
-                                alt=""
-                                aria-hidden="true"
-                                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110 opacity-60 pointer-events-none select-none"
-                            />
-                            {/* Main image — contain so portrait photos are never cropped */}
-                            <img
-                                src={getOptimizedImageUrl(ad.images[0], { width: 400, quality: 75 })}
+                        <div className="w-full h-full relative group/image">
+                            {/* Animated shimmer for VIP */}
+                            {ad.is_vip && (
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/image:animate-[shimmer_2s_infinite] z-10 pointer-events-none" />
+                            )}
+
+                            <OptimizedImage
+                                src={ad.images[0]}
+                                width={400}
                                 alt={ad.title}
-                                loading="lazy"
-                                className="relative w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
+                                className="transition-transform duration-700 group-hover:scale-110"
+                                objectFit="contain"
                             />
                         </div>
                     ) : (
@@ -111,12 +112,26 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false, sh
                     )
                 )}
 
-                {ad.is_vip && (
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-bold uppercase rounded-lg shadow-lg z-20 pointer-events-none flex items-center gap-1 border border-white/20">
-                        <Crown className="h-3 w-3 fill-current" />
-                        VIP
-                    </div>
-                )}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 items-start z-20 pointer-events-none">
+                    {ad.is_vip && (
+                        <div className="px-2 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-bold uppercase rounded-lg shadow-lg flex items-center gap-1 border border-white/20">
+                            <Crown className="h-3 w-3 fill-current" />
+                            VIP
+                        </div>
+                    )}
+                    {ad.is_color_highlight && !ad.is_vip && (
+                        <div className="px-2 py-1 bg-gradient-to-r from-orange-500 to-yellow-500 text-white text-[9px] font-bold uppercase rounded-lg shadow-lg flex items-center gap-1 border border-white/20">
+                            <Zap className="h-3 w-3 fill-current" />
+                            ТОП
+                        </div>
+                    )}
+                    {ad.is_urgent && (
+                        <div className="px-2 py-1 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[9px] font-bold uppercase rounded-lg shadow-lg flex items-center gap-1 border border-white/20">
+                            <Flame className="h-3 w-3 fill-current" />
+                            СРОЧНО
+                        </div>
+                    )}
+                </div>
 
                 {ad.condition === 'new' && (
                     <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-[9px] font-semibold uppercase rounded shadow-sm z-20 pointer-events-none">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Heart, Package, MapPin, ChevronLeft } from 'lucide-react';
+import { AdCard } from '@/components/ui/AdCard';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -65,34 +66,7 @@ export default function FavoritesPage() {
                 {favorites.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                         {favorites.map(({ ads: ad }) => (
-                            <Link prefetch={false}
-                                key={ad.id}
-                                href={`/ad/?id=${ad.id}`}
-                                className="bg-surface border border-border rounded-3xl overflow-hidden hover:shadow-lg transition-all flex flex-col group"
-                            >
-                                <div className="aspect-square bg-muted relative overflow-hidden">
-                                    {ad.images?.[0] ? (
-                                        <img src={ad.images[0]} alt={ad.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-muted text-xs uppercase font-semibold tracking-widest">Нет фото</div>
-                                    )}
-                                    <div className="absolute top-2 right-2 p-1.5 bg-red-500 rounded-full shadow-lg">
-                                        <Heart className="h-4 w-4 fill-white text-white" />
-                                    </div>
-                                </div>
-                                <div className="p-3 flex flex-col flex-1">
-                                    <h3 className="text-[13px] font-semibold text-foreground leading-[1.3] line-clamp-2 mb-1.5 group-hover:text-primary transition-colors h-9">
-                                        {ad.title}
-                                    </h3>
-                                    <div className="text-[17px] font-semibold text-foreground mb-2">
-                                        {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
-                                    </div>
-                                    <div className="mt-auto flex items-center gap-1 text-[11px] text-foreground/50 font-medium">
-                                        <MapPin className="h-3 w-3 text-primary/60" />
-                                        <span className="truncate">{ad.city}</span>
-                                    </div>
-                                </div>
-                            </Link>
+                            <AdCard key={ad.id} ad={ad} initialFavorite={true} />
                         ))}
                     </div>
                 ) : (

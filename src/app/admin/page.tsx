@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
     Package, Users, Settings, Trash2, CheckCircle2,
     ShieldCheck, ImageIcon, Star,
-    LayoutGrid, Flag, Search, X, Bot, Menu, ChevronRight, LogOut, List, Grid3x3, Clock, CreditCard, ExternalLink
+    LayoutGrid, Flag, Search, X, Bot, Menu, ChevronRight, LogOut, List, Grid3x3, Clock, CreditCard, ExternalLink, Zap, Crown
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ import { CategoriesSection } from '@/components/admin/CategoriesSection';
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
-    const [activeTab, setActiveTab] = useState<'ads' | 'moderation' | 'users' | 'banners' | 'reports' | 'categories' | 'reviews' | 'settings' | 'payments'>('moderation');
+    const [activeTab, setActiveTab] = useState<'ads' | 'moderation' | 'users' | 'banners' | 'reports' | 'categories' | 'reviews' | 'settings' | 'payments' | 'promotions'>('moderation');
     const [stats, setStats] = useState({ ads: 0, users: 0, pending: 0, cities: 0, categories: 0 });
 
     const [ads, setAds] = useState<Ad[]>([]);
@@ -100,19 +100,25 @@ export default function AdminDashboard() {
             supabase.from('categories').select('*').order('name'),
             supabase.from('reviews').select('*, reviewer:profiles!reviewer_id(full_name)').order('created_at', { ascending: false }).limit(200),
             supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single(),
-            supabase.from('transactions').select('*, profiles(full_name), ads(title)').order('created_at', { ascending: false }).limit(200)
+            supabase.from('transactions').select('*, ads(title)').order('created_at', { ascending: false }).limit(200)
         ]);
 
         const dedupe = <T extends { id: string }>(arr: T[]) => Array.from(new Map(arr.map(item => [item.id, item])).values());
+        const rawUsers = dedupe((usersRes.data || []) as Profile[]);
+
+        const enrichedTransactions = (transactionsRes.data || []).map((t: any) => ({
+            ...t,
+            profiles: { full_name: rawUsers.find(u => u.id === t.user_id)?.full_name || 'Неизвестно' }
+        }));
 
         setAds(dedupe((adsRes.data || []) as Ad[]));
-        setUsers(dedupe((usersRes.data || []) as Profile[]));
+        setUsers(rawUsers);
         setCities(dedupe((citiesRes.data || []) as City[]));
         setReports(dedupe((reportsRes.data || []) as Report[]));
         setBanners(dedupe((bannersRes.data || []) as Banner[]));
         setCategories(dedupe((categoriesRes.data || []) as AdCategory[]));
         setReviews(dedupe((reviewsRes.data || []) as Review[]));
-        setTransactions(dedupe((transactionsRes.data || []) as Transaction[]));
+        setTransactions(dedupe(enrichedTransactions as Transaction[]));
         setBannersEnabled(settingsRes.data?.value === 'true');
 
         setStats({
@@ -169,6 +175,7 @@ export default function AdminDashboard() {
         { id: 'categories', label: 'Категории', icon: LayoutGrid },
         { id: 'reports', label: 'Жалобы', icon: Flag, count: reports.length, color: 'text-red-500' },
         { id: 'reviews', label: 'Отзывы', icon: Star },
+        { id: 'promotions', label: 'Продвижение', icon: Zap, color: 'text-amber-500' },
         { id: 'payments', label: 'Платежи', icon: CreditCard, color: 'text-green-500' },
         { id: 'settings', label: 'Настройки', icon: Settings },
     ];
@@ -365,6 +372,78 @@ export default function AdminDashboard() {
                                         {transactions.length === 0 && (
                                             <tr>
                                                 <td colSpan={5} className="p-10 text-center text-muted-foreground text-sm font-medium italic">Платежей пока нет...</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'promotions' && (
+                        <div className="bg-white dark:bg-surface rounded-2xl border border-green-200/30 dark:border-border/40 overflow-hidden shadow-sm">
+                            <div className="p-6 border-b border-green-200/40 dark:border-border/40 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:bg-muted/10">
+                                <h3 className="font-semibold uppercase tracking-widest text-sm flex items-center gap-2">
+                                    <Zap className="h-4 w-4 text-orange-500" /> Активные продвижения
+                                    ({ads.filter(a => a.is_vip || a.is_color_highlight).length})
+                                </h3>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="bg-muted/30 border-b border-border/40">
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Объявление</th>
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Тип</th>
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Истекает</th>
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground text-right">Управление</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/40">
+                                        {ads.filter(a => a.is_vip || a.is_color_highlight).sort((a, b) => new Date(a.promoted_until || 0).getTime() - new Date(b.promoted_until || 0).getTime()).map((ad) => (
+                                            <tr key={ad.id} className="hover:bg-muted/20 transition-colors">
+                                                <td className="p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-muted flex-shrink-0 border border-border/40">
+                                                            <img src={ad.images?.[0]} className="w-full h-full object-cover" alt="" />
+                                                        </div>
+                                                        <Link href={`/ad?id=${ad.id}`} target="_blank" className="text-sm font-semibold hover:underline block truncate max-w-[200px]">{ad.title}</Link>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex gap-1 flex-wrap">
+                                                        {ad.is_vip && <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full text-[9px] font-bold uppercase flex items-center gap-1 shadow-sm"><Crown className="h-2 w-2" /> VIP</span>}
+                                                        {ad.is_color_highlight && <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-full text-[9px] font-bold uppercase flex items-center gap-1 shadow-sm"><Zap className="h-2 w-2" /> ТОП</span>}
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-xs font-semibold">
+                                                    {ad.promoted_until ? (
+                                                        <span className={cn(
+                                                            new Date(ad.promoted_until) < new Date() ? "text-red-500" : "text-muted-foreground"
+                                                        )}>
+                                                            {new Date(ad.promoted_until).toLocaleString("ru-RU")}
+                                                        </span>
+                                                    ) : <span className="italic opacity-50">∞</span>}
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <button
+                                                        onClick={async () => {
+                                                            if (confirm('Снять продвижение?')) {
+                                                                await supabase.from('ads').update({ is_vip: false, is_color_highlight: false, promoted_until: null }).eq('id', ad.id);
+                                                                fetchData();
+                                                                toast.success('Продвижение снято');
+                                                            }
+                                                        }}
+                                                        className="p-2 hover:bg-red-500/10 text-red-500 rounded-lg transition-all"
+                                                        title="Снять продвижение"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {ads.filter(a => a.is_vip || a.is_color_highlight).length === 0 && (
+                                            <tr>
+                                                <td colSpan={4} className="p-10 text-center text-muted-foreground text-sm font-medium italic">Нет активных продвижений...</td>
                                             </tr>
                                         )}
                                     </tbody>

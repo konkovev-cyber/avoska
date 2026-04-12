@@ -10,6 +10,7 @@ import { getOptimizedImageUrl } from '@/lib/image-utils';
 import { getStoredCity } from '@/lib/geo';
 import { cn } from '@/lib/utils';
 import { recommendationService } from '@/lib/recommendations';
+import { AdCard } from '@/components/ui/AdCard';
 
 type SortOption = 'newest' | 'cheapest' | 'expensive';
 type ConditionOption = 'all' | 'new' | 'used';
@@ -403,40 +404,7 @@ function SearchContent() {
                     ) : ads.length > 0 ? (
                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                             {ads.map((ad) => (
-                                <Link prefetch={false}
-                                    key={ad.id}
-                                    href={`/ad/?id=${ad.id}`}
-                                    className="group relative flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-border/40 active:scale-[0.98] duration-200"
-                                >
-                                    <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                                        <img
-                                            src={getOptimizedImageUrl(ad.images?.[0] || '', { width: 400, quality: 75 })}
-                                            alt={ad.title}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-md text-[9px] text-white font-semibold px-2 py-0.5 rounded-md uppercase tracking-wider">
-                                            {ad.category?.name}
-                                        </div>
-                                    </div>
-
-                                    <div className="p-3 flex flex-col flex-1 gap-1">
-                                        <div className="text-lg font-semibold tracking-tight text-foreground leading-none">
-                                            {ad.price ? `${ad.price.toLocaleString()} ₽` : 'Договорная'}
-                                        </div>
-
-                                        <h3 className="text-sm font-medium leading-snug line-clamp-2 text-foreground/90 min-h-[2.5em]">
-                                            {ad.title}
-                                        </h3>
-
-                                        <div className="mt-auto pt-2 flex items-center gap-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide opacity-70">
-                                            <MapPin className="h-3 w-3 shrink-0" />
-                                            <span className="truncate">{ad.city}</span>
-                                            <span className="mx-1">•</span>
-                                            <span className="shrink-0">{new Date(ad.created_at).toLocaleDateString()}</span>
-                                        </div>
-                                    </div>
-                                </Link>
+                                <AdCard key={ad.id} ad={ad} />
                             ))}
                         </div>
                     ) : (

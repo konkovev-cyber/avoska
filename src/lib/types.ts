@@ -39,6 +39,7 @@ export interface Ad {
     promoted_until?: string | null;
     is_vip?: boolean;
     is_color_highlight?: boolean;
+    is_urgent?: boolean;
     views_count?: number;
     contacts_count?: number;
 

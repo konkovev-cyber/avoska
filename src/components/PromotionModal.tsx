@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Zap, Crown, Timer, ExternalLink, Loader2 } from 'lucide-react';
+import { X, Zap, Crown, Flame, ArrowUpCircle, ExternalLink, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase/client';
@@ -15,12 +15,28 @@ interface PromotionModalProps {
 
 const SERVICES = [
     {
+        id: 'up_1_time',
+        name: 'Поднятие в поиске',
+        description: 'Разовое поднятие на 1-е место списка',
+        price: 29,
+        icon: ArrowUpCircle,
+        color: 'bg-blue-500',
+    },
+    {
         id: 'highlight_3_days',
-        name: 'Турбо-продажа',
-        description: 'Выделение цветом на 3 дня',
+        name: 'Выделение ТОП',
+        description: 'Яркая наклейка "ТОП" на 3 дня',
         price: 49,
         icon: Zap,
         color: 'bg-orange-500',
+    },
+    {
+        id: 'urgent_7_days',
+        name: 'Значок СРОЧНО',
+        description: 'Красный стикер на 7 дней',
+        price: 79,
+        icon: Flame,
+        color: 'bg-red-500',
     },
     {
         id: 'vip_7_days',
@@ -97,22 +113,29 @@ export default function PromotionModal({ adId, adTitle, onClose, onUpdate }: Pro
                             key={service.id}
                             disabled={!!loading}
                             onClick={() => handlePromote(service)}
-                            className="w-full p-4 rounded-2xl border border-border bg-surface hover:border-primary transition-all group flex items-center gap-4 text-left active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full p-5 rounded-[2rem] border border-border/40 bg-surface/50 hover:bg-surface hover:border-primary/50 shadow-sm hover:shadow-xl transition-all group flex items-center gap-5 text-left active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden relative"
                         >
+                            {/* Accent background glow on hover */}
                             <div className={cn(
-                                "w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-md shrink-0 transition-transform group-hover:rotate-6",
+                                "absolute -right-10 -top-10 w-32 h-32 rounded-full blur-[60px] opacity-0 group-hover:opacity-20 transition-opacity",
                                 service.color
+                            )} />
+
+                            <div className={cn(
+                                "w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-xl shrink-0 transition-all group-hover:scale-110 group-hover:rotate-3",
+                                service.color,
+                                "ring-4 ring-white/10"
                             )}>
-                                {loading === service.id ? <Loader2 className="w-6 h-6 animate-spin" /> : <service.icon className="h-6 w-6" />}
+                                {loading === service.id ? <Loader2 className="w-7 h-7 animate-spin" /> : <service.icon className="h-7 w-7" />}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="font-bold uppercase tracking-wider">{service.name}</div>
-                                <div className="text-xs text-muted-foreground font-semibold mt-0.5">{service.description}</div>
+                                <div className="font-bold uppercase tracking-widest text-[11px] text-muted-foreground mb-0.5 group-hover:text-primary transition-colors">{service.name}</div>
+                                <div className="text-sm font-bold leading-tight line-clamp-1">{service.description}</div>
                             </div>
                             <div className="text-right shrink-0">
-                                <div className="text-lg font-bold text-primary">{service.price} ₽</div>
-                                <div className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground flex items-center justify-end gap-1 mt-1 group-hover:text-primary">
-                                    Оплатить <ExternalLink className="h-3 w-3" />
+                                <div className="text-xl font-black text-primary drop-shadow-sm">{service.price} ₽</div>
+                                <div className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground flex items-center justify-end gap-1 mt-1 opacity-60 group-hover:opacity-100">
+                                    Выбрать <ExternalLink className="h-3 w-3" />
                                 </div>
                             </div>
                         </button>

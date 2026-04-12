@@ -4,12 +4,14 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { ExternalLink, Smartphone } from 'lucide-react';
+import { ExternalLink, Smartphone, Sparkles } from 'lucide-react';
+import BannerCheckoutModal from '@/components/UserBannerCheckoutModal';
 
 export default function RightSidebar() {
     const pathname = usePathname();
     const [banners, setBanners] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
     const isHidden = pathname.startsWith('/admin') || pathname.startsWith('/login') || pathname.startsWith('/register');
 
     useEffect(() => {
@@ -97,10 +99,19 @@ export default function RightSidebar() {
 
             {/* Fallback if no banners */}
             {!loading && banners.filter(b => b.image_url).length === 0 && (
-                <div className="p-8 text-center bg-muted/5 rounded-2xl border border-border/50 border-dashed">
-                    <p className="text-sm text-muted">Место для вашей рекламы</p>
-                </div>
+                <button onClick={() => setIsBannerModalOpen(true)} className="p-8 w-full text-center bg-muted/5 group hover:bg-amber-500/5 hover:border-amber-500/50 rounded-2xl border border-border/50 border-dashed transition-all active:scale-95">
+                    <p className="text-sm font-semibold text-muted group-hover:text-amber-600 transition-colors uppercase tracking-widest">+ Ваша Реклама</p>
+                </button>
             )}
+
+            {/* Permanent CTA for side banners */}
+            {!loading && banners.filter(b => b.image_url).length > 0 && (
+                <button onClick={() => setIsBannerModalOpen(true)} className="w-full py-3 rounded-xl border border-amber-500/30 text-amber-600 font-bold uppercase text-[10px] tracking-widest hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all flex items-center justify-center gap-2">
+                    <Sparkles className="h-3 w-3" /> Купить это место (500 ₽)
+                </button>
+            )}
+
+            {isBannerModalOpen && <BannerCheckoutModal position="sidebar" onClose={() => setIsBannerModalOpen(false)} />}
 
             {/* Footer Links */}
             <div className="mt-auto pt-6 text-[10px] text-muted-foreground font-medium text-center border-t border-border/10">

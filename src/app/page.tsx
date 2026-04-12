@@ -10,7 +10,9 @@ import dynamic from 'next/dynamic';
 import {
   ChevronRight,
   MapPin,
-  Smartphone
+  Smartphone,
+  Megaphone,
+  Search
 } from 'lucide-react';
 import { recommendationService } from '@/lib/recommendations';
 import { CATEGORIES, APK_DOWNLOAD_URL } from '@/lib/constants';
@@ -18,6 +20,7 @@ import { AdCard } from '@/components/ui/AdCard';
 import { Ad, Banner } from '@/lib/types';
 import { supabaseKeepalive } from '@/lib/supabase-keepalive';
 import RotatingFeedBanners from '@/components/ui/RotatingFeedBanners';
+import { cn } from '@/lib/utils';
 
 const HoverImageGallery = dynamic(() => import('@/components/ui/HoverImageGallery'), {
   loading: () => <div className="bg-muted animate-pulse aspect-[4/3]" />
@@ -58,7 +61,7 @@ export default function HomePage() {
       setCity(currentCity);
 
       const [bannersRes, settingsRes] = await Promise.all([
-        supabase.from('banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(5),
+        supabase.from('banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(20),
         supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
       ]);
 
@@ -88,8 +91,8 @@ export default function HomePage() {
         ads: adsCount.count || 0
       });
 
-      const topBanners = bannersEnabled ? fetchedBanners.filter(b => b.position === 'top' || !b.position) : [];
-      const sidebarBanners = bannersEnabled ? fetchedBanners.filter(b => b.position === 'sidebar') : [];
+      const topBanners = (settingsRes.data?.value === 'false') ? [] : fetchedBanners.filter(b => b.position === 'top' || !b.position);
+      const sidebarBanners = fetchedBanners.filter(b => b.position === 'sidebar');
 
       setBanners(fetchedBanners); // Keep all for state if needed, but we'll use filters in render
 
@@ -230,23 +233,58 @@ export default function HomePage() {
   const sidebarBanners = banners.filter(b => b.is_active && b.position === 'sidebar');
 
   return (
-    <div className="max-w-[1400px] mx-auto px-2 md:px-8 py-1 md:py-6 pb-20">
+    <div className="max-w-[1400px] mx-auto px-2 md:px-8 py-1 md:py-6 pb-20 space-y-8">
       <div className="w-full">
+        {/* Search Hero - Avito/Avirona Style */}
+        <section className="relative mb-8 mt-2 md:mt-0">
+          <div className="bg-gradient-to-br from-primary/10 via-background to-emerald-500/5 p-4 md:p-8 rounded-[2.5rem] border border-primary/10 shadow-xl shadow-primary/5 overflow-hidden">
+            <div className="relative z-10 max-w-2xl mx-auto text-center space-y-4">
+              <h1 className="text-2xl md:text-4xl font-black tracking-tight text-foreground leading-tight">
+                Найдите всё, <span className="text-primary italic">даже мечту</span>
+              </h1>
+              <div className="relative group max-w-xl mx-auto">
+                <div className="absolute inset-0 bg-primary/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                <div className="relative bg-white border-2 border-primary/20 focus-within:border-primary h-12 md:h-14 rounded-2xl flex items-center pl-4 md:pl-6 pr-0 shadow-lg transition-all overflow-hidden group/search">
+                  <Search className="h-4 w-4 text-muted-foreground mr-3 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Поиск по объявлениям..."
+                    className="flex-1 bg-transparent border-none outline-none font-bold text-sm md:text-base mr-2"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') router.push(`/search?q=${(e.target as HTMLInputElement).value}`);
+                    }}
+                  />
+                  <button className="bg-primary text-white px-6 md:px-10 h-full font-black hover:bg-primary/90 active:scale-[0.98] transition-all text-xs md:text-sm uppercase tracking-tighter hidden sm:block border-l border-primary/10">
+                    Найти
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2 md:gap-3 text-[10px] md:text-xs">
+                <span className="text-muted-foreground font-black uppercase tracking-widest mr-1 opacity-40">Часто ищут:</span>
+                {['iPhone 15', 'Квартира', 'Работа', 'Автомобиль'].map(tag => (
+                  <Link key={tag} href={`/search?q=${tag}`} className="bg-surface border border-border px-3 py-1 rounded-full font-bold hover:bg-primary/5 hover:text-primary transition-colors">
+                    {tag}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Abstract Background Elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 blur-[100px] translate-y-1/2 -translate-x-1/2" />
+          </div>
+        </section>
 
         <section className="mb-6">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6 px-1">
-            <div>
-              <h1 className="text-2xl md:text-5xl font-semibold text-foreground mb-1 tracking-tighter">Все категории</h1>
-              <p className="text-xs md:text-lg text-muted-foreground font-medium">Найдите то, что нужно именно вам</p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 px-1">
+            <div className="space-y-1">
+              <h2 className="text-xl md:text-3xl font-black text-foreground tracking-tight uppercase tracking-[0.05em]">Категории</h2>
+              <div className="h-1.5 w-12 bg-primary rounded-full" />
             </div>
-            <div className="flex gap-3 md:gap-6">
-              <div className="flex flex-col items-start md:items-end bg-surface/50 backdrop-blur-sm border border-border px-4 py-2 rounded-2xl shadow-sm">
-                <div className="text-xl md:text-2xl font-bold text-primary leading-tight">{totalStats.users}</div>
-                <div className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-muted-foreground/80">Пользователей</div>
-              </div>
-              <div className="flex flex-col items-start md:items-end bg-surface/50 backdrop-blur-sm border border-border px-4 py-2 rounded-2xl shadow-sm">
-                <div className="text-xl md:text-2xl font-bold text-primary leading-tight">{totalStats.ads}</div>
-                <div className="text-[9px] md:text-[10px] uppercase font-bold tracking-widest text-muted-foreground/80">Объявлений</div>
+            <div className="flex gap-2">
+              <div className="hidden lg:flex items-center gap-1.5 bg-primary/5 px-4 py-2 rounded-2xl border border-primary/10">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-black uppercase text-primary tracking-widest">Live: {totalStats.ads} активных объявлений</span>
               </div>
             </div>
           </div>
@@ -359,8 +397,9 @@ export default function HomePage() {
           )}
         </section>
 
-        <div className="my-8 space-y-6 px-1">
+        <div className="my-8 space-y-8 px-1">
           <RotatingFeedBanners topBanners={topBanners} isMobileApp={isMobileApp} />
+
         </div>
 
         {/* Recommendations Section */}

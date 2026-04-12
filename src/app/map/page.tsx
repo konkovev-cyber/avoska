@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 
 export default function GlobalMapPage() {
     const [ads, setAds] = useState<Ad[]>([]);
+    const [filteredAds, setFilteredAds] = useState<Ad[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [ymapsLoaded, setYmapsLoaded] = useState(false);
@@ -42,12 +43,32 @@ export default function GlobalMapPage() {
 
             if (error) throw error;
             setAds(data || []);
+            setFilteredAds(data || []);
         } catch (err) {
             console.error('Error fetching ads for map:', err);
         } finally {
             setLoading(false);
         }
     };
+
+    // Debounced search filtering
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (!searchQuery.trim()) {
+                setFilteredAds(ads);
+                return;
+            }
+            const query = searchQuery.toLowerCase();
+            const filtered = ads.filter(ad =>
+                ad.title.toLowerCase().includes(query) ||
+                ad.city.toLowerCase().includes(query) ||
+                ad.description?.toLowerCase().includes(query)
+            );
+            setFilteredAds(filtered);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, ads]);
 
     useEffect(() => {
         if (!ymapsLoaded || ads.length === 0) return;
@@ -73,7 +94,7 @@ export default function GlobalMapPage() {
         objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
         map.geoObjects.add(objectManager);
 
-        const features = ads.map(ad => ({
+        const features = filteredAds.map(ad => ({
             type: 'Feature',
             id: ad.id,
             geometry: {
@@ -81,21 +102,39 @@ export default function GlobalMapPage() {
                 coordinates: [ad.latitude, ad.longitude]
             },
             properties: {
-                balloonContentHeader: `<div class="font-semibold text-sm">${ad.title}</div>`,
+                balloonContentHeader: `
+                    <div style="font-family: inherit; padding-bottom: 8px; border-bottom: 1px solid #eee; margin-bottom: 8px;">
+                        <span style="font-size: 14px; font-weight: 700; color: #171717;">${ad.title}</span>
+                    </div>
+                `,
                 balloonContentBody: `
-                    <div class="flex gap-2 items-start p-1 min-w-[200px]">
-                        <img src="${ad.images[0]}" class="w-16 h-16 rounded object-cover" />
-                        <div>
-                            <div class="font-semibold text-primary text-lg">${ad.price ? ad.price.toLocaleString() + ' ₽' : 'Договорная'}</div>
-                            <div class="text-[10px] text-muted-foreground font-semibold uppercase">${ad.city}</div>
-                            <button onclick="window.location.href='/ad?id=${ad.id}'" class="mt-2 w-full py-1 text-[10px] font-semibold bg-primary text-white rounded uppercase tracking-widest">Перейти</button>
+                    <div style="font-family: inherit; min-width: 220px; display: flex; flex-direction: column; gap: 10px;">
+                        <div style="position: relative; width: 100%; height: 120px; border-radius: 12px; overflow: hidden; background: #f5f5f5;">
+                            <img src="${ad.images[0]}" style="width: 100%; height: 100%; object-fit: cover;" />
+                            ${ad.is_vip ? '<div style="position: absolute; top: 8px; left: 8px; background: linear-gradient(to right, #9333ea, #4f46e5); color: white; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 800;">VIP</div>' : ''}
                         </div>
+                        <div>
+                            <div style="font-size: 18px; font-weight: 800; color: #2E7D32;">${ad.price ? ad.price.toLocaleString() + ' ₽' : 'Договорная'}</div>
+                            <div style="font-size: 11px; color: #737373; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px;">
+                                <svg style="display:inline-block; vertical-align:middle; width:12px; height:12px; margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                                ${ad.city}
+                            </div>
+                        </div>
+                        <button 
+                            onclick="window.open('/ad?id=${ad.id}', '_self')" 
+                            style="width: 100%; padding: 10px; background: #2E7D32; color: white; border: none; border-radius: 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: opacity 0.2s;"
+                            onmouseover="this.style.opacity='0.9'"
+                            onmouseout="this.style.opacity='1'"
+                        >
+                            Открыть карту товара
+                        </button>
                     </div>
                 `,
                 hintContent: ad.title
             },
             options: {
-                preset: ad.is_vip ? 'islands#violetDotIcon' : 'islands#greenDotIcon'
+                preset: ad.is_vip ? 'islands#violetDotIcon' : 'islands#greenDotIcon',
+                hideIconOnBalloonOpen: false
             }
         }));
 
@@ -109,7 +148,7 @@ export default function GlobalMapPage() {
         }
 
         return () => map.destroy();
-    }, [ymapsLoaded, ads]);
+    }, [ymapsLoaded, filteredAds]);
 
     return (
         <div className="flex flex-col h-screen bg-background overflow-hidden">
@@ -145,7 +184,7 @@ export default function GlobalMapPage() {
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 bg-black/80 text-white px-4 py-2 rounded-full backdrop-blur-md border border-white/10 shadow-2xl flex items-center gap-3">
                     <div className="flex items-center gap-1.5 border-r border-white/20 pr-3">
                         <MapPin className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider">{ads.length}</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider">{filteredAds.length}</span>
                     </div>
                     <span className="text-[10px] font-semibold uppercase tracking-widest opacity-60">Точек на карте</span>
                 </div>
