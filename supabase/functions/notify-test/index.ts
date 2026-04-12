@@ -1,65 +1,45 @@
-const TELEGRAM_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
-Deno.serve(async (req) => {
-    // Handle CORS preflight
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', {
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-                'Access-Control-Max-Age': '86400',
-            }
-        });
-    }
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
-    const corsHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        'Content-Type': 'application/json',
-    };
+serve(async (req) => {
+    if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
     try {
-        const { chatId } = await req.json();
-        if (!chatId) {
-            return new Response(JSON.stringify({ success: false, error: 'chatId is required' }), {
-                status: 400,
-                headers: corsHeaders
-            });
-        }
+        const body = await req.json()
+        const chatId = body.chatId || body.chat_id
+        const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
 
-        if (!TELEGRAM_TOKEN) {
-            return new Response(JSON.stringify({ success: false, error: 'TELEGRAM_BOT_TOKEN not set' }), {
-                status: 500,
-                headers: corsHeaders
-            });
-        }
+        console.log(`Test call: ID=${chatId}, Token exists=${!!botToken}`)
 
-        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        if (!botToken) throw new Error('TELEGRAM_BOT_TOKEN not set in secrets')
+        if (!chatId) throw new Error('chatId is missing in request body')
+
+        const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: chatId,
-                text: `✅ <b>Тест Авоська+</b>\n\nЭто тестовое сообщение.\nЕсли вы его видите — настройки Telegram работают! 🎉`,
-                parse_mode: 'HTML',
-            }),
-        });
+                text: "🚀 Тестовое сообщение от Avoska! Ваши уведомления работают корректно.",
+                parse_mode: 'Markdown'
+            })
+        })
 
-        const data = await res.json();
-        if (!data.ok) {
-            return new Response(JSON.stringify({ success: false, error: data.description }), {
-                status: 400,
-                headers: corsHeaders
-            });
-        }
+        const data = await res.json()
+        console.log('TG Response:', JSON.stringify(data))
 
-        return new Response(JSON.stringify({ success: true }), {
-            headers: corsHeaders
-        });
-    } catch (e) {
-        return new Response(JSON.stringify({ success: false, error: String(e) }), {
-            status: 500,
-            headers: corsHeaders
-        });
+        return new Response(JSON.stringify(data), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+        })
+    } catch (error) {
+        console.error('Test Error:', error.message)
+        return new Response(JSON.stringify({ error: error.message }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400,
+        })
     }
-});
+})

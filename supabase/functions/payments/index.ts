@@ -32,67 +32,83 @@ serve(async (req) => {
             const event = body.event
             const payment = body.object
 
-            if (event !== 'payment.succeeded') {
-                return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-            }
+            console.log('Webhook received:', JSON.stringify(body, null, 2))
 
-            const metadata = payment.metadata
-            if (!metadata || !metadata.transaction_id) {
-                return new Response(JSON.stringify({ success: false }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-            }
-
-            const transactionId = metadata.transaction_id
             if (body.event === 'payment.succeeded') {
                 const payment = body.object
-                const { transaction_id, ad_id, package_type } = payment.metadata
+                const metadata = payment?.metadata || {}
+                const { transaction_id, ad_id, package_type } = metadata
+
+                console.log(`Processing successful payment for transaction: ${transaction_id}, ad: ${ad_id}`)
 
                 // 1. Обновляем транзакцию
-                await supabase.from('transactions').update({
+                const { error: trxError } = await supabase.from('transactions').update({
                     status: 'success',
+                    payment_id: payment.id,
+                    payment_method: payment.payment_method?.type || 'unknown',
                     updated_at: new Date().toISOString()
                 }).eq('id', transaction_id)
 
+                if (trxError) console.error('Error updating transaction:', trxError)
+
                 // 2. Обновляем объявление
-                const isVip = package_type.includes('vip')
-                const isHighlight = package_type.includes('highlight')
+                const isVip = String(package_type).includes('vip')
+                const isHighlight = String(package_type).includes('highlight')
                 const days = isVip ? 7 : 3
                 const promotedUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
 
-                await supabase.from('ads').update({
+                const { error: adError } = await supabase.from('ads').update({
                     is_vip: isVip,
                     is_color_highlight: isHighlight,
                     promoted_until: promotedUntil
                 }).eq('id', ad_id)
 
+                if (adError) console.error('Error updating ad promotion:', adError)
+
                 // 3. Уведомление в Телеграм
                 const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
-                const adminIds = Deno.env.get('TELEGRAM_ADMIN_IDS')?.split(',') || []
+                const adminIdsStr = Deno.env.get('TELEGRAM_ADMIN_IDS')
+                const adminIds = adminIdsStr?.split(',') || []
+
+                console.log(`TG Config: Token exists: ${!!botToken}, IDs: ${adminIdsStr}`)
 
                 if (botToken && adminIds.length > 0) {
-                    const message = `💰 *Новая оплата!*\n\n` +
-                        `📦 Услуга: ${isVip ? 'VIP Статус' : 'Подсветка'}\n` +
+                    const message = `💰 *Успешная оплата!*\n\n` +
+                        `📦 Услуга: ${isVip ? '💎 VIP Статус' : '🔥 Подсветка'}\n` +
                         `💵 Сумма: ${payment.amount.value} ${payment.amount.currency}\n` +
                         `🔗 Объявление: [Открыть](https://avoska.353290.ru/ad?id=${ad_id})\n` +
-                        `🆔 Транзакция: \`${transaction_id}\``
+                        `🆔 ID Платежа: \`${payment.id}\``
 
                     for (const chatId of adminIds) {
-                        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                chat_id: chatId.trim(),
-                                text: message,
-                                parse_mode: 'Markdown'
+                        try {
+                            const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    chat_id: chatId.trim(),
+                                    text: message,
+                                    parse_mode: 'Markdown'
+                                })
                             })
-                        }).catch(err => console.error('TG Error:', err))
+                            const tgData = await tgRes.json()
+                            if (!tgData.ok) {
+                                console.error(`TG Error for ID ${chatId}:`, JSON.stringify(tgData))
+                            } else {
+                                console.log(`TG Message successfully sent to ${chatId}`)
+                            }
+                        } catch (err) {
+                            console.error('Fetch to Telegram API failed:', err)
+                        }
                     }
+                } else {
+                    console.error('Telegram config missing in Edge Function secrets!')
                 }
 
                 return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
             } else {
-                return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+                console.log(`Ignored event type: ${body.event}`)
+                return new Response(JSON.stringify({ success: true, message: 'Event ignored' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
             }
-
         } else {
             // CREATE PAYMENT LOGIC
             const { adId, packageType } = await req.json()
