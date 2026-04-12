@@ -99,3 +99,19 @@ export interface AdminSettings {
     notify_new_users: boolean;
     updated_at: string;
 }
+export interface Transaction {
+    id: string;
+    user_id: string;
+    ad_id: string | null;
+    amount: number;
+    currency: string;
+    status: 'pending' | 'success' | 'failed';
+    payment_id: string | null;
+    payment_method: string | null;
+    package_type: string | null;
+    created_at: string;
+    updated_at: string;
+    // Joined
+    profiles?: { full_name: string };
+    ads?: { title: string };
+}

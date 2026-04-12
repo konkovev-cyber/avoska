@@ -42,32 +42,56 @@ serve(async (req) => {
             }
 
             const transactionId = metadata.transaction_id
-            const adId = metadata.ad_id
-            const packageType = metadata.package_type
+            if (body.event === 'payment.succeeded') {
+                const payment = body.object
+                const { transaction_id, ad_id, package_type } = payment.metadata
 
-            await supabase
-                .from('transactions')
-                .update({ status: 'success' })
-                .eq('id', transactionId)
+                // 1. Обновляем транзакцию
+                await supabase.from('transactions').update({
+                    status: 'success',
+                    updated_at: new Date().toISOString()
+                }).eq('id', transaction_id)
 
-            const updates: any = {}
-            if (packageType === 'vip_7_days') {
-                updates.is_vip = true
-                const date = new Date()
-                date.setDate(date.getDate() + 7)
-                updates.promoted_until = date.toISOString()
-            } else if (packageType === 'highlight_3_days') {
-                updates.is_color_highlight = true
-                const date = new Date()
-                date.setDate(date.getDate() + 3)
-                updates.promoted_until = date.toISOString()
+                // 2. Обновляем объявление
+                const isVip = package_type.includes('vip')
+                const isHighlight = package_type.includes('highlight')
+                const days = isVip ? 7 : 3
+                const promotedUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
+
+                await supabase.from('ads').update({
+                    is_vip: isVip,
+                    is_color_highlight: isHighlight,
+                    promoted_until: promotedUntil
+                }).eq('id', ad_id)
+
+                // 3. Уведомление в Телеграм
+                const botToken = Deno.env.get('TELEGRAM_BOT_TOKEN')
+                const adminIds = Deno.env.get('TELEGRAM_ADMIN_IDS')?.split(',') || []
+
+                if (botToken && adminIds.length > 0) {
+                    const message = `💰 *Новая оплата!*\n\n` +
+                        `📦 Услуга: ${isVip ? 'VIP Статус' : 'Подсветка'}\n` +
+                        `💵 Сумма: ${payment.amount.value} ${payment.amount.currency}\n` +
+                        `🔗 Объявление: [Открыть](https://avoska.353290.ru/ad?id=${ad_id})\n` +
+                        `🆔 Транзакция: \`${transaction_id}\``
+
+                    for (const chatId of adminIds) {
+                        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chat_id: chatId.trim(),
+                                text: message,
+                                parse_mode: 'Markdown'
+                            })
+                        }).catch(err => console.error('TG Error:', err))
+                    }
+                }
+
+                return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+            } else {
+                return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
             }
-
-            if (Object.keys(updates).length > 0) {
-                await supabase.from('ads').update(updates).eq('id', adId)
-            }
-
-            return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
 
         } else {
             // CREATE PAYMENT LOGIC

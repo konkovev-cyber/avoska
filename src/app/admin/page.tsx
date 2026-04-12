@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 import {
     Package, Users, Settings, Trash2, CheckCircle2,
     ShieldCheck, ImageIcon, Star,
-    LayoutGrid, Flag, Search, X, Bot, Menu, ChevronRight, LogOut, List, Grid3x3, Clock
+    LayoutGrid, Flag, Search, X, Bot, Menu, ChevronRight, LogOut, List, Grid3x3, Clock, CreditCard, ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Ad, Profile, City, Report, Banner, AdCategory, Review } from '@/lib/types';
+import { Ad, Profile, City, Report, Banner, AdCategory, Review, Transaction } from '@/lib/types';
 
 import { AdsTable } from '@/components/admin/AdsTable';
 import { UsersTable } from '@/components/admin/UsersTable';
@@ -21,7 +21,7 @@ import { CategoriesSection } from '@/components/admin/CategoriesSection';
 
 export default function AdminDashboard() {
     const [isAdmin, setIsAdmin] = useState(false);
-    const [activeTab, setActiveTab] = useState<'ads' | 'moderation' | 'users' | 'banners' | 'reports' | 'categories' | 'reviews' | 'settings'>('moderation');
+    const [activeTab, setActiveTab] = useState<'ads' | 'moderation' | 'users' | 'banners' | 'reports' | 'categories' | 'reviews' | 'settings' | 'payments'>('moderation');
     const [stats, setStats] = useState({ ads: 0, users: 0, pending: 0, cities: 0, categories: 0 });
 
     const [ads, setAds] = useState<Ad[]>([]);
@@ -31,6 +31,7 @@ export default function AdminDashboard() {
     const [banners, setBanners] = useState<Banner[]>([]);
     const [categories, setCategories] = useState<AdCategory[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
 
     const [bannersEnabled, setBannersEnabled] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -90,7 +91,7 @@ export default function AdminDashboard() {
     };
 
     const fetchData = async () => {
-        const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes, reviewsRes, settingsRes] = await Promise.all([
+        const [adsRes, usersRes, citiesRes, reportsRes, bannersRes, categoriesRes, reviewsRes, settingsRes, transactionsRes] = await Promise.all([
             supabase.from('ads').select('*').order('created_at', { ascending: false }).limit(500),
             supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(500),
             supabase.from('cities').select('*').order('name'),
@@ -98,7 +99,8 @@ export default function AdminDashboard() {
             supabase.from('banners').select('*').order('created_at', { ascending: false }),
             supabase.from('categories').select('*').order('name'),
             supabase.from('reviews').select('*, reviewer:profiles!reviewer_id(full_name)').order('created_at', { ascending: false }).limit(200),
-            supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single()
+            supabase.from('app_settings').select('*').eq('key', 'banners_enabled').single(),
+            supabase.from('transactions').select('*, profiles(full_name), ads(title)').order('created_at', { ascending: false }).limit(200)
         ]);
 
         const dedupe = <T extends { id: string }>(arr: T[]) => Array.from(new Map(arr.map(item => [item.id, item])).values());
@@ -110,6 +112,7 @@ export default function AdminDashboard() {
         setBanners(dedupe((bannersRes.data || []) as Banner[]));
         setCategories(dedupe((categoriesRes.data || []) as AdCategory[]));
         setReviews(dedupe((reviewsRes.data || []) as Review[]));
+        setTransactions(dedupe((transactionsRes.data || []) as Transaction[]));
         setBannersEnabled(settingsRes.data?.value === 'true');
 
         setStats({
@@ -166,6 +169,7 @@ export default function AdminDashboard() {
         { id: 'categories', label: 'Категории', icon: LayoutGrid },
         { id: 'reports', label: 'Жалобы', icon: Flag, count: reports.length, color: 'text-red-500' },
         { id: 'reviews', label: 'Отзывы', icon: Star },
+        { id: 'payments', label: 'Платежи', icon: CreditCard, color: 'text-green-500' },
         { id: 'settings', label: 'Настройки', icon: Settings },
     ];
 
@@ -310,6 +314,59 @@ export default function AdminDashboard() {
                                                 </td>
                                             </tr>
                                         ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'payments' && (
+                        <div className="bg-white dark:bg-surface rounded-2xl border border-green-200/30 dark:border-border/40 overflow-hidden shadow-sm">
+                            <div className="p-6 border-b border-green-200/40 dark:border-border/40 bg-gradient-to-r from-green-50/80 to-emerald-50/40 dark:bg-muted/10 flex justify-between items-center">
+                                <h3 className="font-semibold uppercase tracking-widest text-sm text-green-800 dark:text-green-400">История платежей ({transactions.length})</h3>
+                                <button onClick={fetchData} className="text-xs text-primary font-bold hover:underline uppercase tracking-tighter">Обновить</button>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="bg-green-50/40 dark:bg-muted/30 border-b border-green-200/40 dark:border-border/40">
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Дата</th>
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Пользователь</th>
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Объявление</th>
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Сумма</th>
+                                            <th className="p-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Статус</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-green-100/60 dark:divide-border/40">
+                                        {transactions.map((t) => (
+                                            <tr key={t.id} className="hover:bg-green-50/30 dark:hover:bg-muted/20 transition-colors">
+                                                <td className="p-4 text-xs font-medium text-muted-foreground">{new Date(t.created_at).toLocaleString()}</td>
+                                                <td className="p-4 text-sm font-bold text-green-900 dark:text-green-100">{t.profiles?.full_name || 'Неизвестно'}</td>
+                                                <td className="p-4 text-sm">
+                                                    {t.ad_id ? (
+                                                        <Link prefetch={false} href={`/ad?id=${t.ad_id}`} className="text-primary hover:underline flex items-center gap-1 font-semibold">
+                                                            {t.ads?.title || 'Объявление'} <ExternalLink className="h-3 w-3" />
+                                                        </Link>
+                                                    ) : '—'}
+                                                </td>
+                                                <td className="p-4 text-sm font-black text-primary">{t.amount} {t.currency}</td>
+                                                <td className="p-4">
+                                                    <span className={cn(
+                                                        "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
+                                                        t.status === 'success' ? "bg-green-500/20 text-green-600 dark:text-green-400" :
+                                                            t.status === 'pending' ? "bg-amber-500/20 text-amber-600" :
+                                                                "bg-red-500/20 text-red-600"
+                                                    )}>
+                                                        {t.status === 'success' ? 'Оплачено' : t.status === 'pending' ? 'Ожидание' : 'Ошибка'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {transactions.length === 0 && (
+                                            <tr>
+                                                <td colSpan={5} className="p-10 text-center text-muted-foreground text-sm font-medium italic">Платежей пока нет...</td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
