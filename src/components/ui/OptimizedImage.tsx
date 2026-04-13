@@ -21,7 +21,7 @@ const supabaseLoader = ({ src, width, quality }: { src: string; width: number; q
     if (!src.includes('supabase.co')) return src;
     const baseUrl = src.split('?')[0];
     const renderUrl = baseUrl.replace('/object/public/', '/render/image/public/');
-    return `${renderUrl}?width=${width}&quality=${quality || 80}`;
+    return `${renderUrl}?width=${width}&quality=${quality || 80}&fit=contain`;
 };
 
 export function OptimizedImage({
@@ -74,7 +74,7 @@ export function OptimizedImage({
                     isLoading ? "scale-105 blur-lg" : "scale-100 blur-0",
                     cleanClassName
                 )}
-                style={{ objectFit: fit }}
+                style={{ objectFit: fit, width: '100%', height: '100%' }}
                 onLoad={(e) => {
                     setIsLoading(false);
                     if (onLoad) onLoad(e);

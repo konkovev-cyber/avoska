@@ -11,12 +11,12 @@ export async function cropToSquare(file: File, size = 800): Promise<File> {
             img.src = event.target?.result as string;
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                
+
                 // Calculate square dimensions from center
                 const minSide = Math.min(img.width, img.height);
                 const startX = (img.width - minSide) / 2;
                 const startY = (img.height - minSide) / 2;
-                
+
                 canvas.width = size;
                 canvas.height = size;
 
@@ -148,5 +148,5 @@ export function getOptimizedImageUrl(url: string, opts: { width?: number; qualit
     // From: https://[project].supabase.co/storage/v1/object/public/[bucket]/[path]
     // To:   https://[project].supabase.co/storage/v1/render/image/public/[bucket]/[path]?width=[w]&quality=[q]
 
-    return url.replace('/object/public/', '/render/image/public/') + `?width=${width}&quality=${quality}`;
+    return url.replace('/object/public/', '/render/image/public/') + `?width=${width}&quality=${quality}&fit=contain`;
 }
