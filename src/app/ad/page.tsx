@@ -16,7 +16,7 @@ import {
     Share2,
     ShieldCheck,
     Star,
-    CheckCircle,
+    CircleCheck,
     User,
     MapPin,
     Info,
@@ -39,9 +39,9 @@ import {
     Phone,
     Sparkles,
     Zap,
-    AlertCircle,
+    CircleAlert,
     Palette,
-    ArrowUpCircle
+    CircleArrowUp
 } from 'lucide-react';
 import UserBannerCheckoutModal from '@/components/UserBannerCheckoutModal';
 import { toast } from 'sonner';
@@ -693,7 +693,7 @@ function AdContent() {
                 {/* Main Section */}
                 <div className="flex-1 space-y-5">
                     {/* Image - Truly responsive container */}
-                    <div className="relative w-full min-h-[350px] md:min-h-[450px] max-h-[80vh] flex items-center justify-center bg-zinc-950 rounded-2xl overflow-hidden group shadow-xl cursor-zoom-in">
+                    <div className="relative w-full aspect-[4/3] md:min-h-[450px] md:aspect-[16/9] max-h-[80vh] flex items-center justify-center bg-zinc-950 rounded-2xl overflow-hidden group shadow-xl cursor-zoom-in">
                         {ad.images && ad.images.length > 0 ? (
                             <>
                                 <div className="absolute top-2 right-2 bg-black/30 backdrop-blur-md p-1.5 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
@@ -705,7 +705,7 @@ function AdContent() {
                                     bannerVisible={false}
                                     onIndexChange={(index) => setCurrentImageIndex(index)}
                                 >
-                                    <div className="w-full h-full relative">
+                                    <div className="absolute inset-0 w-full h-full">
                                         <AnimatePresence mode="wait" initial={false}>
                                             <motion.div
                                                 key={currentImageIndex}
@@ -726,17 +726,28 @@ function AdContent() {
                                                     }
                                                 }}
                                             >
-                                                {/* Main Crisp Image */}
-                                                <PhotoView src={ad.images[currentImageIndex]}>
-                                                    <div className="absolute inset-0 w-full h-full z-10 flex items-center justify-center">
-                                                        <OptimizedImage
-                                                            src={ad.images[currentImageIndex]}
-                                                            width={1000}
-                                                            alt="Фото объявления"
-                                                            objectFit="contain"
-                                                        />
-                                                    </div>
-                                                </PhotoView>
+                                                <div className="absolute inset-0 w-full h-full z-10 overflow-hidden bg-zinc-900">
+                                                    {/* Blurred Background Layer */}
+                                                    <OptimizedImage
+                                                        src={ad.images[currentImageIndex]}
+                                                        alt=""
+                                                        aria-hidden="true"
+                                                        className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110 pointer-events-none"
+                                                        priority
+                                                    />
+                                                    
+                                                    {/* Sharp Foreground Layer */}
+                                                    <PhotoView src={ad.images[currentImageIndex]}>
+                                                        <div className="relative w-full h-full z-20 flex items-center justify-center cursor-zoom-in">
+                                                            <OptimizedImage
+                                                                src={ad.images[currentImageIndex]}
+                                                                width={1200}
+                                                                alt="Фото объявления"
+                                                                objectFit="contain"
+                                                            />
+                                                        </div>
+                                                    </PhotoView>
+                                                </div>
                                             </motion.div>
                                         </AnimatePresence>
                                     </div>
@@ -776,12 +787,21 @@ function AdContent() {
                                     )}
                                     aria-label={`Выбрать фото ${i + 1}`}
                                 >
-                                    <div className="relative w-full h-full">
+                                    <div className="relative w-full h-full bg-zinc-800">
+                                        {/* Blurred Background for Thumbnail */}
+                                        <OptimizedImage
+                                            src={img}
+                                            alt=""
+                                            aria-hidden="true"
+                                            className="absolute inset-0 w-full h-full object-cover blur-md opacity-50 scale-110"
+                                        />
+                                        {/* Foreground Thumbnail */}
                                         <OptimizedImage
                                             src={img}
                                             width={150}
                                             alt={`Фото ${i + 1}`}
                                             objectFit="contain"
+                                            className="relative z-10"
                                         />
                                     </div>
                                 </button>
@@ -1069,7 +1089,7 @@ function AdContent() {
                                         }}
                                         className="col-span-2 bg-emerald-600 text-white text-[11px] font-black h-12 rounded-2xl hover:bg-emerald-700 transition-all active:scale-95 shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
                                     >
-                                        <CheckCircle className="h-4 w-4" />
+                                        <CircleCheck className="h-4 w-4" />
                                         <span>ОДОБРИТЬ</span>
                                     </button>
                                 )}
@@ -1086,7 +1106,7 @@ function AdContent() {
                                     }}
                                     className="col-span-2 bg-white border border-border text-foreground text-[10px] font-black h-10 rounded-xl hover:bg-surface hover:border-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2"
                                 >
-                                    <ArrowUpCircle className="h-4 w-4 text-primary" />
+                                    <CircleArrowUp className="h-4 w-4 text-primary" />
                                     <span>ПОДНЯТЬ ВВЕРХ</span>
                                 </button>
 
@@ -1123,7 +1143,7 @@ function AdContent() {
                                         ad.is_urgent ? "bg-red-500 text-white border-transparent" : "bg-white text-muted-foreground border-border hover:bg-red-50"
                                     )}
                                 >
-                                    <AlertCircle className="h-3.5 w-3.5" />
+                                    <CircleAlert className="h-3.5 w-3.5" />
                                     <span>СРОЧНО</span>
                                 </button>
 

@@ -148,5 +148,5 @@ export function getOptimizedImageUrl(url: string, opts: { width?: number; qualit
     // From: https://[project].supabase.co/storage/v1/object/public/[bucket]/[path]
     // To:   https://[project].supabase.co/storage/v1/render/image/public/[bucket]/[path]?width=[w]&quality=[q]
 
-    return url.replace('/object/public/', '/render/image/public/') + `?width=${width}&quality=${quality}&fit=contain`;
+    return url.replace('/object/public/', '/render/image/public/') + `?width=${width}&quality=${quality}`;
 }

@@ -81,7 +81,7 @@ export function AdCard({ ad, isHoverGallery = false, initialFavorite = false, sh
             )}
         >
             <div className={cn(
-                "aspect-square w-full relative overflow-hidden rounded-[1.4rem] bg-muted border border-border/10 group-hover:shadow-lg transition-all active:scale-[0.98]",
+                "aspect-[4/3] w-full relative overflow-hidden rounded-[1.4rem] bg-muted border border-border/10 group-hover:shadow-lg transition-all active:scale-[0.98]",
                 ad.is_vip && "ring-2 ring-amber-500 ring-offset-1 ring-offset-background/50"
             )}>
                 {isHoverGallery && !isTouch ? (
